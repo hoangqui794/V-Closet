@@ -1,0 +1,57 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+@layer base {
+
+    html,
+    body,
+    #root {
+        height: 100dvh;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f0e6;
+        /* Elegant desktop backdrop */
+        overflow: hidden;
+    }
+
+    #root {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .mobile-frame {
+        width: 100%;
+        max-width: 430px;
+        height: 100%;
+        max-height: 932px;
+        /* iPhone 15 Pro Max approx height */
+        position: relative;
+        background-color: #fdfaf6;
+        box-shadow: 0 10px 40px rgba(59, 45, 34, 0.15);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/* Hide scrollbars globally for a cleaner app look */
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbars for a cleaner mobile look */
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
