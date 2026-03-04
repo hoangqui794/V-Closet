@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import svgPaths from "../../imports/svg-ta7we0nsx9";
-import imgImage1 from "@/assets/logo-premium.png";
+import imgImage1 from "@/assets/v-closet-logo.png";
 import imgLogo from "@/assets/92375b66cc5f6db228cbba4fabc2bd6032c970de.png";
 
 export function LoginPage() {
