@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import svgPaths from "../../imports/svg-ta7we0nsx9";
-import imgImage1 from "@/assets/v-closet-logo.png";
+import imgImage1 from "@/assets/logoVcloset.png";
 import imgLogo from "@/assets/92375b66cc5f6db228cbba4fabc2bd6032c970de.png";
 
 export function LoginPage() {
@@ -24,16 +24,17 @@ export function LoginPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="h-[142px] relative rounded-[119px] shrink-0 w-[136px]"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="h-[220px] w-[220px] relative flex items-center justify-center shrink-0"
         >
-          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[119px]">
-            <img
-              alt="V-Closet Logo"
-              className="absolute h-[110.82%] left-[-13.97%] max-w-none top-[-11.12%] w-[127.44%]"
-              src={imgImage1}
-            />
-          </div>
+          {/* Subtle soft glow background */}
+          <div className="absolute inset-0 rounded-full bg-[rgba(74,55,40,0.03)] blur-[20px] scale-90" />
+
+          <img
+            alt="V-Closet Logo"
+            className="w-full h-full object-contain relative z-10 drop-shadow-[0_8px_24px_rgba(0,0,0,0.05)]"
+            src={imgImage1}
+          />
         </motion.div>
 
         {/* App Name */}
@@ -41,7 +42,7 @@ export function LoginPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-[11px] mb-[40px]"
+          className="mt-0 mb-[24px]"
         >
           <div className="font-['Manrope',sans-serif] font-[800] text-[30px] text-[#4a3728] tracking-[-0.75px] leading-[36px]">
             V-Closet
@@ -53,7 +54,7 @@ export function LoginPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-col gap-[8px] items-center w-full mb-[32px]"
+          className="flex flex-col gap-[4px] items-center w-full mb-[28px]"
         >
           <div className="font-['Manrope',sans-serif] font-bold text-[24px] text-[#4a3728] text-center leading-[30px]">
             Welcome Back
