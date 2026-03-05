@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppLayout } from "./components/AppLayout";
 import { LoginPage } from "./components/LoginPage";
+import { RegisterPage } from "./components/RegisterPage";
 import { OnboardingPage } from "./components/OnboardingPage";
 import { CommunityPage } from "./components/CommunityPage";
 import { WardrobePage } from "./components/WardrobePage";
@@ -13,6 +14,10 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: LoginPage,
+  },
+  {
+    path: "/register",
+    Component: RegisterPage,
   },
   {
     path: "/onboarding",

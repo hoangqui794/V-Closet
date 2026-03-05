@@ -235,7 +235,7 @@ export function LoginPage() {
           </span>
           <button
             className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#4a3728] text-center leading-[24px] bg-transparent border-none cursor-pointer p-0"
-            onClick={() => { }}
+            onClick={() => navigate("/register")}
           >
             Register
           </button>

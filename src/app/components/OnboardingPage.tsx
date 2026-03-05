@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -18,13 +18,13 @@ const GENDERS = [
 ];
 
 const COUNTRIES = [
-  { id: "vn", label: "Việt Nam", flag: "🇻🇳" },
-  { id: "us", label: "United States", flag: "🇺🇸" },
-  { id: "jp", label: "Japan", flag: "🇯🇵" },
-  { id: "kr", label: "South Korea", flag: "🇰🇷" },
-  { id: "th", label: "Thailand", flag: "🇹🇭" },
-  { id: "sg", label: "Singapore", flag: "🇸🇬" },
-  { id: "other", label: "Khác", flag: "🌍" },
+  { id: "vn", label: "Việt Nam", flag: "https://flagsapi.com/VN/flat/64.png" },
+  { id: "us", label: "United States", flag: "https://flagsapi.com/US/flat/64.png" },
+  { id: "jp", label: "Japan", flag: "https://flagsapi.com/JP/flat/64.png" },
+  { id: "kr", label: "South Korea", flag: "https://flagsapi.com/KR/flat/64.png" },
+  { id: "th", label: "Thailand", flag: "https://flagsapi.com/TH/flat/64.png" },
+  { id: "sg", label: "Singapore", flag: "https://flagsapi.com/SG/flat/64.png" },
+  { id: "other", label: "Khác", flag: "GLOBE_ICON" },
 ];
 
 const LIFESTYLES = [
@@ -94,7 +94,7 @@ function BodyShapeSVG({ shape }: { shape: BodyShapeType }) {
   const highlight = "#A8C8E8";
   const outline = "#888";
 
-  const shapePaths: Record<string, JSX.Element> = {
+  const shapePaths: Record<string, React.ReactNode> = {
     unsure: (
       <g>
         <text x="50" y="58" textAnchor="middle" fontSize="28" fill="#aaa">🤔</text>
@@ -160,7 +160,7 @@ function ListItem({
   selected: boolean;
   onClick: () => void;
   colorSwatch?: string | null;
-  icon?: JSX.Element;
+  icon?: React.ReactNode;
 }) {
   return (
     <motion.button
@@ -349,17 +349,27 @@ export function OnboardingPage() {
           >
             {/* ── Step 0: Welcome ── */}
             {step === 0 && (
-              <div className="flex flex-col items-center justify-center pt-[48px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[26px] text-[#4a3728] text-center leading-[34px] tracking-[-0.5px] mb-[32px]">
+              <div className="flex flex-col items-center justify-center min-h-[65vh] pt-[40px]">
+                <div className="font-['Manrope',sans-serif] font-[800] text-[26px] text-[#4a3728] text-center leading-[34px] tracking-[-0.5px] mb-[40px]">
                   Trước khi bắt đầu,{"\n"}hãy để tớ làm quen{"\n"}với bạn nhé!
                 </div>
-                <div className="w-[180px] h-[180px] mb-[24px]">
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                    delay: 0.1
+                  }}
+                  className="w-[280px] h-[280px] mb-[32px]"
+                >
                   <ImageWithFallback
                     src={mascotImg}
                     alt="V-Closet Mascot"
                     className="w-full h-full object-contain"
                   />
-                </div>
+                </motion.div>
               </div>
             )}
 
@@ -452,7 +462,23 @@ export function OnboardingPage() {
                   className="flex items-center justify-between w-full bg-white border border-[rgba(74,55,40,0.15)] rounded-[14px] px-[16px] py-[14px] cursor-pointer"
                 >
                   <div className="flex items-center gap-[12px]">
-                    <span className="text-[20px]">{selectedCountryData?.flag}</span>
+                    {selectedCountryData?.flag === "GLOBE_ICON" ? (
+                      <div className="w-[28px] h-[20px] flex items-center justify-center shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a3728" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="2" y1="12" x2="22" y2="12"></line>
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                      </div>
+                    ) : (
+                      <div className="w-[28px] h-[20px] rounded-[3px] overflow-hidden shrink-0 border border-[rgba(0,0,0,0.05)]">
+                        <img
+                          src={selectedCountryData?.flag}
+                          className="w-full h-full object-cover shadow-sm"
+                          alt={selectedCountryData?.label}
+                        />
+                      </div>
+                    )}
                     <span className="font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728]">
                       {selectedCountryData?.label}
                     </span>
@@ -484,7 +510,19 @@ export function OnboardingPage() {
                           className={`flex items-center gap-[12px] w-full px-[16px] py-[12px] border-none cursor-pointer transition-colors ${country === c.id ? "bg-[rgba(74,55,40,0.06)]" : "bg-transparent"
                             }`}
                         >
-                          <span className="text-[18px]">{c.flag}</span>
+                          {c.flag === "GLOBE_ICON" ? (
+                            <div className="w-[24px] h-[17px] flex items-center justify-center shrink-0">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a3728" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                              </svg>
+                            </div>
+                          ) : (
+                            <div className="w-[24px] h-[17px] rounded-[2px] overflow-hidden shrink-0 border border-[rgba(0,0,0,0.05)]">
+                              <img src={c.flag} className="w-full h-full object-cover" alt={c.label} />
+                            </div>
+                          )}
                           <span className="font-['Manrope',sans-serif] font-[500] text-[14px] text-[#4a3728]">
                             {c.label}
                           </span>
