@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useUserProfile, BodyShapeType } from "./UserProfileContext";
+import { useLanguage } from "./LanguageContext";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import mascotImg from "@/assets/c743ecc47591b3bbec72e7d78e8a4836897243cc.png";
 import hourglassImg from "@/assets/body-shapes/hourglass.png";
@@ -16,77 +17,77 @@ import rectangleImg from "@/assets/body-shapes/rectangle.png";
    ═══════════════════════════════════════════ */
 
 const GENDERS = [
-  { id: "female", label: "Nữ" },
-  { id: "male", label: "Nam" },
-  { id: "nonbinary", label: "Phi nhị giới" },
-  { id: "private", label: "Không muốn tiết lộ" },
+  { id: "female", labelKey: "female" },
+  { id: "male", labelKey: "male" },
+  { id: "nonbinary", labelKey: "nonbinary" },
+  { id: "private", labelKey: "private" },
 ];
 
 const COUNTRIES = [
-  { id: "vn", label: "Việt Nam", flag: "https://flagsapi.com/VN/flat/64.png" },
-  { id: "us", label: "United States", flag: "https://flagsapi.com/US/flat/64.png" },
-  { id: "jp", label: "Japan", flag: "https://flagsapi.com/JP/flat/64.png" },
-  { id: "kr", label: "South Korea", flag: "https://flagsapi.com/KR/flat/64.png" },
-  { id: "th", label: "Thailand", flag: "https://flagsapi.com/TH/flat/64.png" },
-  { id: "sg", label: "Singapore", flag: "https://flagsapi.com/SG/flat/64.png" },
-  { id: "other", label: "Khác", flag: "GLOBE_ICON" },
+  { id: "vn", labelKey: "vietnam", flag: "https://flagsapi.com/VN/flat/64.png" },
+  { id: "us", labelKey: "usa", flag: "https://flagsapi.com/US/flat/64.png" },
+  { id: "jp", labelKey: "japan", flag: "https://flagsapi.com/JP/flat/64.png" },
+  { id: "kr", labelKey: "korea", flag: "https://flagsapi.com/KR/flat/64.png" },
+  { id: "th", labelKey: "thailand", flag: "https://flagsapi.com/TH/flat/64.png" },
+  { id: "sg", labelKey: "singapore", flag: "https://flagsapi.com/SG/flat/64.png" },
+  { id: "other", labelKey: "other", flag: "GLOBE_ICON" },
 ];
 
 const LIFESTYLES = [
-  { id: "student-hs", label: "Học sinh cấp 2/cấp 3" },
-  { id: "student-uni", label: "Sinh viên đại học" },
-  { id: "office-casual", label: "Nhân viên mặc trang phục casual" },
-  { id: "office-formal", label: "Nhân viên mặc trang phục trang trọng" },
-  { id: "uniform", label: "Nhân viên mặc đồng phục" },
-  { id: "homemaker", label: "Nội trợ" },
-  { id: "other", label: "Khác" },
+  { id: "student-hs", labelKey: "studentHS" },
+  { id: "student-uni", labelKey: "studentUni" },
+  { id: "office-casual", labelKey: "officeCasual" },
+  { id: "office-formal", labelKey: "officeFormal" },
+  { id: "uniform", labelKey: "uniform" },
+  { id: "homemaker", labelKey: "homemaker" },
+  { id: "other", labelKey: "other" },
 ];
 
 const HAIR_COLORS = [
-  { id: "blonde", label: "Tóc vàng", color: "#C5A55A" },
-  { id: "brown", label: "Tóc nâu", color: "#6B4226" },
-  { id: "black", label: "Tóc nâu sẫm/Đen", color: "#2C2C2C" },
-  { id: "red", label: "Tóc đỏ", color: "#8B3A2F" },
-  { id: "gray", label: "Tóc xám/Bạc", color: "#A8A8A0" },
-  { id: "other", label: "Khác", color: null },
-  { id: "unsure", label: "Tôi không chắc", color: null },
+  { id: "blonde", labelKey: "blonde", color: "#C5A55A" },
+  { id: "brown", labelKey: "brownHair", color: "#6B4226" },
+  { id: "black", labelKey: "blackHair", color: "#2C2C2C" },
+  { id: "red", labelKey: "redHair", color: "#8B3A2F" },
+  { id: "gray", labelKey: "grayHair", color: "#A8A8A0" },
+  { id: "other", labelKey: "other", color: null },
+  { id: "unsure", labelKey: "notSure", color: null },
 ];
 
 const EYE_COLORS = [
-  { id: "brown", label: "Nâu", color: "#7B5B4C" },
-  { id: "black", label: "Đen", color: "#2C2C2C" },
-  { id: "blue", label: "Xanh dương", color: "#7CAFE0" },
-  { id: "hazel", label: "Nâu hạt dẻ", color: "#C5A55A" },
-  { id: "green", label: "Xanh lá", color: "#7CD9A0" },
-  { id: "gray", label: "Xám", color: "#A8A898" },
-  { id: "other", label: "Khác", color: null },
-  { id: "unsure", label: "Tôi không chắc", color: null },
+  { id: "brown", labelKey: "brownEye", color: "#7B5B4C" },
+  { id: "black", labelKey: "blackEye", color: "#2C2C2C" },
+  { id: "blue", labelKey: "blueEye", color: "#7CAFE0" },
+  { id: "hazel", labelKey: "hazelEye", color: "#C5A55A" },
+  { id: "green", labelKey: "greenEye", color: "#7CD9A0" },
+  { id: "gray", labelKey: "grayEye", color: "#A8A898" },
+  { id: "other", labelKey: "other", color: null },
+  { id: "unsure", labelKey: "notSure", color: null },
 ];
 
-const BODY_SHAPES: { id: BodyShapeType; label: string; img: any }[] = [
-  { id: "unsure", label: "Tôi không chắc", img: null },
-  { id: "hourglass", label: "Đồng hồ cát", img: hourglassImg },
-  { id: "pear", label: "Tam giác", img: pearImg },
-  { id: "inverted-triangle", label: "Tam giác ngược", img: invertedTriangleImg },
-  { id: "apple", label: "Dáng tròn", img: appleImg },
-  { id: "rectangle", label: "Chữ nhật", img: rectangleImg },
+const BODY_SHAPES: { id: BodyShapeType; labelKey: string; img: any }[] = [
+  { id: "unsure", labelKey: "notSure", img: null },
+  { id: "hourglass", labelKey: "hourglass", img: hourglassImg },
+  { id: "pear", labelKey: "pear", img: pearImg },
+  { id: "inverted-triangle", labelKey: "invertedTriangle", img: invertedTriangleImg },
+  { id: "apple", labelKey: "apple", img: appleImg },
+  { id: "rectangle", labelKey: "rectangle", img: rectangleImg },
 ];
 
 const COLOR_PALETTES = [
-  { id: "unsure", label: "Tôi không chắc", img: null },
-  { id: "warm-bright", label: "Ấm áp · Tươi sáng", img: "https://images.unsplash.com/photo-1633327071214-dc442e4eb932?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3YXJtJTIwYXV0dW1uJTIwb3V0Zml0JTIwZmxhdGxheSUyMGNvenl8ZW58MXx8fHwxNzcyNjI3Nzc1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "cool-soft", label: "Mát mẻ · Dịu dàng", img: "https://images.unsplash.com/photo-1599445997715-55c4d8853c48?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb29sJTIwcGFzdGVsJTIwYmx1ZSUyMG91dGZpdCUyMGZsYXRsYXl8ZW58MXx8fHwxNzcyNjI3Nzc2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "warm-deep", label: "Ấm áp · Sâu lắng", img: "https://images.unsplash.com/photo-1769200353674-34a06156c66f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlYXJ0aCUyMHRvbmUlMjBicm93biUyMG91dGZpdCUyMGZsYXRsYXl8ZW58MXx8fHwxNzcyNjI3Nzc2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "dark-moody", label: "Tối · Cá tính", img: "https://images.unsplash.com/photo-1638898790370-fc2068b1f8b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYXJrJTIwbW9vZHklMjBmYXNoaW9uJTIwb3V0Zml0JTIwd2ludGVyfGVufDF8fHx8MTc3MjYyNzc4M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "unsure", labelKey: "notSure", img: null },
+  { id: "warm-bright", labelKey: "warmBright", img: "https://images.unsplash.com/photo-1633327071214-dc442e4eb932?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3YXJtJTIwYXV0dW1uJTIwb3V0Zml0JTIwZmxhdGxheSUyMGNvenl8ZW58MXx8fHwxNzcyNjI3Nzc1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "cool-soft", labelKey: "coolSoft", img: "https://images.unsplash.com/photo-1599445997715-55c4d8853c48?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb29sJTIwcGFzdGVsJTIwYmx1ZSUyMG91dGZpdCUyMGZsYXRsYXl8ZW58MXx8fHwxNzcyNjI3Nzc2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "warm-deep", labelKey: "warmDeep", img: "https://images.unsplash.com/photo-1769200353674-34a06156c66f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlYXJ0aCUyMHRvbmUlMjBicm93biUyMG91dGZpdCUyMGZsYXRsYXl8ZW58MXx8fHwxNzcyNjI3Nzc2fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "dark-moody", labelKey: "darkMoody", img: "https://images.unsplash.com/photo-1638898790370-fc2068b1f8b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYXJrJTIwbW9vZHklMjBmYXNoaW9uJTIwb3V0Zml0JTIwd2ludGVyfGVufDF8fHx8MTc3MjYyNzc4M3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
 ];
 
 const FASHION_STYLES = [
-  { id: "casual", label: "Thường ngày", img: "https://images.unsplash.com/photo-1760551733107-25bd7b041623?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXN1YWwlMjBzdHJlZXR3ZWFyJTIwd29tYW4lMjBvdXRmaXR8ZW58MXx8fHwxNzcyNjI3Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "minimal", label: "Tối giản", img: "https://images.unsplash.com/photo-1663151860665-49dff5bcf3ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwZmFzaGlvbiUyMHdvbWFuJTIwY2xlYW58ZW58MXx8fHwxNzcyNjI3Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "streetwear", label: "Streetwear", img: "https://images.unsplash.com/photo-1575633660454-cd44c9538d91?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHJlZXR3ZWFyJTIwdXJiYW4lMjBmYXNoaW9uJTIwd29tYW58ZW58MXx8fHwxNzcyNjI3Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "athleisure", label: "Thể thao/Athleisure", img: "https://images.unsplash.com/photo-1768929096134-f45af7839e83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhdGhsZWlzdXJlJTIwc3BvcnR5JTIwZmFzaGlvbiUyMHdvbWFufGVufDF8fHx8MTc3MjYyNzc3OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "elegant", label: "Thanh lịch", img: "https://images.unsplash.com/photo-1756483510840-b0dda5f0dd0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVnYW50JTIwZm9ybWFsJTIwZmFzaGlvbiUyMHdvbWFuJTIwZHJlc3N8ZW58MXx8fHwxNzcyNjI3Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
-  { id: "vintage", label: "Vintage/Retro", img: "https://images.unsplash.com/photo-1731513343223-3b12315c4ffb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwcmV0cm8lMjBmYXNoaW9uJTIwd29tYW4lMjBvdXRmaXR8ZW58MXx8fHwxNzcyNjI3Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "casual", labelKey: "casual", img: "https://images.unsplash.com/photo-1760551733107-25bd7b041623?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXN1YWwlMjBzdHJlZXR3ZWFyJTIwd29tYW4lMjBvdXRmaXR8ZW58MXx8fHwxNzcyNjI3Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "minimal", labelKey: "minimal", img: "https://images.unsplash.com/photo-1663151860665-49dff5bcf3ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwZmFzaGlvbiUyMHdvbWFuJTIwY2xlYW58ZW58MXx8fHwxNzcyNjI3Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "streetwear", labelKey: "streetwear", img: "https://images.unsplash.com/photo-1575633660454-cd44c9538d91?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHJlZXR3ZWFyJTIwdXJiYW4lMjBmYXNoaW9uJTIwd29tYW58ZW58MXx8fHwxNzcyNjI3Nzc3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "athleisure", labelKey: "athleisure", img: "https://images.unsplash.com/photo-1768929096134-f45af7839e83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhdGhsZWlzdXJlJTIwc3BvcnR5JTIwZmFzaGlvbiUyMHdvbWFufGVufDF8fHx8MTc3MjYyNzc3OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "elegant", labelKey: "elegant", img: "https://images.unsplash.com/photo-1756483510840-b0dda5f0dd0f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbGVnYW50JTIwZm9ybWFsJTIwZmFzaGlvbiUyMHdvbWFuJTIwZHJlc3N8ZW58MXx8fHwxNzcyNjI3Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
+  { id: "vintage", labelKey: "vintage", img: "https://images.unsplash.com/photo-1731513343223-3b12315c4ffb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwcmV0cm8lMjBmYXNoaW9uJTIwd29tYW4lMjBvdXRmaXR8ZW58MXx8fHwxNzcyNjI3Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" },
 ];
 
 const TOTAL_STEPS = 10;
@@ -158,6 +159,7 @@ function ListItem({
 export function OnboardingPage() {
   const navigate = useNavigate();
   const { updateProfile, completeOnboarding } = useUserProfile();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState(0);
 
@@ -203,7 +205,7 @@ export function OnboardingPage() {
         nickname,
         referralCode,
         gender,
-        country: selectedCountry?.label || "Việt Nam",
+        country: selectedCountry?.id || "vn",
         lifestyle,
         hairColor,
         eyeColor,
@@ -212,7 +214,7 @@ export function OnboardingPage() {
         fashionStyle: fashionStyles,
       });
       completeOnboarding();
-      toast.success("Hồ sơ đã sẵn sàng! Chào mừng bạn đến V-Closet 🎉");
+      toast.success(t("readyMsg"));
       navigate("/app/community");
     }
   };
@@ -236,10 +238,10 @@ export function OnboardingPage() {
 
   /* ── Button labels ── */
   const getButtonLabel = () => {
-    if (step === 0) return "Tôi đã sẵn sàng";
-    if (step === 1) return "Bắt đầu";
-    if (step === TOTAL_STEPS - 1) return "Hoàn tất";
-    return "Tiếp theo";
+    if (step === 0) return t("ready");
+    if (step === 1) return t("start");
+    if (step === TOTAL_STEPS - 1) return t("finish");
+    return t("next");
   };
 
   /* ── Progress ── */
@@ -268,7 +270,7 @@ export function OnboardingPage() {
               onClick={handleSkip}
               className="font-['Manrope',sans-serif] font-[500] text-[14px] text-[rgba(74,55,40,0.45)] bg-transparent border-none cursor-pointer p-[8px] -mr-[8px]"
             >
-              Bỏ qua
+              {t("skip")}
             </button>
           )}
           {step === 0 && <div className="w-[26px]" />}
@@ -302,8 +304,8 @@ export function OnboardingPage() {
             {/* ── Step 0: Welcome ── */}
             {step === 0 && (
               <div className="flex flex-col items-center justify-center min-h-[65vh] pt-[40px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[26px] text-[#4a3728] text-center leading-[34px] tracking-[-0.5px] mb-[40px]">
-                  Trước khi bắt đầu,{"\n"}hãy để tớ làm quen{"\n"}với bạn nhé!
+                <div className="font-['Manrope',sans-serif] font-[800] text-[26px] text-[#4a3728] text-center leading-[34px] tracking-[-0.5px] mb-[40px] whitespace-pre-line">
+                  {t("welcomeOnboarding")}
                 </div>
                 <motion.div
                   initial={{ scale: 0.5, opacity: 0 }}
@@ -329,7 +331,7 @@ export function OnboardingPage() {
             {step === 1 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[24px]">
-                  Nhập biệt danh của bạn
+                  {t("enterNickname")}
                 </div>
                 <input
                   type="text"
@@ -340,7 +342,7 @@ export function OnboardingPage() {
                   className="w-full bg-white border border-[rgba(74,55,40,0.15)] rounded-[14px] px-[16px] py-[16px] font-['Manrope',sans-serif] font-[500] text-[16px] text-[#4a3728] outline-none placeholder-[rgba(74,55,40,0.25)] focus:border-[#4a3728] transition-colors"
                 />
                 <div className="font-['Manrope',sans-serif] font-[400] text-[12px] text-[rgba(74,55,40,0.4)] mt-[10px] leading-[18px]">
-                  Biệt danh phải dài từ 5-15 ký tự và chỉ có thể bao gồm chữ cái, số, dấu gạch dưới (_) và dấu chấm (.).
+                  {t("nicknameHint")}
                 </div>
 
                 {/* Referral code */}
@@ -349,7 +351,7 @@ export function OnboardingPage() {
                   className="flex items-center justify-between w-full mt-[32px] py-[14px] border-b border-[rgba(74,55,40,0.1)] bg-transparent cursor-pointer border-t-0 border-l-0 border-r-0 px-0"
                 >
                   <span className="font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728]">
-                    Mã giới thiệu
+                    {t("referralCode")}
                   </span>
                   <motion.svg
                     width="12"
@@ -375,7 +377,7 @@ export function OnboardingPage() {
                         type="text"
                         value={referralCode}
                         onChange={(e) => setReferralCode(e.target.value)}
-                        placeholder="Nhập mã giới thiệu (nếu có)"
+                        placeholder={t("enterReferral")}
                         className="w-full bg-white border border-[rgba(74,55,40,0.15)] rounded-[14px] px-[16px] py-[14px] font-['Manrope',sans-serif] font-[500] text-[14px] text-[#4a3728] outline-none placeholder-[rgba(74,55,40,0.25)] mt-[12px] focus:border-[#4a3728] transition-colors"
                       />
                     </motion.div>
@@ -388,13 +390,13 @@ export function OnboardingPage() {
             {step === 2 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
-                  Giới tính của bạn là gì?
+                  {t("genderQuestion")}
                 </div>
                 <div className="flex flex-col">
                   {GENDERS.map((g) => (
                     <ListItem
                       key={g.id}
-                      label={g.label}
+                      label={t(g.labelKey)}
                       selected={gender === g.id}
                       onClick={() => setGender(g.id)}
                     />
@@ -407,7 +409,7 @@ export function OnboardingPage() {
             {step === 3 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[20px]">
-                  Bạn sống ở đâu?
+                  {t("locationQuestion")}
                 </div>
                 <button
                   onClick={() => setShowCountryPicker(!showCountryPicker)}
@@ -427,12 +429,12 @@ export function OnboardingPage() {
                         <img
                           src={selectedCountryData?.flag}
                           className="w-full h-full object-cover shadow-sm"
-                          alt={selectedCountryData?.label}
+                          alt={t(selectedCountryData?.labelKey || "")}
                         />
                       </div>
                     )}
                     <span className="font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728]">
-                      {selectedCountryData?.label}
+                      {t(selectedCountryData?.labelKey || "")}
                     </span>
                   </div>
                   <motion.svg
@@ -472,11 +474,11 @@ export function OnboardingPage() {
                             </div>
                           ) : (
                             <div className="w-[24px] h-[17px] rounded-[2px] overflow-hidden shrink-0 border border-[rgba(0,0,0,0.05)]">
-                              <img src={c.flag} className="w-full h-full object-cover" alt={c.label} />
+                              <img src={c.flag} className="w-full h-full object-cover" alt={t(c.labelKey)} />
                             </div>
                           )}
                           <span className="font-['Manrope',sans-serif] font-[500] text-[14px] text-[#4a3728]">
-                            {c.label}
+                            {t(c.labelKey)}
                           </span>
                           {country === c.id && (
                             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className="ml-auto">
@@ -496,13 +498,13 @@ export function OnboardingPage() {
             {step === 4 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
-                  Vui lòng chọn phong cách sống và loại hình công việc chính của bạn.
+                  {t("lifestyleQuestion")}
                 </div>
                 <div className="flex flex-col">
                   {LIFESTYLES.map((l) => (
                     <ListItem
                       key={l.id}
-                      label={l.label}
+                      label={t(l.labelKey)}
                       selected={lifestyle === l.id}
                       onClick={() => setLifestyle(l.id)}
                     />
@@ -515,13 +517,13 @@ export function OnboardingPage() {
             {step === 5 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
-                  Màu tóc của bạn là gì?
+                  {t("hairColorQuestion")}
                 </div>
                 <div className="flex flex-col">
                   {HAIR_COLORS.map((h) => (
                     <ListItem
                       key={h.id}
-                      label={h.label}
+                      label={t(h.labelKey)}
                       selected={hairColor === h.id}
                       onClick={() => setHairColor(h.id)}
                       colorSwatch={h.color}
@@ -542,13 +544,13 @@ export function OnboardingPage() {
             {step === 6 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
-                  Màu mắt của bạn là gì?
+                  {t("eyeColorQuestion")}
                 </div>
                 <div className="flex flex-col">
                   {EYE_COLORS.map((e) => (
                     <ListItem
                       key={e.id}
-                      label={e.label}
+                      label={t(e.labelKey)}
                       selected={eyeColor === e.id}
                       onClick={() => setEyeColor(e.id)}
                       colorSwatch={e.color}
@@ -569,7 +571,7 @@ export function OnboardingPage() {
             {step === 7 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
-                  Dáng người của bạn là gì?
+                  {t("bodyShapeQuestion")}
                 </div>
                 <div className="grid grid-cols-2 gap-[12px]">
                   {BODY_SHAPES.map((s) => {
@@ -588,7 +590,7 @@ export function OnboardingPage() {
                           {s.img ? (
                             <img
                               src={s.img}
-                              alt={s.label}
+                              alt={t(s.labelKey)}
                               className="w-full h-full object-contain"
                             />
                           ) : (
@@ -597,7 +599,7 @@ export function OnboardingPage() {
                         </div>
                         <span className={`font-['Manrope',sans-serif] font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
                           }`}>
-                          {s.label}
+                          {t(s.labelKey)}
                         </span>
                       </motion.button>
                     );
@@ -610,7 +612,7 @@ export function OnboardingPage() {
             {step === 8 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
-                  Tông màu nào hợp với bạn nhất?
+                  {t("colorPaletteQuestion")}
                 </div>
                 <div className="grid grid-cols-2 gap-[12px]">
                   {COLOR_PALETTES.map((p) => {
@@ -629,7 +631,7 @@ export function OnboardingPage() {
                           {p.img ? (
                             <ImageWithFallback
                               src={p.img}
-                              alt={p.label}
+                              alt={t(p.labelKey)}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -641,7 +643,7 @@ export function OnboardingPage() {
                         <div className="px-[10px] py-[10px]">
                           <span className={`font-['Manrope',sans-serif] font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
                             }`}>
-                            {p.label}
+                            {t(p.labelKey)}
                           </span>
                         </div>
                       </motion.button>
@@ -655,7 +657,7 @@ export function OnboardingPage() {
             {step === 9 && (
               <div className="pt-[16px]">
                 <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
-                  Chọn phong cách bạn yêu thích
+                  {t("fashionStyleQuestion")}
                 </div>
                 <div className="grid grid-cols-2 gap-[12px]">
                   {FASHION_STYLES.map((s) => {
@@ -684,14 +686,14 @@ export function OnboardingPage() {
                         <div className="w-full aspect-[4/3] bg-[#f0e6da] overflow-hidden">
                           <ImageWithFallback
                             src={s.img}
-                            alt={s.label}
+                            alt={t(s.labelKey)}
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div className="px-[10px] py-[10px]">
                           <span className={`font-['Manrope',sans-serif] font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
                             }`}>
-                            {s.label}
+                            {t(s.labelKey)}
                           </span>
                         </div>
                       </motion.button>

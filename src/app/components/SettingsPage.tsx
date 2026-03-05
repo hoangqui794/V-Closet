@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { SlideUp, StaggerContainer, StaggerItem } from "./PageTransition";
+import { useLanguage } from "./LanguageContext";
 
 interface SettingItemProps {
     label: string;
@@ -38,6 +39,7 @@ function SettingItem({ label, icon, onClick, destructive }: SettingItemProps) {
 
 export function SettingsPage() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
 
     return (
         <div className="bg-[#fdfaf6] w-full min-h-full flex flex-col">
@@ -53,7 +55,7 @@ export function SettingsPage() {
                 </button>
                 <div className="flex-1 text-center pr-[18px]">
                     <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
-                        Cài đặt
+                        {t("settings")}
                     </span>
                 </div>
             </div>
@@ -62,20 +64,20 @@ export function SettingsPage() {
                 {/* Section: Tài khoản */}
                 <div className="mt-[24px] px-[20px] mb-[12px]">
                     <span className="font-['Manrope',sans-serif] font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
-                        Tài khoản
+                        {t("account")}
                     </span>
                 </div>
                 <StaggerContainer className="flex flex-col mx-[16px] overflow-hidden rounded-[20px] border border-[rgba(74,55,40,0.08)]">
                     <StaggerItem>
                         <SettingItem
-                            label="Thông tin cá nhân"
+                            label={t("personalInfo")}
                             icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a3728" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>}
                             onClick={() => navigate("/app/settings/edit-profile")}
                         />
                     </StaggerItem>
                     <StaggerItem>
                         <SettingItem
-                            label="Đổi mật khẩu"
+                            label={t("changePassword")}
                             icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a3728" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>}
                             onClick={() => navigate("/app/settings/change-password")}
                         />
@@ -85,15 +87,15 @@ export function SettingsPage() {
                 {/* Section: Thông báo & Bảo mật */}
                 <div className="mt-[32px] px-[20px] mb-[12px]">
                     <span className="font-['Manrope',sans-serif] font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
-                        Ứng dụng
+                        App
                     </span>
                 </div>
                 <StaggerContainer className="flex flex-col mx-[16px] overflow-hidden rounded-[20px] border border-[rgba(74,55,40,0.08)]">
                     <StaggerItem>
                         <SettingItem
-                            label="Thông báo"
+                            label={t("notifications")}
                             icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a3728" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>}
-                            onClick={() => toast("Cài đặt thông báo")}
+                            onClick={() => navigate("/app/settings/notifications")}
                         />
                     </StaggerItem>
                     <StaggerItem>
@@ -105,9 +107,9 @@ export function SettingsPage() {
                     </StaggerItem>
                     <StaggerItem>
                         <SettingItem
-                            label="Ngôn ngữ"
+                            label={t("language")}
                             icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a3728" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>}
-                            onClick={() => toast("Chọn ngôn ngữ")}
+                            onClick={() => navigate("/app/settings/language")}
                         />
                     </StaggerItem>
                 </StaggerContainer>

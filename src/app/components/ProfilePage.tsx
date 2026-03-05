@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useMenu } from "./MenuContext";
 import { useUserProfile, BodyMeasurements } from "./UserProfileContext";
 import { SlideUp, ScaleIn, StaggerContainer, StaggerItem } from "./PageTransition";
+import { useLanguage } from "./LanguageContext";
 import svgPaths from "../../imports/svg-38y878fasw";
 
 const BODY_SHAPE_LABELS: Record<string, string> = {
@@ -200,12 +201,13 @@ export function ProfilePage() {
   const { profile } = useUserProfile();
   const [showMeasurements, setShowMeasurements] = useState(false);
 
+  const { t } = useLanguage();
   const menuActions: Record<string, () => void> = {
-    "Chỉnh sửa hồ sơ": () => toast("✏️ Mở trang chỉnh sửa hồ sơ..."),
-    "Số đo cá nhân": () => setShowMeasurements(true),
-    "Lịch sử mua hàng": () => toast("📜 Mở lịch sử mua hàng..."),
-    "Cài đặt": () => navigate("/app/settings"),
-    "Trợ giúp": () => toast("❓ Mở trung tâm trợ giúp..."),
+    [t("editProfile")]: () => navigate("/app/settings/edit-profile"),
+    [t("personalStats")]: () => setShowMeasurements(true),
+    [t("wardrobeHistory")]: () => toast("📜 Mở lịch sử mua hàng..."),
+    [t("settings")]: () => navigate("/app/settings"),
+    [t("help")]: () => toast("❓ Mở trung tâm trợ giúp..."),
   };
 
   const bodyShapeLabel = profile.bodyShape
@@ -222,7 +224,7 @@ export function ProfilePage() {
           </svg>
         </button>
         <div className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
-          Cá nhân
+          {t("profile")}
         </div>
         <div className="w-[18px]" />
       </div>
@@ -268,7 +270,7 @@ export function ProfilePage() {
             24
           </div>
           <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
-            Trang phục
+            {t("posts")}
           </div>
         </div>
         <div className="w-px bg-[rgba(74,55,40,0.1)]" />
@@ -277,7 +279,7 @@ export function ProfilePage() {
             8
           </div>
           <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
-            Phối đồ
+            {t("outfit")}
           </div>
         </div>
         <div className="w-px bg-[rgba(74,55,40,0.1)]" />
@@ -286,7 +288,7 @@ export function ProfilePage() {
             156
           </div>
           <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
-            Votes
+            {t("votes")}
           </div>
         </div>
       </SlideUp>
@@ -294,17 +296,10 @@ export function ProfilePage() {
       {/* Menu Items */}
       <StaggerContainer delay={0.3} className="flex flex-col gap-[2px] mt-[24px] mx-[16px]">
         {[
-          { label: "Chỉnh sửa hồ sơ", icon: "edit", subtitle: null },
-          {
-            label: "Số đo cá nhân",
-            icon: "ruler",
-            subtitle: profile.measurements.height
-              ? `${profile.measurements.height}cm • ${profile.measurements.weight || "—"}kg`
-              : "Chưa cập nhật",
-          },
-          { label: "Lịch sử mua hàng", icon: "history", subtitle: null },
-          { label: "Cài đặt", icon: "settings", subtitle: null },
-          { label: "Trợ giúp", icon: "help", subtitle: null },
+          { label: t("personalStats"), icon: "ruler", subtitle: profile.measurements.height ? `${profile.measurements.height}cm • ${profile.measurements.weight || "—"}kg` : t("notUpdated") },
+          { label: t("wardrobeHistory"), icon: "history", subtitle: null },
+          { label: t("settings"), icon: "settings", subtitle: null },
+          { label: t("help"), icon: "help", subtitle: null },
         ].map((item, idx) => (
           <StaggerItem key={item.label}>
             <motion.button
@@ -349,7 +344,7 @@ export function ProfilePage() {
           className="w-full bg-transparent border border-[#4a3728] rounded-[12px] py-[14px] cursor-pointer"
         >
           <span className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#4a3728]">
-            Đăng xuất
+            {t("logout")}
           </span>
         </motion.button>
       </SlideUp>

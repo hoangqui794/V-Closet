@@ -11,6 +11,8 @@ import { ProfilePage } from "./components/ProfilePage";
 import { SettingsPage } from "./components/SettingsPage";
 import { EditProfilePage } from "./components/EditProfilePage";
 import { ChangePasswordPage } from "./components/ChangePasswordPage";
+import { NotificationSettingsPage } from "./components/NotificationSettingsPage";
+import { LanguageSettingsPage } from "./components/LanguageSettingsPage";
 import { ShopeeImportPage } from "./components/ShopeeImportPage";
 
 export const router = createBrowserRouter([
@@ -39,6 +41,8 @@ export const router = createBrowserRouter([
       { path: "settings", Component: SettingsPage },
       { path: "settings/edit-profile", Component: EditProfilePage },
       { path: "settings/change-password", Component: ChangePasswordPage },
+      { path: "settings/notifications", Component: NotificationSettingsPage },
+      { path: "settings/language", Component: LanguageSettingsPage },
       { path: "shopee", Component: ShopeeImportPage },
     ],
   },

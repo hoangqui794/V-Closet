@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router";
 import { motion } from "motion/react";
 import svgPaths from "../../imports/svg-38y878fasw";
+import { useLanguage } from "./LanguageContext";
 
 const navItems = [
   { path: "/app/community", icon: "community" },
@@ -64,17 +65,12 @@ const iconMap: Record<string, React.FC<{ active: boolean }>> = {
   profile: ProfileIcon,
 };
 
-const labelMap: Record<string, string> = {
-  community: "Cộng đồng",
-  wardrobe: "Tủ đồ",
-  camera: "Chụp ảnh",
-  outfit: "Phối đồ",
-  profile: "Cá nhân",
-};
+
 
 export function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   return (
     <nav className="bg-[#fdfaf6] flex items-start justify-center pb-[20px] pt-[10px] px-[8px] w-full shrink-0 relative border-t border-[rgba(74,55,40,0.08)]">
@@ -107,14 +103,13 @@ export function BottomNav() {
             </div>
 
             <span
-              className={`font-['Manrope',sans-serif] text-[10px] tracking-[0.2px] transition-colors duration-150 ${
-                active
+              className={`font-['Manrope',sans-serif] text-[10px] tracking-[0.2px] transition-colors duration-150 ${active
                   ? "text-[#4a3728]"
                   : "text-[#8b7355]"
-              }`}
+                }`}
               style={{ fontWeight: active ? 700 : 400 }}
             >
-              {labelMap[item.icon]}
+              {t(item.icon)}
             </span>
           </button>
         );

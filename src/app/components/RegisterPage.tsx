@@ -2,11 +2,13 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import svgPaths from "../../imports/svg-ta7we0nsx9";
+import { useLanguage } from "./LanguageContext";
 import imgImage1 from "@/assets/logoVcloset.png";
 import imgLogo from "@/assets/92375b66cc5f6db228cbba4fabc2bd6032c970de.png";
 
 export function RegisterPage() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -60,10 +62,10 @@ export function RegisterPage() {
                     className="flex flex-col gap-[4px] items-center w-full mb-[24px]"
                 >
                     <div className="font-['Manrope',sans-serif] font-bold text-[22px] text-[#4a3728] text-center leading-[28px]">
-                        Create Account
+                        {t("createAccount")}
                     </div>
                     <div className="font-['Manrope',sans-serif] font-normal text-[14px] text-[rgba(74,55,40,0.7)] text-center leading-[20px]">
-                        Join V-Closet to start building your digital wardrobe.
+                        {t("registerSub")}
                     </div>
                 </motion.div>
 
@@ -78,7 +80,7 @@ export function RegisterPage() {
                     <div className="flex flex-col gap-[8px] items-start w-full">
                         <div className="pl-[4px] w-full">
                             <div className="font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
-                                Full Name
+                                {t("fullName")}
                             </div>
                         </div>
                         <div className="relative w-full">
@@ -87,7 +89,7 @@ export function RegisterPage() {
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
-                                    placeholder="Enter your full name"
+                                    placeholder={t("enterFullName")}
                                     className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[15px] font-['Manrope',sans-serif] font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
                                 />
                             </div>
@@ -104,7 +106,7 @@ export function RegisterPage() {
                     <div className="flex flex-col gap-[8px] items-start w-full">
                         <div className="pl-[4px] w-full">
                             <div className="font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
-                                Email Address
+                                {t("emailAddress")}
                             </div>
                         </div>
                         <div className="relative w-full">
@@ -113,7 +115,7 @@ export function RegisterPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
+                                    placeholder={t("enterEmail")}
                                     className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[15px] font-['Manrope',sans-serif] font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
                                 />
                             </div>
@@ -138,7 +140,7 @@ export function RegisterPage() {
                     <div className="flex flex-col gap-[8px] items-start w-full">
                         <div className="pl-[4px] w-full">
                             <div className="font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
-                                Password
+                                {t("password")}
                             </div>
                         </div>
                         <div className="relative w-full">
@@ -147,7 +149,7 @@ export function RegisterPage() {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Create a password"
+                                    placeholder={t("createPassword")}
                                     className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[15px] font-['Manrope',sans-serif] font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
                                 />
                             </div>
@@ -172,7 +174,7 @@ export function RegisterPage() {
                     <div className="flex flex-col gap-[8px] items-start w-full">
                         <div className="pl-[4px] w-full">
                             <div className="font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
-                                Confirm Password
+                                {t("confirmPassword")}
                             </div>
                         </div>
                         <div className="relative w-full">
@@ -181,7 +183,7 @@ export function RegisterPage() {
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    placeholder="Confirm your password"
+                                    placeholder={t("confirmPassword")}
                                     className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[15px] font-['Manrope',sans-serif] font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
                                 />
                             </div>
@@ -211,7 +213,7 @@ export function RegisterPage() {
                         className="bg-[#4a3728] flex gap-[8px] h-[56px] items-center justify-center rounded-[12px] w-full cursor-pointer border-none shadow-[0px_10px_15px_-3px_rgba(74,55,40,0.2),0px_4px_6px_-4px_rgba(74,55,40,0.2)] mt-[4px]"
                     >
                         <span className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#fdfaf6] text-center leading-[24px]">
-                            Create Account
+                            {t("createAccount")}
                         </span>
                         <svg width="15" height="12" viewBox="0 0 15 12" fill="none">
                             <path d={svgPaths.p1acd9480} fill="#FDFAF6" />
@@ -228,7 +230,7 @@ export function RegisterPage() {
                 >
                     <div className="bg-[rgba(220,203,181,0.6)] flex-1 h-px" />
                     <div className="font-['Manrope',sans-serif] font-bold text-[12px] text-[rgba(74,55,40,0.4)] tracking-[0.6px] uppercase leading-[16px]">
-                        Or register with
+                        {t("orContinueWith")}
                     </div>
                     <div className="bg-[rgba(220,203,181,0.6)] flex-1 h-px" />
                 </motion.div>
@@ -291,13 +293,13 @@ export function RegisterPage() {
                     className="flex gap-[4px] items-start mt-[24px]"
                 >
                     <span className="font-['Manrope',sans-serif] font-normal text-[16px] text-[rgba(74,55,40,0.6)] text-center leading-[24px]">
-                        Already have an account?{" "}
+                        {t("alreadyHaveAccount")}{" "}
                     </span>
                     <button
                         className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#4a3728] text-center leading-[24px] bg-transparent border-none cursor-pointer p-0"
                         onClick={() => navigate("/")}
                     >
-                        Login
+                        {t("login")}
                     </button>
                 </motion.div>
             </div>
