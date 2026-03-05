@@ -8,6 +8,9 @@ import { WardrobePage } from "./components/WardrobePage";
 import { CameraPage } from "./components/CameraPage";
 import { OutfitPage } from "./components/OutfitPage";
 import { ProfilePage } from "./components/ProfilePage";
+import { SettingsPage } from "./components/SettingsPage";
+import { EditProfilePage } from "./components/EditProfilePage";
+import { ChangePasswordPage } from "./components/ChangePasswordPage";
 import { ShopeeImportPage } from "./components/ShopeeImportPage";
 
 export const router = createBrowserRouter([
@@ -33,6 +36,9 @@ export const router = createBrowserRouter([
       { path: "camera", Component: CameraPage },
       { path: "outfit", Component: OutfitPage },
       { path: "profile", Component: ProfilePage },
+      { path: "settings", Component: SettingsPage },
+      { path: "settings/edit-profile", Component: EditProfilePage },
+      { path: "settings/change-password", Component: ChangePasswordPage },
       { path: "shopee", Component: ShopeeImportPage },
     ],
   },

@@ -39,12 +39,12 @@ function BodyMeasurementPanel({
     min: number;
     max: number;
   }[] = [
-    { key: "height", label: "Chiều cao", unit: "cm", cx: 80, cy: 8, placeholder: "165", min: 140, max: 200 },
-    { key: "chest", label: "Vòng ngực", unit: "cm", cx: 80, cy: 75, placeholder: "88", min: 60, max: 130 },
-    { key: "waist", label: "Vòng eo", unit: "cm", cx: 80, cy: 105, placeholder: "68", min: 50, max: 120 },
-    { key: "hips", label: "Vòng hông", unit: "cm", cx: 80, cy: 130, placeholder: "92", min: 60, max: 140 },
-    { key: "weight", label: "Cân nặng", unit: "kg", cx: 80, cy: 195, placeholder: "55", min: 30, max: 150 },
-  ];
+      { key: "height", label: "Chiều cao", unit: "cm", cx: 80, cy: 8, placeholder: "165", min: 140, max: 200 },
+      { key: "chest", label: "Vòng ngực", unit: "cm", cx: 80, cy: 75, placeholder: "88", min: 60, max: 130 },
+      { key: "waist", label: "Vòng eo", unit: "cm", cx: 80, cy: 105, placeholder: "68", min: 50, max: 120 },
+      { key: "hips", label: "Vòng hông", unit: "cm", cx: 80, cy: 130, placeholder: "92", min: 60, max: 140 },
+      { key: "weight", label: "Cân nặng", unit: "kg", cx: 80, cy: 195, placeholder: "55", min: 30, max: 150 },
+    ];
 
   return (
     <AnimatePresence>
@@ -82,11 +82,11 @@ function BodyMeasurementPanel({
                 <svg viewBox="0 0 160 220" className="w-full">
                   {/* Body outline */}
                   {/* Head */}
-                  <ellipse cx="80" cy="28" rx="16" ry="18" fill="#e3d5ca" stroke="#c9b9a8" strokeWidth="1.5"/>
+                  <ellipse cx="80" cy="28" rx="16" ry="18" fill="#e3d5ca" stroke="#c9b9a8" strokeWidth="1.5" />
                   {/* Neck */}
-                  <rect x="74" y="44" width="12" height="10" rx="4" fill="#e3d5ca" stroke="#c9b9a8" strokeWidth="1"/>
+                  <rect x="74" y="44" width="12" height="10" rx="4" fill="#e3d5ca" stroke="#c9b9a8" strokeWidth="1" />
                   {/* Torso */}
-                  <path d="M52 54 C48 56 44 64 44 76 L44 100 C44 108 48 116 56 120 L60 122 C64 130 64 140 60 148 L54 180 C52 188 56 196 64 196 L72 196 C76 196 78 192 78 188 L82 148 L86 188 C86 192 88 196 92 196 L100 196 C108 196 112 188 110 180 L104 148 C100 140 100 130 104 122 L108 120 C116 116 120 108 120 100 L120 76 C120 64 116 56 112 54 C106 50 94 48 80 48 C66 48 58 50 52 54Z" fill="#e3d5ca" stroke="#c9b9a8" strokeWidth="1.5"/>
+                  <path d="M52 54 C48 56 44 64 44 76 L44 100 C44 108 48 116 56 120 L60 122 C64 130 64 140 60 148 L54 180 C52 188 56 196 64 196 L72 196 C76 196 78 192 78 188 L82 148 L86 188 C86 192 88 196 92 196 L100 196 C108 196 112 188 110 180 L104 148 C100 140 100 130 104 122 L108 120 C116 116 120 108 120 100 L120 76 C120 64 116 56 112 54 C106 50 94 48 80 48 C66 48 58 50 52 54Z" fill="#e3d5ca" stroke="#c9b9a8" strokeWidth="1.5" />
 
                   {/* Measurement point indicators */}
                   {measurementPoints.map((pt) => (
@@ -204,7 +204,7 @@ export function ProfilePage() {
     "Chỉnh sửa hồ sơ": () => toast("✏️ Mở trang chỉnh sửa hồ sơ..."),
     "Số đo cá nhân": () => setShowMeasurements(true),
     "Lịch sử mua hàng": () => toast("📜 Mở lịch sử mua hàng..."),
-    "Cài đặt": () => toast("⚙️ Mở cài đặt..."),
+    "Cài đặt": () => navigate("/app/settings"),
     "Trợ giúp": () => toast("❓ Mở trung tâm trợ giúp..."),
   };
 
@@ -310,9 +310,8 @@ export function ProfilePage() {
             <motion.button
               whileTap={{ scale: 0.98, backgroundColor: "rgba(74,55,40,0.04)" }}
               onClick={menuActions[item.label]}
-              className={`bg-white flex items-center justify-between px-[20px] py-[16px] border-none cursor-pointer w-full ${
-                idx === 0 ? "rounded-t-[16px]" : ""
-              } ${idx === 4 ? "rounded-b-[16px]" : ""}`}
+              className={`bg-white flex items-center justify-between px-[20px] py-[16px] border-none cursor-pointer w-full ${idx === 0 ? "rounded-t-[16px]" : ""
+                } ${idx === 4 ? "rounded-b-[16px]" : ""}`}
             >
               <div className="flex flex-col items-start">
                 <span className="font-['Manrope',sans-serif] font-medium text-[16px] text-[#4a3728]">
