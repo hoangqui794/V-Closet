@@ -5,6 +5,11 @@ import { toast } from "sonner";
 import { useUserProfile, BodyShapeType } from "./UserProfileContext";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import mascotImg from "@/assets/c743ecc47591b3bbec72e7d78e8a4836897243cc.png";
+import hourglassImg from "@/assets/body-shapes/hourglass.png";
+import pearImg from "@/assets/body-shapes/pear.png";
+import invertedTriangleImg from "@/assets/body-shapes/inverted-triangle.png";
+import appleImg from "@/assets/body-shapes/apple.png";
+import rectangleImg from "@/assets/body-shapes/rectangle.png";
 
 /* ═══════════════════════════════════════════
    DATA
@@ -58,13 +63,13 @@ const EYE_COLORS = [
   { id: "unsure", label: "Tôi không chắc", color: null },
 ];
 
-const BODY_SHAPES: { id: BodyShapeType; label: string }[] = [
-  { id: "unsure", label: "Tôi không chắc" },
-  { id: "hourglass", label: "Đồng hồ cát" },
-  { id: "pear", label: "Tam giác" },
-  { id: "inverted-triangle", label: "Tam giác ngược" },
-  { id: "apple", label: "Dáng tròn" },
-  { id: "rectangle", label: "Chữ nhật" },
+const BODY_SHAPES: { id: BodyShapeType; label: string; img: any }[] = [
+  { id: "unsure", label: "Tôi không chắc", img: null },
+  { id: "hourglass", label: "Đồng hồ cát", img: hourglassImg },
+  { id: "pear", label: "Tam giác", img: pearImg },
+  { id: "inverted-triangle", label: "Tam giác ngược", img: invertedTriangleImg },
+  { id: "apple", label: "Dáng tròn", img: appleImg },
+  { id: "rectangle", label: "Chữ nhật", img: rectangleImg },
 ];
 
 const COLOR_PALETTES = [
@@ -90,60 +95,7 @@ const TOTAL_STEPS = 10;
    BODY SHAPE SVGs
    ═══════════════════════════════════════════ */
 
-function BodyShapeSVG({ shape }: { shape: BodyShapeType }) {
-  const highlight = "#A8C8E8";
-  const outline = "#888";
-
-  const shapePaths: Record<string, React.ReactNode> = {
-    unsure: (
-      <g>
-        <text x="50" y="58" textAnchor="middle" fontSize="28" fill="#aaa">🤔</text>
-      </g>
-    ),
-    hourglass: (
-      <g>
-        <path d="M30 25 C30 25 35 20 50 20 C65 20 70 25 70 25 L70 35 C70 35 60 40 50 40 C40 40 30 35 30 35Z" fill="none" stroke={outline} strokeWidth="1.5" />
-        <path d="M30 55 C30 55 35 60 50 60 C65 60 70 55 70 55 L70 45 C70 45 60 40 50 40 C40 40 30 45 30 45Z" fill="none" stroke={outline} strokeWidth="1.5" />
-        <path d="M35 25 L35 35 C35 35 42 39 50 39 C58 39 65 35 65 35 L65 25" fill={highlight} opacity="0.5" />
-        <path d="M35 55 L35 45 C35 45 42 41 50 41 C58 41 65 45 65 45 L65 55" fill={highlight} opacity="0.5" />
-      </g>
-    ),
-    pear: (
-      <g>
-        <path d="M37 20 C37 20 42 18 50 18 C58 18 63 20 63 20 L63 35 C63 35 55 38 50 38 C45 38 37 35 37 35Z" fill="none" stroke={outline} strokeWidth="1.5" />
-        <path d="M28 62 C28 62 35 65 50 65 C65 65 72 62 72 62 L72 42 C72 42 60 38 50 38 C40 38 28 42 28 42Z" fill="none" stroke={outline} strokeWidth="1.5" />
-        <polygon points="40,24 50,38 60,24" fill={highlight} opacity="0.5" />
-      </g>
-    ),
-    "inverted-triangle": (
-      <g>
-        <path d="M25 20 C25 20 35 18 50 18 C65 18 75 20 75 20 L75 38 C75 38 60 42 50 42 C40 42 25 38 25 38Z" fill="none" stroke={outline} strokeWidth="1.5" />
-        <path d="M35 62 C35 62 40 65 50 65 C60 65 65 62 65 62 L65 42 C65 42 58 40 50 40 C42 40 35 42 35 42Z" fill="none" stroke={outline} strokeWidth="1.5" />
-        <polygon points="40,60 50,40 60,60" fill={highlight} opacity="0.5" />
-      </g>
-    ),
-    apple: (
-      <g>
-        <ellipse cx="50" cy="40" rx="25" ry="22" fill="none" stroke={outline} strokeWidth="1.5" />
-        <ellipse cx="50" cy="40" rx="20" ry="18" fill={highlight} opacity="0.4" />
-        <path d="M38 58 L38 70" stroke={outline} strokeWidth="1.5" />
-        <path d="M62 58 L62 70" stroke={outline} strokeWidth="1.5" />
-      </g>
-    ),
-    rectangle: (
-      <g>
-        <rect x="32" y="18" width="36" height="48" rx="3" fill="none" stroke={outline} strokeWidth="1.5" />
-        <rect x="34" y="30" width="32" height="16" rx="2" fill={highlight} opacity="0.4" />
-      </g>
-    ),
-  };
-
-  return (
-    <svg viewBox="0 0 100 80" className="w-full h-full">
-      {shapePaths[shape] || shapePaths.unsure}
-    </svg>
-  );
-}
+// SVG component removed in favor of professional images
 
 /* ═══════════════════════════════════════════
    REUSABLE COMPONENTS
@@ -632,8 +584,16 @@ export function OnboardingPage() {
                           : "border-[rgba(74,55,40,0.1)]"
                           }`}
                       >
-                        <div className="w-full h-[80px] mb-[8px]">
-                          <BodyShapeSVG shape={s.id} />
+                        <div className="w-full h-[100px] mb-[8px] flex items-center justify-center overflow-hidden">
+                          {s.img ? (
+                            <img
+                              src={s.img}
+                              alt={s.label}
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <span className="text-[32px]">🤔</span>
+                          )}
                         </div>
                         <span className={`font-['Manrope',sans-serif] font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
                           }`}>
