@@ -115,10 +115,10 @@ export function WardrobePage() {
           </div>
           <div>
             <div className="font-['Manrope',sans-serif] font-bold text-[14px] text-[#4a3728]">
-              Tach nen AI
+              Tách nền AI
             </div>
             <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
-              3 items processing...
+              Đang xử lý 3 món đồ...
             </div>
           </div>
         </div>

@@ -20,9 +20,9 @@ export function CommunityPage() {
   const [likes, setLikes] = useState<Record<number, boolean>>({});
   const [voteCounts, setVoteCounts] = useState<Record<number, number>>({ 1: 128, 2: 94 });
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("Kham pha");
+  const [activeTab, setActiveTab] = useState("Khám phá");
 
-  const TABS = ["Kham pha", "Xu huong", "Dang theo doi", "Thach thuc"];
+  const TABS = ["Khám phá", "Xu hướng", "Đang theo dõi", "Thách thức"];
 
   const TOP_STYLISTS = [
     { name: "Lan Anh", avatar: imgAvatar1, followers: "12k" },
@@ -40,8 +40,8 @@ export function CommunityPage() {
       image: imgFeed2,
       likes: 1240,
       comments: 42,
-      caption: "Ngay moi voi phong cach Minimalist ☕️ #minimalist #outfitoftheday",
-      time: "2 gio truoc"
+      caption: "Ngày mới với phong cách Minimalist ☕️ #minimalist #outfitoftheday",
+      time: "2 giờ trước"
     },
     {
       id: 2,
@@ -50,15 +50,15 @@ export function CommunityPage() {
       image: imgFeed1,
       likes: 856,
       comments: 18,
-      caption: "Mua thu vao pho 🍂 Chut nhe nhang cho ngay cuoi tuan.",
-      time: "4 gio truoc"
+      caption: "Mùa thu vào phố 🍂 Chút nhẹ nhàng cho ngày cuối tuần.",
+      time: "4 giờ trước"
     }
   ];
 
   const toggleVote = (id: number) => {
     setVotes((prev) => {
       const wasVoted = prev[id];
-      if (!wasVoted) toast.success("Da binh chon!");
+      if (!wasVoted) toast.success("Đã bình chọn!");
       return { ...prev, [id]: !wasVoted };
     });
     setVoteCounts((prev) => ({
@@ -69,7 +69,7 @@ export function CommunityPage() {
 
   const toggleLike = (id: number) => {
     setLikes(prev => ({ ...prev, [id]: !prev[id] }));
-    if (!likes[id]) toast.success("Da thich bai viet!");
+    if (!likes[id]) toast.success("Đã thích bài viết!");
   };
 
   const [showSpin, setShowSpin] = useState(false);
@@ -84,7 +84,7 @@ export function CommunityPage() {
           </svg>
         </button>
         <div className="font-['Outfit',sans-serif] font-[700] text-[20px] text-[#3b2d22] tracking-[-0.5px]">
-          Community
+          CỘNG ĐỒNG
         </div>
         <div className="flex items-center gap-[16px]">
           <button onClick={openNotif} className="relative bg-transparent border-none cursor-pointer p-0 active:scale-95 transition-transform">
@@ -108,7 +108,7 @@ export function CommunityPage() {
           </svg>
           <input
             type="text"
-            placeholder="Tim kiem phong cach, nguoi dung..."
+            placeholder="Tìm kiếm phong cách, người dùng..."
             className="bg-transparent border-none outline-none ml-[12px] w-full font-['Manrope',sans-serif] text-[15px] text-[#3b2d22] placeholder:text-[rgba(59,45,34,0.4)]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -134,9 +134,9 @@ export function CommunityPage() {
       <SlideUp delay={0.1} className="mt-[24px]">
         <div className="flex items-center justify-between px-[20px] mb-[12px]">
           <div className="font-['Outfit',sans-serif] font-bold text-[18px] text-[#3b2d22]">
-            Top Stylist trong tuan
+            Top Stylist trong tuần
           </div>
-          <button className="text-[#d4a373] font-bold text-[13px] bg-transparent border-none">Xem tat ca</button>
+          <button className="text-[#d4a373] font-bold text-[13px] bg-transparent border-none">Xem tất cả</button>
         </div>
         <div className="flex gap-[16px] px-[20px] overflow-x-auto no-scrollbar">
           {TOP_STYLISTS.map((stylist, i) => (
@@ -167,18 +167,18 @@ export function CommunityPage() {
             <span className="bg-[#d4a373] rounded-[6px] px-[10px] py-[4px] font-['Outfit',sans-serif] font-bold text-[10px] text-white tracking-[1px] uppercase">
               LIVE CHALLENGE
             </span>
-            <span className="text-[rgba(255,255,255,0.8)] text-[12px] font-['Manrope',sans-serif]">1.2k dang tham gia</span>
+            <span className="text-[rgba(255,255,255,0.8)] text-[12px] font-['Manrope',sans-serif]">1.2k đang tham gia</span>
           </div>
           <div className="font-['Outfit',sans-serif] font-bold text-[28px] text-white leading-tight mb-[4px]">
             Autumn Elegance 🍂
           </div>
           <div className="font-['Manrope',sans-serif] text-[14px] text-[rgba(255,255,255,0.7)] mb-[16px]">
-            Khoe phong cach thu nhe nhang cua ban nhan ngay voucher 500k.
+            Khoe phong cách thu nhẹ nhàng của bạn nhận ngay voucher 500k.
           </div>
           <div className="flex items-center gap-[12px]">
             <button
               className="bg-white rounded-full px-[24px] py-[12px] border-none cursor-pointer font-['Outfit',sans-serif] font-bold text-[13px] text-[#3b2d22] active:scale-95 transition-transform"
-              onClick={() => toast.success("Da dang ky Autumn Challenge! 🍁")}
+              onClick={() => toast.success("Đã đăng ký Autumn Challenge! 🍁")}
             >
               Tham gia ngay
             </button>
@@ -210,8 +210,8 @@ export function CommunityPage() {
               </svg>
             </div>
             <div className="text-left">
-              <div className="font-['Outfit',sans-serif] font-bold text-[17px] text-white">Vong Xoay May Man</div>
-              <div className="font-['Manrope',sans-serif] text-[13px] text-[rgba(212,163,115,0.8)]">Nhan ngay Voucher 100k & qua tang</div>
+              <div className="font-['Outfit',sans-serif] font-bold text-[17px] text-white">Vòng Xoay May Mắn</div>
+              <div className="font-['Manrope',sans-serif] text-[13px] text-[rgba(212,163,115,0.8)]">Nhận ngay Voucher 100k & quà tặng</div>
             </div>
           </div>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="relative z-10">
@@ -223,7 +223,7 @@ export function CommunityPage() {
       {/* Community Social Feed */}
       <div className="mt-[32px]">
         <div className="px-[20px] mb-[20px] flex items-center justify-between">
-          <div className="font-['Outfit',sans-serif] font-bold text-[22px] text-[#3b2d22]">Kham pha style</div>
+          <div className="font-['Outfit',sans-serif] font-bold text-[22px] text-[#3b2d22]">Khám phá style</div>
           <div className="flex gap-[8px]">
             <button className="p-[8px] bg-white rounded-lg border border-[rgba(59,45,34,0.1)]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -314,7 +314,7 @@ export function CommunityPage() {
         <div className="bg-[#f5ebe0] rounded-[32px] p-[24px]">
           <div className="text-center mb-[24px]">
             <div className="font-['Outfit',sans-serif] font-bold text-[24px] text-[#3b2d22]">Style Battle 🔥</div>
-            <div className="font-['Manrope',sans-serif] text-[13px] text-[#7f5539]">Binh chon phoi do ban yeu thich</div>
+            <div className="font-['Manrope',sans-serif] text-[13px] text-[#7f5539]">Bình chọn phối đồ bạn yêu thích</div>
           </div>
           <div className="flex gap-[16px]">
             {/* Card 1 */}
@@ -359,7 +359,7 @@ export function CommunityPage() {
       {/* Floating Action Button for Posting */}
       <div className="fixed bottom-[110px] right-[20px] z-30">
         <button
-          onClick={() => toast.success("Feature coming soon: Chia se phoi do cua ban! ✨")}
+          onClick={() => toast.success("Feature coming soon: Chia sẻ phối đồ của bạn! ✨")}
           className="bg-[#3b2d22] text-white size-[60px] rounded-full flex items-center justify-center shadow-[0px_10px_25px_rgba(59,45,34,0.3)] active:scale-90 transition-all group"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -367,7 +367,7 @@ export function CommunityPage() {
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
           <div className="absolute right-full mr-[12px] bg-[#3b2d22] text-white px-[12px] py-[6px] rounded-lg text-[12px] font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-            Dang phoi do
+            Đăng phối đồ
           </div>
         </button>
       </div>

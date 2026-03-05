@@ -12,13 +12,13 @@ import imgDenimShorts from "@/assets/276e8e204190fc4880b226a31087cc029ffd76f3.pn
 import imgOrganicTee from "@/assets/b80ef58802fb5301ad07563a92bfc142b3d8419e.png";
 import imgBeigeJacket from "@/assets/a9426fd437c4c217d8b03a3ca79bd9563d34c3f1.png";
 
-const bodyShapes = ["Can doi", "Qua le", "Dong ho cat", "Day dan"];
+const bodyShapes = ["Cân đối", "Quả lê", "Đồng hồ cát", "Đầy đặn"];
 const sizes = ["S", "M", "L"];
 
 const dragItems = [
-  { name: "Quan Short Denim", img: imgDenimShorts },
-  { name: "Ao Thun Organic", img: imgOrganicTee },
-  { name: "Ao Khoac Nhe", img: imgBeigeJacket },
+  { name: "Quần Short Denim", img: imgDenimShorts },
+  { name: "Áo Thun Organic", img: imgOrganicTee },
+  { name: "Áo Khoác Nhẹ", img: imgBeigeJacket },
 ];
 
 /* ── AI Scan Prompt Modal ── */
@@ -168,9 +168,7 @@ export function OutfitPage() {
               <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#3B2D22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <div className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#3b2d22] tracking-[-0.45px] uppercase">
-            Phong Thu Do
-          </div>
+          Phòng Thử Đồ
           <button onClick={() => { setSaved(!saved); toast(saved ? "Đã bỏ lưu" : "💾 Đã lưu phối đồ!"); }} className="rounded-full size-[40px] flex items-center justify-end cursor-pointer bg-transparent border-none active:bg-[rgba(74,55,40,0.06)] transition-colors">
             <svg width="18" height="20" viewBox="0 0 18 20" fill="none">
               <path d={svgPaths.p2b729200} fill="#3B2D22" />
@@ -225,14 +223,14 @@ export function OutfitPage() {
             <div className="flex gap-[8px] items-center mb-[20px]">
               <div className="bg-[#3b2d22] h-[4px] rounded-full w-[32px]" />
               <div className="font-['Manrope',sans-serif] font-[800] text-[14px] text-[#3b2d22] tracking-[1.4px] uppercase">
-                Tuy Chinh Nhan Vat
+                Tùy Chỉnh Nhân Vật
               </div>
             </div>
 
             {/* Dáng người */}
             <div className="mb-[24px]">
               <div className="font-['Manrope',sans-serif] font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase mb-[12px] px-[4px]">
-                Dang nguoi
+                Dáng người
               </div>
               <div className="flex gap-[10px] overflow-x-auto pb-[4px]">
                 {bodyShapes.map((shape, i) => (
@@ -307,13 +305,13 @@ export function OutfitPage() {
           <StaggerItem className="px-[16px]">
             <div className="flex items-center justify-between mb-[16px] px-[4px]">
               <div className="font-['Manrope',sans-serif] font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase tracking-[1px]">
-                KEO VA THA DE THU DO
+                KÉO VÀ THẢ ĐỂ THỬ ĐỒ
               </div>
               <button
                 onClick={() => navigate("/app/wardrobe")}
                 className="bg-transparent border-none cursor-pointer text-[10px] text-[rgba(59,45,34,0.4)] font-extrabold uppercase active:opacity-60 transition-opacity"
               >
-                Xem tat ca
+                Xem tất cả
               </button>
             </div>
             <div className="flex gap-[14px] overflow-x-auto pb-[20px]">
@@ -321,7 +319,7 @@ export function OutfitPage() {
                 <div className="aspect-square bg-[rgba(245,235,224,0.4)] border-2 border-dashed border-[rgba(213,189,175,0.5)] rounded-[24px] w-full flex items-center justify-center">
                   <span className="text-[28px] text-[rgba(213,189,175,0.7)] font-light">+</span>
                 </div>
-                <span className="font-['Manrope',sans-serif] font-bold text-[10px] text-[rgba(59,45,34,0.4)] uppercase mt-[8px]">Them do</span>
+                <span className="font-['Manrope',sans-serif] font-bold text-[10px] text-[rgba(59,45,34,0.4)] uppercase mt-[8px]">Thêm đồ</span>
               </button>
               {dragItems.map((item, i) => (
                 <button
