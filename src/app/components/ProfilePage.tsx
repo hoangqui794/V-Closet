@@ -204,6 +204,7 @@ export function ProfilePage() {
   const { t } = useLanguage();
   const menuActions: Record<string, () => void> = {
     [t("editProfile")]: () => navigate("/app/settings/edit-profile"),
+    [t("subscription")]: () => navigate("/app/subscription"),
     [t("personalStats")]: () => setShowMeasurements(true),
     [t("wardrobeHistory")]: () => toast("📜 Mở lịch sử mua hàng..."),
     [t("settings")]: () => navigate("/app/settings"),
@@ -297,6 +298,7 @@ export function ProfilePage() {
       <StaggerContainer delay={0.3} className="flex flex-col gap-[2px] mt-[24px] mx-[16px]">
         {[
           { label: t("personalStats"), icon: "ruler", subtitle: profile.measurements.height ? `${profile.measurements.height}cm • ${profile.measurements.weight || "—"}kg` : t("notUpdated") },
+          { label: t("subscription"), icon: "credit-card", subtitle: "Gói FREE" },
           { label: t("wardrobeHistory"), icon: "history", subtitle: null },
           { label: t("settings"), icon: "settings", subtitle: null },
           { label: t("help"), icon: "help", subtitle: null },
