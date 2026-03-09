@@ -17,7 +17,13 @@ export function LoginPage() {
   };
 
   return (
-    <div className="mobile-frame items-center">
+    <div className="mobile-frame items-center relative">
+      {/* Secret Admin Button */}
+      <button
+        onClick={() => navigate("/admin")}
+        className="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full opacity-50 hover:opacity-100 transition-opacity cursor-pointer border-none z-50"
+        title="Admin Access"
+      />
       <div className="flex flex-col items-center justify-center w-full px-[16px] pt-[28px] pb-[40px]">
         {/* Spacer */}
         <div className="h-[6px] shrink-0 w-px" />

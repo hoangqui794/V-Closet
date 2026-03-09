@@ -12,7 +12,8 @@ const menuItems = [
 ];
 
 const secondaryItems = [
-  { label: "Cài đặt", icon: "settings" },
+  { label: "Cài đặt", icon: "settings", path: "/app/settings" },
+  { label: "Quản trị hệ thống", icon: "admin", path: "/admin" },
   { label: "Trợ giúp & Hỗ trợ", icon: "help" },
   { label: "Về V-Closet", icon: "about" },
 ];
@@ -69,6 +70,7 @@ export function SideMenu() {
   const location = useLocation();
 
   const handleNav = (path: string) => {
+    if (!path) return;
     navigate(path);
     closeMenu();
   };
@@ -128,21 +130,19 @@ export function SideMenu() {
                     <button
                       key={item.path}
                       onClick={() => handleNav(item.path)}
-                      className={`w-full flex items-center gap-[14px] px-[16px] py-[13px] rounded-[12px] border-none cursor-pointer transition-colors duration-100 ${
-                        active
+                      className={`w-full flex items-center gap-[14px] px-[16px] py-[13px] rounded-[12px] border-none cursor-pointer transition-colors duration-100 ${active
                           ? "bg-[rgba(74,55,40,0.08)]"
                           : "bg-transparent active:bg-[rgba(74,55,40,0.04)]"
-                      }`}
+                        }`}
                     >
                       <div className="w-[24px] flex items-center justify-center">
                         <MenuIcon icon={item.icon} active={active} />
                       </div>
                       <span
-                        className={`font-['Manrope',sans-serif] text-[15px] ${
-                          active
+                        className={`font-['Manrope',sans-serif] text-[15px] ${active
                             ? "text-[#4a3728] font-bold"
                             : "text-[#7f5539] font-medium"
-                        }`}
+                          }`}
                       >
                         {item.label}
                       </span>
@@ -162,6 +162,7 @@ export function SideMenu() {
                 {secondaryItems.map((item) => (
                   <button
                     key={item.label}
+                    onClick={() => item.path && handleNav(item.path)}
                     className="w-full flex items-center gap-[14px] px-[16px] py-[12px] rounded-[12px] border-none cursor-pointer bg-transparent active:bg-[rgba(74,55,40,0.04)] transition-colors duration-100"
                   >
                     <div className="w-[24px] flex items-center justify-center">
@@ -224,6 +225,23 @@ function SecondaryIcon({ type }: { type: string }) {
         >
           <circle cx="12" cy="12" r="3" />
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      );
+    case "admin":
+      return (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="9" y1="21" x2="9" y2="9" />
         </svg>
       );
     case "help":

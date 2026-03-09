@@ -17,6 +17,12 @@ import { ShopeeImportPage } from "./components/ShopeeImportPage";
 import { SubscriptionPage } from "./components/SubscriptionPage";
 import { PaymentPage } from "./components/PaymentPage";
 
+import { AdminLayout } from "./components/admin/AdminLayout";
+import { Dashboard } from "./components/admin/Dashboard";
+import { UserManagement } from "./components/admin/UserManagement";
+import { ItemManagement } from "./components/admin/ItemManagement";
+import { SubscriptionManagement } from "./components/admin/SubscriptionManagement";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -48,6 +54,17 @@ export const router = createBrowserRouter([
       { path: "shopee", Component: ShopeeImportPage },
       { path: "subscription", Component: SubscriptionPage },
       { path: "payment", Component: PaymentPage },
+    ],
+  },
+  {
+    path: "/admin",
+    Component: AdminLayout,
+    children: [
+      { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+      { path: "dashboard", Component: Dashboard },
+      { path: "users", Component: UserManagement },
+      { path: "items", Component: ItemManagement },
+      { path: "subscriptions", Component: SubscriptionManagement },
     ],
   },
 ]);
