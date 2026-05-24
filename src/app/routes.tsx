@@ -20,8 +20,9 @@ import { PaymentPage } from "./components/PaymentPage";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { Dashboard } from "./components/admin/Dashboard";
 import { UserManagement } from "./components/admin/UserManagement";
-import { ItemManagement } from "./components/admin/ItemManagement";
+import { AffiliateManagement } from "./components/admin/AffiliateManagement";
 import { SubscriptionManagement } from "./components/admin/SubscriptionManagement";
+import { AIConfig } from "./components/admin/AIConfig";
 
 export const router = createBrowserRouter([
   {
@@ -63,8 +64,9 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: "dashboard", Component: Dashboard },
       { path: "users", Component: UserManagement },
-      { path: "items", Component: ItemManagement },
+      { path: "affiliate", Component: AffiliateManagement },
       { path: "subscriptions", Component: SubscriptionManagement },
+      { path: "ai-config", Component: AIConfig },
     ],
   },
 ]);

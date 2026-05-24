@@ -7,7 +7,8 @@ import {
     LogOut,
     Bell,
     Search,
-    ChevronRight
+    ChevronRight,
+    Sparkles
 } from "lucide-react";
 import {
     Sidebar,
@@ -43,14 +44,19 @@ const menuItems = [
         icon: Users,
     },
     {
-        title: "Sản phẩm & Tủ đồ",
-        url: "/admin/items",
+        title: "Sản phẩm Affiliate",
+        url: "/admin/affiliate",
         icon: ShoppingBag,
     },
     {
         title: "Gói đăng ký",
         url: "/admin/subscriptions",
         icon: CreditCard,
+    },
+    {
+        title: "Cấu hình AI & API",
+        url: "/admin/ai-config",
+        icon: Sparkles,
     },
 ];
 
