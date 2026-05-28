@@ -23,6 +23,7 @@ import { UserManagement } from "./components/admin/UserManagement";
 import { AffiliateManagement } from "./components/admin/AffiliateManagement";
 import { SubscriptionManagement } from "./components/admin/SubscriptionManagement";
 import { AIConfig } from "./components/admin/AIConfig";
+import { ReportManagement } from "./components/admin/ReportManagement";
 
 export const router = createBrowserRouter([
   {
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: "dashboard", Component: Dashboard },
       { path: "users", Component: UserManagement },
+      { path: "reports", Component: ReportManagement },
       { path: "affiliate", Component: AffiliateManagement },
       { path: "subscriptions", Component: SubscriptionManagement },
       { path: "ai-config", Component: AIConfig },

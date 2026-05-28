@@ -10,7 +10,8 @@ import {
     Search,
     ChevronRight,
     Sparkles,
-    KeyRound
+    KeyRound,
+    Flag
 } from "lucide-react";
 import {
     Dialog, DialogContent, DialogHeader,
@@ -50,6 +51,11 @@ const menuItems = [
         title: "Người dùng",
         url: "/admin/users",
         icon: Users,
+    },
+    {
+        title: "Báo cáo vi phạm",
+        url: "/admin/reports",
+        icon: Flag,
     },
     {
         title: "Sản phẩm Affiliate",

@@ -195,3 +195,41 @@ export async function resetAdminPermissions(userId: string): Promise<void> {
         method: "POST",
     });
 }
+
+// ─── Admin Moderation Reports API ──────────────────────────────────────────────
+
+export interface AdminReport {
+    reportId: string;
+    postId: string;
+    postCaption: string;
+    postCreatorDisplayName: string;
+    reporterDisplayName: string;
+    reason: string;
+    description: string;
+    isResolved: boolean;
+    createdAt: string;
+}
+
+export interface PaginatedReports {
+    reports: AdminReport[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export interface GetReportsParams {
+    page?: number;
+    pageSize?: number;
+    isResolved?: boolean;
+    reason?: string;
+}
+
+export async function getAdminReports(params: GetReportsParams = {}): Promise<PaginatedReports> {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+    if (params.isResolved !== undefined) query.set("isResolved", String(params.isResolved));
+    if (params.reason) query.set("reason", params.reason);
+
+    return request<PaginatedReports>(`/api/admin/moderation/reports?${query.toString()}`);
+}
