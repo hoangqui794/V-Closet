@@ -39,7 +39,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import imgLogoVcloset from "@/assets/logoVcloset.png";
-import { setToken as apiSetToken, getToken as apiGetToken } from "@/lib/api";
+import { setToken as apiSetToken, getToken as apiGetToken, clearToken as apiClearToken } from "@/lib/api";
 
 const menuItems = [
     {
@@ -155,7 +155,7 @@ export function AdminLayout() {
                             <SidebarMenu>
                                 <SidebarMenuItem>
                                     <SidebarMenuButton asChild tooltip="Đăng xuất">
-                                        <Link to="/">
+                                        <Link to="/admin/login" onClick={() => apiClearToken()}>
                                             <LogOut />
                                             <span>Đăng xuất</span>
                                         </Link>

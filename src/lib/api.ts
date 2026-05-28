@@ -321,3 +321,27 @@ export async function depositBrandCredit(brandId: string, payload: DepositBrandC
         body: JSON.stringify(payload),
     });
 }
+
+export interface LoginPayload {
+    email: string;
+    password: string;
+}
+
+export interface LoginResponse {
+    accessToken: string;
+    refreshToken: string;
+    userId: number | string;
+    role: string;
+    email: string;
+    displayName: string;
+    avatarUrl: string | null;
+    isOnboardingCompleted: boolean;
+    isPasswordSet: boolean;
+}
+
+export async function loginAdmin(payload: LoginPayload): Promise<LoginResponse> {
+    return request<LoginResponse>("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
