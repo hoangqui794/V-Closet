@@ -233,3 +233,13 @@ export async function getAdminReports(params: GetReportsParams = {}): Promise<Pa
 
     return request<PaginatedReports>(`/api/admin/moderation/reports?${query.toString()}`);
 }
+
+export interface ReportedPostDetail {
+    postId: string;
+    canvasImage: string | null;
+    reasons?: string[];
+}
+
+export async function getReportedPostDetail(postId: string): Promise<ReportedPostDetail> {
+    return request<ReportedPostDetail>(`/api/admin/moderation/posts/${postId}`);
+}

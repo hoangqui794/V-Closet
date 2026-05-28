@@ -22,7 +22,9 @@ import {
 import {
     getAdminReports,
     AdminReport,
-    GetReportsParams
+    GetReportsParams,
+    getReportedPostDetail,
+    ReportedPostDetail
 } from "../../../lib/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -82,6 +84,24 @@ interface ReportDetailModalProps {
 function ReportDetailModal({ report, open, onClose }: ReportDetailModalProps) {
     if (!report) return null;
 
+    const [postDetail, setPostDetail] = useState<ReportedPostDetail | null>(null);
+    const [loadingDetail, setLoadingDetail] = useState(false);
+
+    useEffect(() => {
+        if (!report || !open) {
+            setPostDetail(null);
+            return;
+        }
+        setLoadingDetail(true);
+        getReportedPostDetail(report.postId)
+            .then(setPostDetail)
+            .catch(err => {
+                console.warn("Failed to load reported post detail:", err);
+                setPostDetail(null);
+            })
+            .finally(() => setLoadingDetail(false));
+    }, [report, open]);
+
     return (
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-xl">
@@ -113,6 +133,28 @@ function ReportDetailModal({ report, open, onClose }: ReportDetailModalProps) {
                             <span className="font-mono text-[10px]">ID: {report.postId.slice(0, 8)}...</span>
                         </div>
                     </div>
+
+                    {/* Post Canvas Preview */}
+                    {loadingDetail ? (
+                        <div className="flex flex-col items-center justify-center py-6 bg-stone-50/30 border border-dashed border-[#dccbb5] rounded-xl gap-2 text-stone-500 animate-pulse">
+                            <Loader2 className="w-5 h-5 animate-spin text-[#4a3728]" />
+                            <span className="text-xs font-medium">Đang tải thiết kế Canvas vi phạm...</span>
+                        </div>
+                    ) : postDetail?.canvasImage ? (
+                        <div className="flex flex-col gap-2 bg-[#fdfaf7] border border-[#f5efe6] rounded-xl p-3 items-center">
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide self-start flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                                Thiết kế Canvas bị báo cáo
+                            </span>
+                            <div className="relative w-full max-h-[220px] rounded-lg overflow-hidden border border-[#f5efe6] bg-white flex items-center justify-center p-2">
+                                <img
+                                    src={postDetail.canvasImage}
+                                    alt="Thiết kế Canvas"
+                                    className="max-h-[200px] object-contain rounded-md shadow-sm transition-transform hover:scale-105 duration-300"
+                                />
+                            </div>
+                        </div>
+                    ) : null}
 
                     {/* Report Reason and description */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
