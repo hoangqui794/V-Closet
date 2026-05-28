@@ -243,3 +243,15 @@ export interface ReportedPostDetail {
 export async function getReportedPostDetail(postId: string): Promise<ReportedPostDetail> {
     return request<ReportedPostDetail>(`/api/admin/moderation/posts/${postId}`);
 }
+
+export interface ResolveReportPayload {
+    action: string; // "hide" | "dismiss"
+    resolutionNotes?: string;
+}
+
+export async function resolveAdminReport(reportId: string, payload: ResolveReportPayload): Promise<void> {
+    return request<void>(`/api/admin/moderation/reports/${reportId}/resolve`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}

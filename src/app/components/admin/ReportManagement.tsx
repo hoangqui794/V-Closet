@@ -24,7 +24,9 @@ import {
     AdminReport,
     GetReportsParams,
     getReportedPostDetail,
-    ReportedPostDetail
+    ReportedPostDetail,
+    resolveAdminReport,
+    ResolveReportPayload
 } from "../../../lib/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -79,13 +81,47 @@ interface ReportDetailModalProps {
     report: AdminReport | null;
     open: boolean;
     onClose: () => void;
+    onSuccess: (message: string) => void;
 }
 
-function ReportDetailModal({ report, open, onClose }: ReportDetailModalProps) {
+function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailModalProps) {
     if (!report) return null;
 
     const [postDetail, setPostDetail] = useState<ReportedPostDetail | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
+
+    // Resolve form state
+    const [action, setAction] = useState("hide");
+    const [notes, setNotes] = useState("");
+    const [resolving, setResolving] = useState(false);
+    const [resolveError, setResolveError] = useState("");
+
+    useEffect(() => {
+        if (open) {
+            setAction("hide");
+            setNotes("");
+            setResolving(false);
+            setResolveError("");
+        }
+    }, [open]);
+
+    const handleResolve = async () => {
+        if (!report) return;
+        setResolving(true);
+        setResolveError("");
+        try {
+            await resolveAdminReport(report.reportId, {
+                action,
+                resolutionNotes: notes.trim() || undefined
+            });
+            onSuccess(action === "hide" ? "Đã ẩn bài viết vi phạm thành công!" : "Đã bác bỏ báo cáo vi phạm thành công!");
+            onClose();
+        } catch (e: unknown) {
+            setResolveError(e instanceof Error ? e.message : "Xử lý báo cáo thất bại");
+        } finally {
+            setResolving(false);
+        }
+    };
 
     useEffect(() => {
         if (!report || !open) {
@@ -188,7 +224,7 @@ function ReportDetailModal({ report, open, onClose }: ReportDetailModalProps) {
                     </div>
 
                     {/* Resolution Status Indicator */}
-                    <div className="flex items-center gap-3 py-1 px-2">
+                    <div className="flex items-center gap-3 py-1 px-2 border-b border-muted pb-3 mb-1">
                         <span className="text-xs font-medium text-stone-500">Trạng thái hiện tại:</span>
                         {report.isResolved ? (
                             <Badge className="bg-green-50 text-green-700 border-green-200 text-xs px-2.5 py-1 font-medium gap-1">
@@ -200,6 +236,55 @@ function ReportDetailModal({ report, open, onClose }: ReportDetailModalProps) {
                             </Badge>
                         )}
                     </div>
+
+                    {/* Resolution Form (Only if unresolved) */}
+                    {!report.isResolved && (
+                        <div className="bg-amber-50/40 border border-amber-200 rounded-xl p-4 flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <AlertOctagon className="w-4 h-4 text-amber-600 shrink-0" />
+                                <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">Giải quyết báo cáo vi phạm</span>
+                            </div>
+                            
+                            {resolveError && (
+                                <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                    <span>{resolveError}</span>
+                                </div>
+                            )}
+
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-stone-600">Chọn hành động xử lý</label>
+                                <Select value={action} onValueChange={setAction}>
+                                    <SelectTrigger className="bg-white border-[#dccbb5] text-xs h-9 focus:ring-[#4a3728]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="hide">Ẩn bài viết / Xử lý vi phạm (hide)</SelectItem>
+                                        <SelectItem value="dismiss">Bác bỏ báo cáo / Báo cáo rác (dismiss)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-stone-600">Ghi chú giải quyết (Tùy chọn)</label>
+                                <Input
+                                    placeholder="Ví dụ: Bác bỏ do nội dung bài đăng hoàn toàn hợp lệ..."
+                                    className="bg-white border-[#dccbb5] text-xs h-9 focus:border-[#4a3728]"
+                                    value={notes}
+                                    onChange={e => setNotes(e.target.value)}
+                                />
+                            </div>
+
+                            <Button
+                                onClick={handleResolve}
+                                disabled={resolving}
+                                className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9 mt-1 w-full gap-2 font-medium"
+                            >
+                                {resolving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                                Xác nhận giải quyết báo cáo
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter className="mt-4">
@@ -492,6 +577,7 @@ export function ReportManagement() {
                 report={selectedReport}
                 open={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
+                onSuccess={(msg) => { addToast("success", msg); fetchReports(); }}
             />
         </div>
     );
