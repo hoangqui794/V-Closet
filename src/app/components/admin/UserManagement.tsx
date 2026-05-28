@@ -602,11 +602,20 @@ function GrantPermissionModal({
                                     <Select value={permissionCode} onValueChange={setPermissionCode}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="admin.create">Tạo tài khoản Admin (admin.create)</SelectItem>
-                                            <SelectItem value="product.manage">Quản lý sản phẩm (product.manage)</SelectItem>
-                                            <SelectItem value="brand.manage">Quản lý đối tác (brand.manage)</SelectItem>
-                                            <SelectItem value="user.ban">Khóa người dùng (user.ban)</SelectItem>
-                                            <SelectItem value="custom">Tự nhập mã quyền...</SelectItem>
+                                            <SelectItem value="user.view">Xem danh sách user (user.view)</SelectItem>
+                                            <SelectItem value="user.ban">Khoá chat/post của user (user.ban)</SelectItem>
+                                            <SelectItem value="user.deactivate">Vô hiệu hoá tài khoản (user.deactivate)</SelectItem>
+                                            <SelectItem value="brand.create">Tạo tài khoản brand partner (brand.create)</SelectItem>
+                                            <SelectItem value="brand.verify">Duyệt brand partner (brand.verify)</SelectItem>
+                                            <SelectItem value="brand.suspend">Đình chỉ brand partner (brand.suspend)</SelectItem>
+                                            <SelectItem value="content.moderate">Kiểm duyệt nội dung (content.moderate)</SelectItem>
+                                            <SelectItem value="content.report">Xử lý report vi phạm (content.report)</SelectItem>
+                                            <SelectItem value="analytics.view">Xem báo cáo doanh thu (analytics.view)</SelectItem>
+                                            <SelectItem value="analytics.export">Xuất báo cáo (analytics.export)</SelectItem>
+                                            <SelectItem value="admin.create">Tạo tài khoản admin/moderator (admin.create)</SelectItem>
+                                            <SelectItem value="permission.grant">Cấp/thu hồi quyền (permission.grant)</SelectItem>
+                                            <SelectItem value="product.manage">Quản lý sản phẩm Shopee (product.manage)</SelectItem>
+                                            <SelectItem value="custom">Tự nhập mã quyền khác...</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
