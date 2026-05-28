@@ -267,3 +267,57 @@ export async function updatePostVisibility(postId: string, payload: UpdatePostVi
         body: JSON.stringify(payload),
     });
 }
+
+// ─── Admin Brand Partners API ───────────────────────────────────────────────
+
+export interface BrandPartner {
+    brandId: string;
+    brandName: string;
+    logoUrl: string | null;
+    websiteUrl: string | null;
+    contactPhone: string | null;
+    taxcode: string | null;
+    creditBalance: number;
+    status: string; // "Pending" | "Verified" | "Suspended"
+    createdAt: string;
+    userId: string;
+    userEmail: string;
+    userDisplayName: string;
+}
+
+export interface GetBrandsParams {
+    status?: string;
+    search?: string;
+}
+
+export async function getAdminBrands(params: GetBrandsParams = {}): Promise<BrandPartner[]> {
+    const query = new URLSearchParams();
+    if (params.status) query.set("status", params.status);
+    if (params.search) query.set("search", params.search);
+
+    return request<BrandPartner[]>(`/api/admin/brands?${query.toString()}`);
+}
+
+export interface UpdateBrandStatusPayload {
+    status: string; // "Pending" | "Verified" | "Suspended"
+    notes?: string;
+}
+
+export async function updateBrandStatus(brandId: string, payload: UpdateBrandStatusPayload): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/brands/${brandId}/status`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}
+
+export interface DepositBrandCreditPayload {
+    amount: number;
+    description?: string;
+}
+
+export async function depositBrandCredit(brandId: string, payload: DepositBrandCreditPayload): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/brands/${brandId}/credit`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}

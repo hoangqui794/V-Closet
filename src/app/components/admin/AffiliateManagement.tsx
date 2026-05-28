@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Search,
     Filter,
@@ -17,7 +17,14 @@ import {
     Tag,
     AlertCircle,
     TrendingUp,
-    ExternalLink
+    ExternalLink,
+    Globe,
+    Phone,
+    Mail,
+    Building2,
+    Calendar,
+    Loader2,
+    Coins
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
@@ -25,6 +32,8 @@ import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../ui/dialog";
+import { getAdminBrands, BrandPartner, updateBrandStatus, depositBrandCredit } from "@/lib/api";
 
 // Mockup dữ liệu sản phẩm Affiliate cào từ Shopee
 const initialProducts = [
@@ -96,10 +105,103 @@ const initialProducts = [
 ];
 
 export function AffiliateManagement() {
-    const [activeTab, setActiveTab] = useState<"products" | "crawler">("products");
+    const [activeTab, setActiveTab] = useState<"products" | "crawler" | "brands">("products");
     const [products, setProducts] = useState(initialProducts);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    
+    // States cho Brand Partner
+    const [brands, setBrands] = useState<BrandPartner[]>([]);
+    const [brandsLoading, setBrandsLoading] = useState(false);
+    const [brandsError, setBrandsError] = useState<string | null>(null);
+    const [brandSearch, setBrandSearch] = useState("");
+    const [brandStatusFilter, setBrandStatusFilter] = useState("all");
+
+    // States cho Nạp tiền quảng cáo
+    const [creditModalOpen, setCreditModalOpen] = useState(false);
+    const [selectedBrand, setSelectedBrand] = useState<BrandPartner | null>(null);
+    const [depositAmount, setDepositAmount] = useState("");
+    const [depositDesc, setDepositDesc] = useState("");
+    const [depositLoading, setDepositLoading] = useState(false);
+    const [depositError, setDepositError] = useState<string | null>(null);
+
+    const fetchBrands = async (status?: string, search?: string) => {
+        setBrandsLoading(true);
+        setBrandsError(null);
+        try {
+            const apiStatus = status === "all" ? undefined : status;
+            const data = await getAdminBrands({
+                status: apiStatus,
+                search: search || undefined
+            });
+            setBrands(data || []);
+        } catch (err: any) {
+            console.error("Lỗi khi tải danh sách đối tác thương hiệu:", err);
+            setBrandsError(err.message || "Không thể tải danh sách đối tác thương hiệu.");
+        } finally {
+            setBrandsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === "brands") {
+            fetchBrands(brandStatusFilter, brandSearch);
+        }
+    }, [activeTab, brandStatusFilter]);
+
+    const handleSearchBrands = (e: React.FormEvent) => {
+        e.preventDefault();
+        fetchBrands(brandStatusFilter, brandSearch);
+    };
+
+    const handleUpdateBrandStatus = async (brandId: string, newStatus: string) => {
+        try {
+            await updateBrandStatus(brandId, {
+                status: newStatus,
+                notes: `Cập nhật trạng thái đối tác sang ${newStatus} bởi Admin.`
+            });
+            setBrands(prev => prev.map(b => b.brandId === brandId ? { ...b, status: newStatus } : b));
+        } catch (err: any) {
+            console.error("Lỗi khi cập nhật trạng thái đối tác thương hiệu:", err);
+            alert(`Lỗi khi cập nhật trạng thái đối tác thương hiệu: ${err.message || err}`);
+        }
+    };
+
+    const handleDepositCredit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedBrand) return;
+        const amt = parseFloat(depositAmount.replace(/,/g, ""));
+        if (isNaN(amt) || amt <= 0) {
+            setDepositError("Vui lòng nhập số tiền nạp hợp lệ lớn hơn 0.");
+            return;
+        }
+        setDepositLoading(true);
+        setDepositError(null);
+        try {
+            await depositBrandCredit(selectedBrand.brandId, {
+                amount: amt,
+                description: depositDesc || undefined
+            });
+            
+            // Cập nhật số dư cục bộ để UI thay đổi mượt mà
+            setBrands(prev => prev.map(b => 
+                b.brandId === selectedBrand.brandId 
+                    ? { ...b, creditBalance: b.creditBalance + amt } 
+                    : b
+            ));
+            
+            alert(`Đã nạp ${amt.toLocaleString("vi-VN")} đ vào tài khoản quảng cáo thành công!`);
+            setCreditModalOpen(false);
+            setSelectedBrand(null);
+            setDepositAmount("");
+            setDepositDesc("");
+        } catch (err: any) {
+            console.error("Lỗi khi nạp tiền quảng cáo:", err);
+            setDepositError(err.message || "Không thể nạp tiền quảng cáo.");
+        } finally {
+            setDepositLoading(false);
+        }
+    };
     
     // States cho Crawler
     const [keywords, setKeywords] = useState(["váy dạ hội", "áo tweed nữ", "baby tee hè", "jeans cạp cao"]);
@@ -218,6 +320,16 @@ export function AffiliateManagement() {
                     }`}
                 >
                     Cấu hình Crawler tự động
+                </button>
+                <button
+                    onClick={() => setActiveTab("brands")}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
+                        activeTab === "brands"
+                            ? "border-[#4a3728] text-[#4a3728]"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                    }`}
+                >
+                    Đối tác Brand Partner
                 </button>
             </div>
 
@@ -513,6 +625,329 @@ export function AffiliateManagement() {
                     </Card>
                 </div>
             )}
+
+            {/* TAB 3: ĐỐI TÁC BRAND PARTNER */}
+            {activeTab === "brands" && (
+                <div className="space-y-6">
+                    {/* Thanh lọc & tìm kiếm */}
+                    <form onSubmit={handleSearchBrands} className="grid gap-4 md:grid-cols-4 items-center bg-card p-4 rounded-xl border border-muted shadow-sm">
+                        <div className="md:col-span-2 relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Tìm theo tên thương hiệu, đại diện, email..."
+                                className="pl-8 bg-background border-muted text-sm"
+                                value={brandSearch}
+                                onChange={(e) => setBrandSearch(e.target.value)}
+                            />
+                        </div>
+                        <Select value={brandStatusFilter} onValueChange={setBrandStatusFilter}>
+                            <SelectTrigger className="bg-background border-muted">
+                                <SelectValue placeholder="Trạng thái duyệt" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-card">
+                                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                                <SelectItem value="Pending">Chờ duyệt (Pending)</SelectItem>
+                                <SelectItem value="Verified">Đã xác thực (Verified)</SelectItem>
+                                <SelectItem value="Suspended">Đã đình chỉ (Suspended)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <div className="flex gap-2">
+                            <Button type="submit" className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                                <Search className="w-4 h-4 mr-2" /> Tìm kiếm
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="border-muted hover:bg-muted/10 text-muted-foreground"
+                                onClick={() => fetchBrands(brandStatusFilter, brandSearch)}
+                                title="Tải lại danh sách"
+                            >
+                                <RefreshCw className={`w-4 h-4 ${brandsLoading ? "animate-spin" : ""}`} />
+                            </Button>
+                        </div>
+                    </form>
+
+                    {/* Hiển thị lỗi nếu có */}
+                    {brandsError && (
+                        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                            <div className="text-sm">
+                                <p className="font-semibold text-rose-800">Không thể tải dữ liệu</p>
+                                <p className="text-rose-600 mt-0.5 leading-relaxed text-xs">{brandsError}</p>
+                                <Button
+                                    variant="link"
+                                    className="p-0 h-auto text-rose-700 hover:text-rose-800 text-xs font-semibold mt-2 underline"
+                                    onClick={() => fetchBrands(brandStatusFilter, brandSearch)}
+                                >
+                                    Thử lại ngay
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Bảng danh sách */}
+                    <div className="rounded-xl border bg-card shadow-sm overflow-hidden border-muted">
+                        <Table>
+                            <TableHeader className="bg-muted/30">
+                                <TableRow>
+                                    <TableHead className="w-64">Đối tác / Thương hiệu</TableHead>
+                                    <TableHead>Thông tin liên hệ</TableHead>
+                                    <TableHead>Website</TableHead>
+                                    <TableHead className="text-right">Số dư quảng cáo</TableHead>
+                                    <TableHead className="text-center">Trạng thái</TableHead>
+                                    <TableHead className="text-center">Ngày đăng ký</TableHead>
+                                    <TableHead className="text-right">Thao tác duyệt</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {brandsLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center py-16">
+                                            <div className="flex flex-col items-center justify-center gap-3">
+                                                <Loader2 className="w-8 h-8 text-[#4a3728] animate-spin" />
+                                                <span className="text-sm text-muted-foreground font-medium">Đang tải danh sách đối tác thương hiệu...</span>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : brands.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center py-16">
+                                            <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                                                <Building2 className="w-12 h-12 text-muted-foreground/50 stroke-[1.5]" />
+                                                <div className="text-sm font-semibold">Không tìm thấy đối tác thương hiệu nào</div>
+                                                <p className="text-xs max-w-xs leading-relaxed text-muted-foreground/80">
+                                                    Danh sách trống hoặc không khớp với bộ lọc trạng thái "<strong>{brandStatusFilter}</strong>".
+                                                </p>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    brands.map((brand) => (
+                                        <TableRow key={brand.brandId} className="hover:bg-muted/10 transition-colors">
+                                            <TableCell>
+                                                <div className="flex items-center gap-3.5">
+                                                    <div className="w-11 h-11 rounded-full overflow-hidden border bg-muted flex items-center justify-center text-[#4a3728] font-bold text-sm shrink-0 shadow-inner">
+                                                        {brand.logoUrl ? (
+                                                            <img src={brand.logoUrl} alt={brand.brandName} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            brand.brandName.substring(0, 2).toUpperCase()
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="font-bold text-sm text-foreground truncate">
+                                                            {brand.brandName}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1">
+                                                            Đại diện: {brand.userDisplayName}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col gap-1 text-xs">
+                                                    <span className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                                                        <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                                        {brand.userEmail}
+                                                    </span>
+                                                    {brand.contactPhone && (
+                                                        <span className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                                                            <Phone className="w-3.5 h-3.5 text-slate-400" />
+                                                            {brand.contactPhone}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {brand.websiteUrl ? (
+                                                    <a
+                                                        href={brand.websiteUrl.startsWith("http") ? brand.websiteUrl : `https://${brand.websiteUrl}`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="text-xs text-[#4a3728] hover:underline font-semibold flex items-center gap-1 hover:text-[#3d2d21] transition-colors"
+                                                    >
+                                                        <Globe className="w-3.5 h-3.5" />
+                                                        {brand.websiteUrl.replace(/https?:\/\/(www\.)?/, "")}
+                                                        <ExternalLink className="w-3 h-3" />
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground/60 italic">—</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-right font-mono text-sm font-semibold text-emerald-600">
+                                                {brand.creditBalance.toLocaleString("vi-VN")} đ
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <Badge
+                                                    className={`font-medium border text-xs px-2.5 py-1 ${
+                                                        brand.status === "Verified"
+                                                            ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100/70"
+                                                            : brand.status === "Pending"
+                                                            ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100/70"
+                                                            : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100/70"
+                                                    }`}
+                                                >
+                                                    {brand.status === "Verified" && <Check className="w-3 h-3 mr-1 inline stroke-[2.5]" />}
+                                                    {brand.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-center font-mono text-xs text-muted-foreground">
+                                                <span className="flex items-center justify-center gap-1">
+                                                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                                    {new Date(brand.createdAt).toLocaleDateString("vi-VN")}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-2 flex-wrap max-w-xs ml-auto">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-8 border-[#4a3728]/20 hover:bg-[#4a3728]/5 text-[#4a3728] font-medium text-xs px-2.5 flex items-center gap-1.5 transition-all shadow-sm"
+                                                        onClick={() => {
+                                                            setSelectedBrand(brand);
+                                                            setCreditModalOpen(true);
+                                                            setDepositAmount("");
+                                                            setDepositDesc("");
+                                                            setDepositError(null);
+                                                        }}
+                                                        title="Nạp tiền quảng cáo"
+                                                    >
+                                                        <Coins className="w-3.5 h-3.5 text-amber-600" /> Nạp tiền
+                                                    </Button>
+                                                    {brand.status === "Pending" && (
+                                                        <>
+                                                            <Button
+                                                                size="sm"
+                                                                className="h-8 bg-green-600 hover:bg-green-700 text-white font-medium text-xs px-3 shadow-sm flex items-center gap-1"
+                                                                onClick={() => handleUpdateBrandStatus(brand.brandId, "Verified")}
+                                                            >
+                                                                <Check className="w-3.5 h-3.5 stroke-[2.5]" /> Duyệt
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="h-8 border-rose-200 hover:bg-rose-50 text-rose-600 font-medium text-xs px-3"
+                                                                onClick={() => handleUpdateBrandStatus(brand.brandId, "Suspended")}
+                                                            >
+                                                                Từ chối
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                    {brand.status === "Verified" && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 border-rose-100 hover:bg-rose-50 text-rose-600 font-medium text-xs px-2.5 flex items-center gap-1 transition-all"
+                                                            onClick={() => handleUpdateBrandStatus(brand.brandId, "Suspended")}
+                                                            title="Đình chỉ đối tác hoạt động"
+                                                        >
+                                                            <X className="w-3.5 h-3.5" /> Đình chỉ
+                                                        </Button>
+                                                    )}
+                                                    {brand.status === "Suspended" && (
+                                                        <Button
+                                                            size="sm"
+                                                            className="h-8 bg-[#4a3728] hover:bg-[#3d2d21] text-white font-medium text-xs px-3 flex items-center gap-1 transition-all"
+                                                            onClick={() => handleUpdateBrandStatus(brand.brandId, "Verified")}
+                                                            title="Kích hoạt lại đối tác"
+                                                        >
+                                                            <Check className="w-3.5 h-3.5 stroke-[2.5]" /> Kích hoạt lại
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Nạp tiền quảng cáo */}
+            <Dialog open={creditModalOpen} onOpenChange={setCreditModalOpen}>
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] font-bold text-lg">
+                            <Coins className="w-5 h-5 text-amber-500" /> Nạp tiền quảng cáo
+                        </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleDepositCredit} className="space-y-4 pt-2">
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                Đối tác nhận
+                            </label>
+                            <div className="p-3 bg-muted/20 border border-muted rounded-xl flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-[#4a3728] font-bold text-xs shrink-0">
+                                    {selectedBrand?.logoUrl ? (
+                                        <img src={selectedBrand.logoUrl} alt={selectedBrand.brandName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        selectedBrand?.brandName.substring(0, 2).toUpperCase()
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-foreground">{selectedBrand?.brandName}</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">Số dư hiện tại: <span className="font-semibold text-emerald-600">{selectedBrand?.creditBalance.toLocaleString("vi-VN")} đ</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
+                                Số tiền nạp (VND)
+                            </label>
+                            <div className="relative">
+                                <Input
+                                    type="text"
+                                    placeholder="Ví dụ: 30000"
+                                    className="bg-background border-muted text-sm font-semibold pr-10"
+                                    value={depositAmount}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/[^0-9]/g, "");
+                                        if (val) {
+                                            setDepositAmount(Number(val).toLocaleString("en-US"));
+                                        } else {
+                                            setDepositAmount("");
+                                        }
+                                    }}
+                                    required
+                                />
+                                <span className="absolute right-3 top-2.5 text-xs font-semibold text-muted-foreground">đ</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
+                                Mô tả / Lý do nạp tiền
+                            </label>
+                            <Input
+                                placeholder="Ví dụ: Nạp tiền quảng cáo chạy chiến dịch hè..."
+                                className="bg-background border-muted text-sm"
+                                value={depositDesc}
+                                onChange={(e) => setDepositDesc(e.target.value)}
+                            />
+                        </div>
+
+                        {depositError && (
+                            <p className="text-xs font-medium text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100">{depositError}</p>
+                        )}
+
+                        <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                            <Button type="button" variant="outline" className="border-muted hover:bg-muted/10 text-xs h-9" onClick={() => setCreditModalOpen(false)}>
+                                Hủy bỏ
+                            </Button>
+                            <Button type="submit" className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9" disabled={depositLoading}>
+                                {depositLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Đang xử lý...
+                                    </>
+                                ) : "Xác nhận nạp tiền"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
