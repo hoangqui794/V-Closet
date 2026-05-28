@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-    Search, Filter, Eye, RefreshCw, ChevronLeft, ChevronRight, X,
+    Search, Filter, Eye, EyeOff, RefreshCw, ChevronLeft, ChevronRight, X,
     CheckCircle, AlertCircle, Loader2, Flag, Calendar, User, FileText, AlertOctagon
 } from "lucide-react";
 import {
@@ -26,7 +26,9 @@ import {
     getReportedPostDetail,
     ReportedPostDetail,
     resolveAdminReport,
-    ResolveReportPayload
+    ResolveReportPayload,
+    updatePostVisibility,
+    UpdatePostVisibilityPayload
 } from "../../../lib/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -295,6 +297,111 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
     );
 }
 
+// ─── Update Post Visibility Modal ─────────────────────────────────────────────
+
+interface UpdatePostVisibilityModalProps {
+    post: { postId: string; postCaption: string } | null;
+    open: boolean;
+    onClose: () => void;
+    onSuccess: (message: string) => void;
+}
+
+function UpdatePostVisibilityModal({ post, open, onClose, onSuccess }: UpdatePostVisibilityModalProps) {
+    const [isHidden, setIsHidden] = useState(true);
+    const [reason, setReason] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (open) {
+            setIsHidden(true);
+            setReason("");
+            setError("");
+            setLoading(false);
+        }
+    }, [open]);
+
+    const handleUpdate = async () => {
+        if (!post) return;
+        setLoading(true);
+        setError("");
+        try {
+            await updatePostVisibility(post.postId, {
+                isHidden,
+                reason: reason.trim() || undefined
+            });
+            onSuccess(isHidden ? "Đã ẩn bài đăng của người dùng thành công!" : "Đã hiển thị lại bài đăng của người dùng!");
+            onClose();
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : "Thay đổi trạng thái hiển thị thất bại");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!post) return null;
+
+    return (
+        <Dialog open={open} onOpenChange={v => !v && onClose()}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-[#4a3728] font-bold">
+                        <EyeOff className="w-5 h-5 text-amber-600" /> Thay đổi hiển thị bài đăng
+                    </DialogTitle>
+                    <DialogDescription className="text-xs text-muted-foreground">
+                        Ẩn hoặc hiển thị lại bài đăng của người dùng.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="flex flex-col gap-4 py-3">
+                    {error && (
+                        <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    <div className="bg-[#fdfaf7] border border-[#f5efe6] rounded-xl p-3 text-xs leading-relaxed text-stone-700">
+                        <span className="font-semibold block text-[#4a3728] mb-0.5">Bài đăng:</span>
+                        "{post.postCaption || "Không có chú thích"}"
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-stone-600">Trạng thái hiển thị mới</label>
+                        <Select value={isHidden ? "true" : "false"} onValueChange={v => setIsHidden(v === "true")}>
+                            <SelectTrigger className="bg-white border-[#dccbb5] text-xs h-9">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="true">Ẩn bài viết khỏi ứng dụng (isHidden = true)</SelectItem>
+                                <SelectItem value="false">Hiển thị bài viết lại (isHidden = false)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-stone-600">Lý do thay đổi</label>
+                        <Input
+                            placeholder="Nhập lý do ẩn bài viết (Ví dụ: Chứa hình ảnh nhạy cảm...)"
+                            className="bg-white border-[#dccbb5] text-xs h-9"
+                            value={reason}
+                            onChange={e => setReason(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+                    <Button onClick={handleUpdate} disabled={loading} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white gap-2 font-medium">
+                        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        Xác nhận thay đổi
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export function ReportManagement() {
@@ -313,6 +420,7 @@ export function ReportManagement() {
 
     // Modals & Details
     const [selectedReport, setSelectedReport] = useState<AdminReport | null>(null);
+    const [visibilityPost, setVisibilityPost] = useState<{ postId: string; postCaption: string } | null>(null);
 
     // Toast
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -529,12 +637,20 @@ export function ReportManagement() {
 
                                     {/* Action button */}
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon"
-                                            className="h-8 w-8 text-muted-foreground hover:text-blue-600"
-                                            title="Xem chi tiết báo cáo"
-                                            onClick={() => setSelectedReport(report)}>
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex items-center justify-end gap-1">
+                                            <Button variant="ghost" size="icon"
+                                                className="h-8 w-8 text-stone-500 hover:text-amber-600"
+                                                title="Thay đổi ẩn/hiện bài viết"
+                                                onClick={() => setVisibilityPost({ postId: report.postId, postCaption: report.postCaption })}>
+                                                <EyeOff className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon"
+                                                className="h-8 w-8 text-muted-foreground hover:text-blue-600"
+                                                title="Xem chi tiết báo cáo"
+                                                onClick={() => setSelectedReport(report)}>
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -577,6 +693,14 @@ export function ReportManagement() {
                 report={selectedReport}
                 open={!!selectedReport}
                 onClose={() => setSelectedReport(null)}
+                onSuccess={(msg) => { addToast("success", msg); fetchReports(); }}
+            />
+
+            {/* Post Visibility Toggle Modal */}
+            <UpdatePostVisibilityModal
+                post={visibilityPost}
+                open={!!visibilityPost}
+                onClose={() => setVisibilityPost(null)}
                 onSuccess={(msg) => { addToast("success", msg); fetchReports(); }}
             />
         </div>

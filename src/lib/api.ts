@@ -255,3 +255,15 @@ export async function resolveAdminReport(reportId: string, payload: ResolveRepor
         body: JSON.stringify(payload),
     });
 }
+
+export interface UpdatePostVisibilityPayload {
+    isHidden: boolean;
+    reason?: string;
+}
+
+export async function updatePostVisibility(postId: string, payload: UpdatePostVisibilityPayload): Promise<void> {
+    return request<void>(`/api/admin/moderation/posts/${postId}/visibility`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}
