@@ -1,4 +1,4 @@
-const BASE_URL = "http://171.237.179.15:5070";
+const BASE_URL = "https://vcloset.vn";
 
 export function getToken(): string | null {
     return localStorage.getItem("accessToken");
