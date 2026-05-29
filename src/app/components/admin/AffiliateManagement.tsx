@@ -29,86 +29,56 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../ui/dialog";
-import { getAdminBrands, BrandPartner, updateBrandStatus, depositBrandCredit } from "@/lib/api";
-
-// Mockup dữ liệu sản phẩm Affiliate cào từ Shopee
-const initialProducts = [
-    {
-        id: "aff-1",
-        name: "Áo Khoác Nữ Tweed Sang Chảnh Khuy Đồng Dày Dặn",
-        image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80",
-        price: 289000,
-        commission: 8,
-        clicks: 1420,
-        canvasTries: 852,
-        ctr: 11.2,
-        status: "Pinned",
-        shopName: "Tweed & More",
-        link: "https://shopee.vn/product/123/456"
-    },
-    {
-        id: "aff-2",
-        name: "Đầm Dáng Dài Trễ Vai Sang Trọng Dự Tiệc Cưới",
-        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=150&q=80",
-        price: 450000,
-        commission: 7.5,
-        clicks: 980,
-        canvasTries: 540,
-        ctr: 8.5,
-        status: "Public",
-        shopName: "Elise Store",
-        link: "https://shopee.vn/product/123/789"
-    },
-    {
-        id: "aff-3",
-        name: "Quần Jeans Ống Rộng Cạp Cao Tôn Dáng Hack Chân",
-        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=150&q=80",
-        price: 199000,
-        commission: 6,
-        clicks: 2310,
-        canvasTries: 1620,
-        ctr: 9.8,
-        status: "Public",
-        shopName: "Denim World",
-        link: "https://shopee.vn/product/123/101"
-    },
-    {
-        id: "aff-4",
-        name: "Áo Thun Baby Tee Tăm Tre Mát Mịn Thêu Chữ Ngọt Ngào",
-        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=150&q=80",
-        price: 89000,
-        commission: 5,
-        clicks: 3420,
-        canvasTries: 2450,
-        ctr: 12.4,
-        status: "Public",
-        shopName: "Teens Closet",
-        link: "https://shopee.vn/product/123/202"
-    },
-    {
-        id: "aff-5",
-        name: "Chân Váy Chữ A Dạ Tweed Cao Cấp Kèm Quần Trong",
-        image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=150&q=80",
-        price: 185000,
-        commission: 8,
-        clicks: 450,
-        canvasTries: 190,
-        ctr: 4.2,
-        status: "Hidden",
-        shopName: "Mimi Boutique",
-        link: "https://shopee.vn/product/123/303"
-    }
-];
+import { 
+    getAdminBrands, 
+    BrandPartner, 
+    updateBrandStatus, 
+    depositBrandCredit,
+    getAdminProducts,
+    createAdminProduct,
+    getAdminProductDetail,
+    updateAdminProduct,
+    deleteAdminProduct,
+    importAffiliateConversions,
+    AffiliateProduct
+} from "@/lib/api";
 
 export function AffiliateManagement() {
     const [activeTab, setActiveTab] = useState<"products" | "crawler" | "brands">("products");
-    const [products, setProducts] = useState(initialProducts);
+    
+    // States cho Affiliate Products (API real)
+    const [products, setProducts] = useState<AffiliateProduct[]>([]);
+    const [loadingProducts, setLoadingProducts] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [categoryFilter, setCategoryFilter] = useState("all");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+
+    // States cho Product Add/Edit dialog
+    const [productDialogOpen, setProductDialogOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<AffiliateProduct | null>(null);
+    const [formName, setFormName] = useState("");
+    const [formCategory, setFormCategory] = useState("Top");
+    const [formPrice, setFormPrice] = useState("");
+    const [formOriginalPrice, setFormOriginalPrice] = useState("");
+    const [formImageUrl, setFormImageUrl] = useState("");
+    const [formAffiliateLink, setFormAffiliateLink] = useState("");
+    const [formShopeeProductId, setFormShopeeProductId] = useState("");
+    const [formShopeeShopId, setFormShopeeShopId] = useState("");
+    const [formIsTrending, setFormIsTrending] = useState(false);
+    const [formIsActive, setFormIsActive] = useState(true);
+    const [actionLoading, setActionLoading] = useState(false);
+
+    // CSV Import states
+    const [selectedCsvFile, setSelectedCsvFile] = useState<File | null>(null);
+    const [csvUploading, setCsvUploading] = useState(false);
     
     // States cho Brand Partner
     const [brands, setBrands] = useState<BrandPartner[]>([]);
@@ -124,6 +94,147 @@ export function AffiliateManagement() {
     const [depositDesc, setDepositDesc] = useState("");
     const [depositLoading, setDepositLoading] = useState(false);
     const [depositError, setDepositError] = useState<string | null>(null);
+
+    const fetchProducts = async (page = 1) => {
+        setLoadingProducts(true);
+        try {
+            const apiCategory = categoryFilter === "all" ? undefined : categoryFilter;
+            const data = await getAdminProducts({
+                page,
+                pageSize: 10,
+                search: searchTerm || undefined,
+                category: apiCategory,
+            });
+            setProducts(data.items || []);
+            setTotalCount(data.totalCount || 0);
+            setTotalPages(data.totalPages || 1);
+            setCurrentPage(data.page || 1);
+        } catch (err: any) {
+            console.error("Lỗi khi tải sản phẩm:", err);
+        } finally {
+            setLoadingProducts(false);
+        }
+    };
+
+    const handleOpenAddDialog = () => {
+        setEditingProduct(null);
+        setFormName("");
+        setFormCategory("Top");
+        setFormPrice("");
+        setFormOriginalPrice("");
+        setFormImageUrl("");
+        setFormAffiliateLink("");
+        setFormShopeeProductId("");
+        setFormShopeeShopId("");
+        setFormIsTrending(false);
+        setFormIsActive(true);
+        setProductDialogOpen(true);
+    };
+
+    const handleOpenEditDialog = async (product: AffiliateProduct) => {
+        setActionLoading(true);
+        try {
+            const detail = await getAdminProductDetail(product.id);
+            setEditingProduct(detail);
+            setFormName(detail.name || "");
+            setFormCategory(detail.category || "Top");
+            setFormPrice(String(detail.price));
+            setFormOriginalPrice(detail.originalPrice ? String(detail.originalPrice) : "");
+            setFormImageUrl(detail.imageUrl || "");
+            setFormAffiliateLink(detail.affiliateLink || "");
+            setFormShopeeProductId(detail.shopeeProductId || "");
+            setFormShopeeShopId(detail.shopeeShopId || "");
+            setFormIsTrending(detail.isTrending);
+            setFormIsActive(detail.isActive);
+            setProductDialogOpen(true);
+        } catch (err: any) {
+            console.error("Lỗi khi tải chi tiết sản phẩm:", err);
+            alert(`Lỗi khi tải thông tin chi tiết: ${err.message || err}`);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleSaveProduct = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const priceNum = parseFloat(formPrice);
+        const origPriceNum = formOriginalPrice ? parseFloat(formOriginalPrice) : null;
+        if (isNaN(priceNum) || priceNum < 0) {
+            alert("Vui lòng nhập giá bán hợp lệ.");
+            return;
+        }
+
+        setActionLoading(true);
+        try {
+            if (editingProduct) {
+                await updateAdminProduct(editingProduct.id, {
+                    name: formName,
+                    category: formCategory,
+                    price: priceNum,
+                    originalPrice: origPriceNum,
+                    imageUrl: formImageUrl,
+                    affiliateLink: formAffiliateLink,
+                    isTrending: formIsTrending,
+                    isActive: formIsActive
+                });
+                alert("Đã cập nhật sản phẩm thành công!");
+            } else {
+                await createAdminProduct({
+                    name: formName,
+                    category: formCategory,
+                    price: priceNum,
+                    originalPrice: origPriceNum,
+                    imageUrl: formImageUrl,
+                    affiliateLink: formAffiliateLink,
+                    shopeeProductId: formShopeeProductId || null,
+                    shopeeShopId: formShopeeShopId || null,
+                    isTrending: formIsTrending,
+                    isActive: formIsActive
+                });
+                alert("Đã thêm sản phẩm mới thành công!");
+            }
+            setProductDialogOpen(false);
+            fetchProducts(currentPage);
+        } catch (err: any) {
+            console.error("Lỗi khi lưu sản phẩm:", err);
+            alert(`Lỗi khi lưu sản phẩm: ${err.message || err}`);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleDeleteProduct = async (id: string) => {
+        if (!confirm("Bạn có chắc chắn muốn xóa mềm sản phẩm này không (chuyển sang trạng thái ẩn)?")) {
+            return;
+        }
+        try {
+            await deleteAdminProduct(id);
+            alert("Đã xóa sản phẩm thành công!");
+            fetchProducts(currentPage);
+        } catch (err: any) {
+            console.error("Lỗi khi xóa sản phẩm:", err);
+            alert(`Lỗi khi xóa: ${err.message || err}`);
+        }
+    };
+
+    const handleImportCsv = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedCsvFile) {
+            alert("Vui lòng chọn một tệp CSV.");
+            return;
+        }
+        setCsvUploading(true);
+        try {
+            await importAffiliateConversions(selectedCsvFile);
+            alert("Đã tải lên và nhập dữ liệu đối soát Shopee Affiliate thành công!");
+            setSelectedCsvFile(null);
+        } catch (err: any) {
+            console.error("Lỗi khi import CSV đối soát:", err);
+            alert(`Lỗi khi tải tệp CSV: ${err.message || err}`);
+        } finally {
+            setCsvUploading(false);
+        }
+    };
 
     const fetchBrands = async (status?: string, search?: string) => {
         setBrandsLoading(true);
@@ -146,8 +257,10 @@ export function AffiliateManagement() {
     useEffect(() => {
         if (activeTab === "brands") {
             fetchBrands(brandStatusFilter, brandSearch);
+        } else if (activeTab === "products") {
+            fetchProducts(1);
         }
-    }, [activeTab, brandStatusFilter]);
+    }, [activeTab, statusFilter, categoryFilter, brandStatusFilter]);
 
     const handleSearchBrands = (e: React.FormEvent) => {
         e.preventDefault();
@@ -183,7 +296,6 @@ export function AffiliateManagement() {
                 description: depositDesc || undefined
             });
             
-            // Cập nhật số dư cục bộ để UI thay đổi mượt mà
             setBrands(prev => prev.map(b => 
                 b.brandId === selectedBrand.brandId 
                     ? { ...b, creditBalance: b.creditBalance + amt } 
@@ -203,7 +315,7 @@ export function AffiliateManagement() {
         }
     };
     
-    // States cho Crawler
+    // States cho Crawler (Mock)
     const [keywords, setKeywords] = useState(["váy dạ hội", "áo tweed nữ", "baby tee hè", "jeans cạp cao"]);
     const [newKeyword, setNewKeyword] = useState("");
     const [isCrawling, setIsCrawling] = useState(false);
@@ -216,18 +328,30 @@ export function AffiliateManagement() {
         "System: Lưu thành công 12 sản phẩm mới vào cơ sở dữ liệu."
     ]);
 
-    // Thay đổi trạng thái ghim/ẩn sản phẩm
-    const handleToggleStatus = (id: string, currentStatus: string) => {
-        setProducts(products.map(p => {
-            if (p.id === id) {
-                let nextStatus = "Public";
-                if (currentStatus === "Public") nextStatus = "Pinned";
-                else if (currentStatus === "Pinned") nextStatus = "Hidden";
-                else nextStatus = "Public";
-                return { ...p, status: nextStatus };
+    const handleToggleStatus = async (id: string, currentIsTrending: boolean, currentIsActive: boolean) => {
+        try {
+            let nextIsTrending = currentIsTrending;
+            let nextIsActive = currentIsActive;
+
+            // Cycle: Public -> Pinned -> Hidden -> Public
+            if (currentIsActive && !currentIsTrending) {
+                nextIsTrending = true; // Pin it
+            } else if (currentIsActive && currentIsTrending) {
+                nextIsTrending = false;
+                nextIsActive = false; // Hide it
+            } else {
+                nextIsActive = true; // Make it public
             }
-            return p;
-        }));
+
+            await updateAdminProduct(id, {
+                isTrending: nextIsTrending,
+                isActive: nextIsActive
+            });
+            fetchProducts(currentPage);
+        } catch (err: any) {
+            console.error("Lỗi khi đổi trạng thái sản phẩm:", err);
+            alert(`Lỗi khi đổi trạng thái: ${err.message || err}`);
+        }
     };
 
     const handleAddKeyword = () => {
@@ -241,7 +365,6 @@ export function AffiliateManagement() {
         setKeywords(keywords.filter(k => k !== keyword));
     };
 
-    // Kích hoạt cào thử thủ công
     const handleStartCrawl = () => {
         setIsCrawling(true);
         setCrawlLog(prev => [...prev, `System: Admin kích hoạt cào sản phẩm thủ công vào lúc ${new Date().toLocaleTimeString()}.`]);
@@ -255,32 +378,16 @@ export function AffiliateManagement() {
                 "Photoroom API: Bóc tách nền thành công cho 8 sản phẩm.",
                 "System: Cập nhật thành công 8 sản phẩm vào hệ thống V-Closet."
             ]);
-            // Thêm ngẫu nhiên một sản phẩm mẫu
-            const newMockProduct = {
-                id: `aff-${products.length + 1}`,
-                name: `Sản phẩm Trending Mới (${keywords[Math.floor(Math.random() * keywords.length)]})`,
-                image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=150&q=80",
-                price: 159000 + Math.floor(Math.random() * 200000),
-                commission: 7,
-                clicks: 0,
-                canvasTries: 0,
-                ctr: 0.0,
-                status: "Public",
-                shopName: "Shopee Mall Store",
-                link: "https://shopee.vn"
-            };
-            setProducts(prev => [newMockProduct, ...prev]);
+            fetchProducts(1);
         }, 3000);
     };
 
     const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              product.shopName.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = statusFilter === "all" || 
-                              (statusFilter === "pinned" && product.status === "Pinned") ||
-                              (statusFilter === "public" && product.status === "Public") ||
-                              (statusFilter === "hidden" && product.status === "Hidden");
-        return matchesSearch && matchesStatus;
+                              (statusFilter === "pinned" && product.isTrending) ||
+                              (statusFilter === "public" && product.isActive && !product.isTrending) ||
+                              (statusFilter === "hidden" && !product.isActive);
+        return matchesStatus;
     });
 
     return (
@@ -309,7 +416,7 @@ export function AffiliateManagement() {
                             : "border-transparent text-muted-foreground hover:text-[#4a3728]"
                     }`}
                 >
-                    Danh sách sản phẩm Shopee ({filteredProducts.length})
+                    Danh sách sản phẩm Shopee ({totalCount})
                 </button>
                 <button
                     onClick={() => setActiveTab("crawler")}
@@ -319,7 +426,7 @@ export function AffiliateManagement() {
                             : "border-transparent text-muted-foreground hover:text-[#4a3728]"
                     }`}
                 >
-                    Cấu hình Crawler tự động
+                    Cấu hình Crawler & Đối soát
                 </button>
                 <button
                     onClick={() => setActiveTab("brands")}
@@ -337,14 +444,24 @@ export function AffiliateManagement() {
             {activeTab === "products" && (
                 <div className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-4 items-center bg-card p-4 rounded-xl border border-muted shadow-sm">
-                        <div className="md:col-span-2 relative">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Tìm kiếm sản phẩm hoặc tên shop..."
-                                className="pl-8 bg-background border-muted"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                        <div className="md:col-span-2 relative flex gap-2">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Tìm kiếm sản phẩm..."
+                                    className="pl-8 bg-background border-muted"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            fetchProducts(1);
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <Button onClick={() => fetchProducts(1)} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                                Tìm
+                            </Button>
                         </div>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
                             <SelectTrigger className="bg-background border-muted">
@@ -357,7 +474,7 @@ export function AffiliateManagement() {
                                 <SelectItem value="hidden">Đã ẩn (Hidden)</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                        <Button onClick={handleOpenAddDialog} className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white">
                             <Plus className="w-4 h-4 mr-2" /> Thêm sản phẩm thủ công
                         </Button>
                     </div>
@@ -369,7 +486,7 @@ export function AffiliateManagement() {
                                     <TableHead className="w-24">Sản phẩm</TableHead>
                                     <TableHead>Tên sản phẩm / Shop</TableHead>
                                     <TableHead className="text-right">Giá gốc</TableHead>
-                                    <TableHead className="text-center">Hoa hồng (%)</TableHead>
+                                    <TableHead className="text-center">Thể loại</TableHead>
                                     <TableHead className="text-center">Số Click / Kéo thả</TableHead>
                                     <TableHead className="text-center">CTR %</TableHead>
                                     <TableHead className="text-center">Trạng thái</TableHead>
@@ -377,7 +494,16 @@ export function AffiliateManagement() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredProducts.length === 0 ? (
+                                {loadingProducts ? (
+                                    <TableRow>
+                                        <TableCell colSpan={8} className="text-center py-12">
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <Loader2 className="w-8 h-8 text-[#4a3728] animate-spin" />
+                                                <span className="text-sm text-muted-foreground">Đang tải danh sách sản phẩm...</span>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : filteredProducts.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                                             Không tìm thấy sản phẩm nào phù hợp.
@@ -388,11 +514,15 @@ export function AffiliateManagement() {
                                         <TableRow key={product.id} className="hover:bg-muted/10 transition-colors">
                                             <TableCell>
                                                 <div className="w-14 h-14 rounded-lg overflow-hidden border bg-background relative flex items-center justify-center">
-                                                    <img
-                                                        src={product.image}
-                                                        alt={product.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
+                                                    {product.imageUrl ? (
+                                                        <img
+                                                            src={product.imageUrl}
+                                                            alt={product.name || ""}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground font-bold">No Image</span>
+                                                    )}
                                                 </div>
                                             </TableCell>
                                             <TableCell className="max-w-xs">
@@ -401,10 +531,12 @@ export function AffiliateManagement() {
                                                         {product.name}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                                                        Shop: {product.shopName}
-                                                        <a href={product.link} target="_blank" rel="noreferrer" className="text-[#4a3728] hover:underline">
-                                                            <ExternalLink className="w-3 h-3 inline" />
-                                                        </a>
+                                                        Shop: {product.shopeeShopId || "Shopee Partner"}
+                                                        {product.affiliateLink && (
+                                                            <a href={product.affiliateLink} target="_blank" rel="noreferrer" className="text-[#4a3728] hover:underline">
+                                                                <ExternalLink className="w-3 h-3 inline" />
+                                                            </a>
+                                                        )}
                                                     </span>
                                                 </div>
                                             </TableCell>
@@ -412,42 +544,35 @@ export function AffiliateManagement() {
                                                 {product.price.toLocaleString("vi-VN")} đ
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-none font-medium">
-                                                    +{product.commission}%
+                                                <Badge className="bg-orange-50 text-orange-800 hover:bg-orange-100 border-none font-medium text-xs">
+                                                    {product.category}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <div className="flex flex-col items-center justify-center">
                                                     <span className="text-sm font-semibold flex items-center gap-1">
-                                                        <MousePointerClick className="w-3.5 h-3.5 text-blue-500" /> {product.clicks}
+                                                        <MousePointerClick className="w-3.5 h-3.5 text-blue-500" /> {product.clicks ?? 0}
                                                     </span>
                                                     <span className="text-[10px] text-muted-foreground mt-0.5">
-                                                        Kéo thả Canvas: {product.canvasTries}
+                                                        Kéo thả Canvas: {product.canvasTries ?? 0}
                                                     </span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center font-mono font-semibold text-sm text-[#4a3728]">
-                                                {product.ctr}%
+                                                {product.ctr ?? 0}%
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Badge
-                                                    variant={
-                                                        product.status === "Pinned"
-                                                            ? "default"
-                                                            : product.status === "Public"
-                                                            ? "outline"
-                                                            : "secondary"
-                                                    }
                                                     className={`font-normal ${
-                                                        product.status === "Pinned"
-                                                            ? "bg-[#4a3728] text-white"
-                                                            : product.status === "Public"
+                                                        product.isTrending
+                                                            ? "bg-[#4a3728] text-white hover:bg-[#3d2d21]"
+                                                            : product.isActive
                                                             ? "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
-                                                            : "bg-gray-100 text-gray-500"
+                                                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                                                     }`}
                                                 >
-                                                    {product.status === "Pinned" && <Pin className="w-2.5 h-2.5 mr-1 inline" />}
-                                                    {product.status}
+                                                    {product.isTrending && <Pin className="w-2.5 h-2.5 mr-1 inline" />}
+                                                    {product.isTrending ? "Pinned" : product.isActive ? "Public" : "Hidden"}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
@@ -456,7 +581,7 @@ export function AffiliateManagement() {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                                        onClick={() => handleToggleStatus(product.id, product.status)}
+                                                        onClick={() => handleToggleStatus(product.id, product.isTrending, product.isActive)}
                                                         title="Đổi trạng thái Ghim/Công khai/Ẩn"
                                                     >
                                                         <Pin className="h-4 w-4" />
@@ -465,6 +590,7 @@ export function AffiliateManagement() {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-8 w-8 text-muted-foreground hover:text-[#4a3728]"
+                                                        onClick={() => handleOpenEditDialog(product)}
                                                         title="Sửa thông tin sản phẩm"
                                                     >
                                                         <Edit className="h-4 w-4" />
@@ -473,6 +599,7 @@ export function AffiliateManagement() {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleDeleteProduct(product.id)}
                                                         title="Xóa sản phẩm"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -485,6 +612,33 @@ export function AffiliateManagement() {
                             </TableBody>
                         </Table>
                     </div>
+
+                    {/* Phân trang */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-end gap-2 pt-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={currentPage === 1 || loadingProducts}
+                                onClick={() => fetchProducts(currentPage - 1)}
+                                className="border-muted hover:bg-muted/10 text-xs"
+                            >
+                                Trang trước
+                            </Button>
+                            <span className="text-xs text-muted-foreground">
+                                Trang {currentPage} / {totalPages}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={currentPage === totalPages || loadingProducts}
+                                onClick={() => fetchProducts(currentPage + 1)}
+                                className="border-muted hover:bg-muted/10 text-xs"
+                            >
+                                Trang sau
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -535,85 +689,48 @@ export function AffiliateManagement() {
                     </Card>
 
                     {/* Cài đặt chu kỳ và chạy crawler */}
-                    <Card className="md:col-span-2 shadow-sm border-muted">
+                    <Card className="md:col-span-1 shadow-sm border-muted">
                         <CardHeader>
                             <CardTitle className="text-[#4a3728] flex items-center gap-2 text-lg">
-                                <RefreshCw className="w-5 h-5" /> Cài đặt Chu kỳ & Chạy thử
+                                <RefreshCw className="w-5 h-5" /> Cài đặt & Chạy thử
                             </CardTitle>
                             <CardDescription>
-                                Điều chỉnh tần suất chạy tác vụ nền (Background Jobs) và thực thi kiểm thử crawler.
+                                Điều chỉnh tần suất chạy tác vụ nền (Background Jobs) và thực thi crawler.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                        Tần suất đồng bộ nền
-                                    </label>
-                                    <Select defaultValue="daily">
-                                        <SelectTrigger className="bg-background border-muted">
-                                            <SelectValue placeholder="Chọn chu kỳ" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-card">
-                                            <SelectItem value="hourly">Mỗi 12 tiếng</SelectItem>
-                                            <SelectItem value="daily">Hàng ngày (03:00 AM)</SelectItem>
-                                            <SelectItem value="weekly">Hàng tuần (Thứ Hai)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                        Giới hạn cào mỗi lượt
-                                    </label>
-                                    <Select defaultValue="50">
-                                        <SelectTrigger className="bg-background border-muted">
-                                            <SelectValue placeholder="Số lượng sản phẩm" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-card">
-                                            <SelectItem value="20">Tối đa 20 sản phẩm</SelectItem>
-                                            <SelectItem value="50">Tối đa 50 sản phẩm</SelectItem>
-                                            <SelectItem value="100">Tối đa 100 sản phẩm</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <div className="p-4 bg-muted/20 border border-muted rounded-xl flex items-start gap-3">
-                                <AlertCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                                <div className="text-sm">
-                                    <p className="font-semibold text-foreground">
-                                        Tự động đồng bộ & Tách nền qua API
-                                    </p>
-                                    <p className="text-muted-foreground mt-0.5 leading-relaxed text-xs">
-                                        Khi crawler chạy, hệ thống sẽ tự động gọi API Photoroom để bóc tách nền
-                                        sắc nét của toàn bộ ảnh sản phẩm, sau đó chia danh mục khoa học (Top, Bottom, Shoes, Accessories) trước khi cập nhật vào Tab Khám Phá.
-                                    </p>
-                                </div>
-                            </div>
-
+                        <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
-                                    Nhật ký hoạt động của máy chủ crawler (Server Log)
-                                </span>
-                                <div className="h-44 w-full bg-slate-950 text-emerald-400 p-4 rounded-xl font-mono text-[11px] overflow-y-auto leading-relaxed border border-slate-800">
-                                    {crawlLog.map((log, i) => (
-                                        <div key={i} className="mb-1">
-                                            <span className="text-slate-500">[{new Date().toLocaleDateString()}]</span> {log}
-                                        </div>
-                                    ))}
-                                    {isCrawling && (
-                                        <div className="flex items-center gap-2 mt-2 text-amber-400 animate-pulse">
-                                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                            System: Đang liên kết Shopee Affiliate, cào sản phẩm và gọi API Photoroom để tách nền...
-                                        </div>
-                                    )}
-                                </div>
+                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                    Tần suất đồng bộ nền
+                                </label>
+                                <Select defaultValue="daily">
+                                    <SelectTrigger className="bg-background border-muted">
+                                        <SelectValue placeholder="Chọn chu kỳ" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-card">
+                                        <SelectItem value="hourly">Mỗi 12 tiếng</SelectItem>
+                                        <SelectItem value="daily">Hàng ngày (03:00 AM)</SelectItem>
+                                        <SelectItem value="weekly">Hàng tuần (Thứ Hai)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                    Giới hạn cào mỗi lượt
+                                </label>
+                                <Select defaultValue="50">
+                                    <SelectTrigger className="bg-background border-muted">
+                                        <SelectValue placeholder="Số lượng sản phẩm" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-card">
+                                        <SelectItem value="20">Tối đa 20 sản phẩm</SelectItem>
+                                        <SelectItem value="50">Tối đa 50 sản phẩm</SelectItem>
+                                        <SelectItem value="100">Tối đa 100 sản phẩm</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </CardContent>
-                        <CardFooter className="border-t border-muted bg-muted/10 p-4 flex justify-between items-center">
-                            <span className="text-xs text-muted-foreground">
-                                Lần cào gần nhất: <strong>Hôm nay, 03:05 AM</strong>
-                            </span>
+                        <CardFooter>
                             <Button
                                 disabled={isCrawling}
                                 onClick={handleStartCrawl}
@@ -622,6 +739,59 @@ export function AffiliateManagement() {
                                 <Play className="w-4 h-4 mr-2" /> {isCrawling ? "Đang đồng bộ..." : "Kích hoạt cào ngay"}
                             </Button>
                         </CardFooter>
+                    </Card>
+
+                    {/* Đối soát Shopee Affiliate CSV */}
+                    <Card className="md:col-span-1 shadow-sm border-muted">
+                        <CardHeader>
+                            <CardTitle className="text-[#4a3728] flex items-center gap-2 text-lg">
+                                <Database className="w-5 h-5 text-orange-500" /> Đối soát Shopee Affiliate
+                            </CardTitle>
+                            <CardDescription>
+                                Tải lên tệp CSV chứa danh sách đơn hàng đối soát từ Shopee Affiliate để cập nhật hoa hồng.
+                            </CardDescription>
+                        </CardHeader>
+                        <form onSubmit={handleImportCsv}>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide block">
+                                        Chọn tệp CSV đối soát
+                                    </label>
+                                    <Input
+                                        type="file"
+                                        accept=".csv"
+                                        className="bg-background border-muted text-sm cursor-pointer file:cursor-pointer file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#4a3728] file:text-white hover:file:bg-[#3d2d21]"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files.length > 0) {
+                                                setSelectedCsvFile(e.target.files[0]);
+                                            }
+                                        }}
+                                        required
+                                    />
+                                    {selectedCsvFile && (
+                                        <p className="text-xs text-emerald-600 font-medium mt-1">
+                                            Đã chọn: {selectedCsvFile.name} ({(selectedCsvFile.size / 1024).toFixed(1)} KB)
+                                        </p>
+                                    )}
+                                </div>
+                            </CardContent>
+                            <CardFooter>
+                                <Button
+                                    type="submit"
+                                    disabled={csvUploading || !selectedCsvFile}
+                                    className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                                >
+                                    {csvUploading ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Đang tải lên...
+                                        </>
+                                    ) : (
+                                        "Tải lên đối soát"
+                                    )}
+                                </Button>
+                            </CardFooter>
+                        </form>
                     </Card>
                 </div>
             )}
@@ -943,6 +1113,153 @@ export function AffiliateManagement() {
                                         Đang xử lý...
                                     </>
                                 ) : "Xác nhận nạp tiền"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Thêm/Sửa sản phẩm */}
+            <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
+                <DialogContent className="sm:max-w-lg bg-card border border-muted shadow-lg text-foreground max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-[#4a3728] font-bold text-lg">
+                            {editingProduct ? "Cập nhật sản phẩm Affiliate" : "Thêm sản phẩm Affiliate mới"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {editingProduct ? "Chỉnh sửa thông tin chi tiết của sản phẩm tiếp thị liên kết Shopee." : "Tạo mới sản phẩm tiếp thị liên kết Shopee hiển thị trên hệ thống."}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSaveProduct} className="space-y-4 pt-2">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5 col-span-2">
+                                <Label>Tên sản phẩm *</Label>
+                                <Input
+                                    placeholder="Ví dụ: Áo khoác Cardigan len tăm dáng rộng..."
+                                    value={formName}
+                                    onChange={(e) => setFormName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <Label>Thể loại *</Label>
+                                <Select value={formCategory} onValueChange={setFormCategory}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Chọn thể loại" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-card">
+                                        <SelectItem value="Top">Top (Áo)</SelectItem>
+                                        <SelectItem value="Bottom">Bottom (Quần/Váy)</SelectItem>
+                                        <SelectItem value="Dress">Dress (Đầm)</SelectItem>
+                                        <SelectItem value="Outerwear">Outerwear (Áo khoác)</SelectItem>
+                                        <SelectItem value="Shoes">Shoes (Giày dép)</SelectItem>
+                                        <SelectItem value="Bag">Bag (Túi xách)</SelectItem>
+                                        <SelectItem value="Accessory">Accessory (Phụ kiện)</SelectItem>
+                                        <SelectItem value="Other">Other (Khác)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label>Đường dẫn ảnh sản phẩm *</Label>
+                                <Input
+                                    placeholder="https://example.com/image.jpg"
+                                    value={formImageUrl}
+                                    onChange={(e) => setFormImageUrl(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label>Giá bán (VND) *</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Ví dụ: 150000"
+                                    value={formPrice}
+                                    onChange={(e) => setFormPrice(e.target.value)}
+                                    required
+                                    min="0"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label>Giá gốc (VND) - nếu có</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Ví dụ: 200000"
+                                    value={formOriginalPrice}
+                                    onChange={(e) => setFormOriginalPrice(e.target.value)}
+                                    min="0"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5 col-span-2">
+                                <Label>Đường dẫn liên kết Shopee (Affiliate Link) *</Label>
+                                <Input
+                                    placeholder="https://shope.ee/..."
+                                    value={formAffiliateLink}
+                                    onChange={(e) => setFormAffiliateLink(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            {!editingProduct && (
+                                <>
+                                    <div className="space-y-1.5">
+                                        <Label>Shopee Product ID (Tùy chọn)</Label>
+                                        <Input
+                                            placeholder="Ví dụ: 123456789"
+                                            value={formShopeeProductId}
+                                            onChange={(e) => setFormShopeeProductId(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <Label>Shopee Shop ID (Tùy chọn)</Label>
+                                        <Input
+                                            placeholder="Ví dụ: 987654321"
+                                            value={formShopeeShopId}
+                                            onChange={(e) => setFormShopeeShopId(e.target.value)}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="flex items-center space-x-2 pt-2 col-span-2">
+                                <input
+                                    type="checkbox"
+                                    id="formIsTrending"
+                                    checked={formIsTrending}
+                                    onChange={(e) => setFormIsTrending(e.target.checked)}
+                                    className="rounded border-muted text-[#4a3728] focus:ring-[#4a3728] h-4 w-4"
+                                />
+                                <Label htmlFor="formIsTrending" className="cursor-pointer">Ghim sản phẩm (Trending)</Label>
+                            </div>
+
+                            <div className="flex items-center space-x-2 pt-2 col-span-2">
+                                <input
+                                    type="checkbox"
+                                    id="formIsActive"
+                                    checked={formIsActive}
+                                    onChange={(e) => setFormIsActive(e.target.checked)}
+                                    className="rounded border-muted text-[#4a3728] focus:ring-[#4a3728] h-4 w-4"
+                                />
+                                <Label htmlFor="formIsActive" className="cursor-pointer">Công khai hiển thị (Active)</Label>
+                            </div>
+                        </div>
+
+                        <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                            <Button type="button" variant="outline" className="border-muted hover:bg-muted/10 text-xs h-9" onClick={() => setProductDialogOpen(false)}>
+                                Hủy bỏ
+                            </Button>
+                            <Button type="submit" className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9" disabled={actionLoading}>
+                                {actionLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Đang lưu...
+                                    </>
+                                ) : "Xác nhận lưu"}
                             </Button>
                         </DialogFooter>
                     </form>

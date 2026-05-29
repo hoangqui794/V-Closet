@@ -19,7 +19,11 @@ async function request<T>(
     const token = getToken();
 
     const hdrs = new Headers(options.headers as HeadersInit);
-    if (!hdrs.has("Content-Type")) hdrs.set("Content-Type", "application/json");
+    if (options.body instanceof FormData) {
+        hdrs.delete("Content-Type");
+    } else if (!hdrs.has("Content-Type")) {
+        hdrs.set("Content-Type", "application/json");
+    }
     if (!hdrs.has("Accept")) hdrs.set("Accept", "application/json");
     if (token && !hdrs.has("Authorization")) hdrs.set("Authorization", `Bearer ${token}`);
 
@@ -343,5 +347,113 @@ export async function loginAdmin(payload: LoginPayload): Promise<LoginResponse> 
     return request<LoginResponse>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(payload),
+    });
+}
+
+// ─── Admin Products API ───────────────────────────────────────────────────────
+
+export interface AffiliateProduct {
+    id: string;
+    shopeeProductId: string | null;
+    shopeeShopId: string | null;
+    name: string | null;
+    description: string | null;
+    imageUrl: string | null;
+    price: number;
+    originalPrice: number | null;
+    category: string; // "Top" | "Bottom" | "Dress" | "Outerwear" | "Shoes" | "Bag" | "Accessory" | "Other"
+    affiliateLink: string | null;
+    trackingCode: string | null;
+    isTrending: boolean;
+    isActive: boolean;
+    clicks?: number;
+    canvasTries?: number;
+    ctr?: number;
+}
+
+export interface PaginatedProducts {
+    items: AffiliateProduct[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export interface GetProductsParams {
+    page?: number;
+    pageSize?: number;
+    category?: string;
+    isActive?: boolean;
+    search?: string;
+}
+
+export interface CreateProductPayload {
+    shopeeProductId?: string | null;
+    shopeeShopId?: string | null;
+    name: string;
+    description?: string | null;
+    imageUrl: string;
+    price: number;
+    originalPrice?: number | null;
+    category: string;
+    affiliateLink: string;
+    trackingCode?: string | null;
+    isTrending: boolean;
+    isActive: boolean;
+}
+
+export interface UpdateProductPayload {
+    name?: string | null;
+    description?: string | null;
+    imageUrl?: string | null;
+    price?: number;
+    originalPrice?: number | null;
+    category?: string;
+    affiliateLink?: string | null;
+    isTrending?: boolean;
+    isActive?: boolean;
+}
+
+export async function getAdminProducts(params: GetProductsParams = {}): Promise<PaginatedProducts> {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+    if (params.category) query.set("category", params.category);
+    if (params.isActive !== undefined) query.set("isActive", String(params.isActive));
+    if (params.search) query.set("search", params.search);
+
+    return request<PaginatedProducts>(`/api/admin/products?${query.toString()}`);
+}
+
+export async function createAdminProduct(payload: CreateProductPayload): Promise<AffiliateProduct> {
+    return request<AffiliateProduct>("/api/admin/products", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function getAdminProductDetail(id: string): Promise<AffiliateProduct> {
+    return request<AffiliateProduct>(`/api/admin/products/${id}`);
+}
+
+export async function updateAdminProduct(id: string, payload: UpdateProductPayload): Promise<AffiliateProduct> {
+    return request<AffiliateProduct>(`/api/admin/products/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function deleteAdminProduct(id: string): Promise<void> {
+    return request<void>(`/api/admin/products/${id}`, {
+        method: "DELETE",
+    });
+}
+
+export async function importAffiliateConversions(file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append("file", file);
+    return request<void>("/api/admin/products/import-conversions", {
+        method: "POST",
+        body: formData,
     });
 }
