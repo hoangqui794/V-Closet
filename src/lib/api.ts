@@ -119,7 +119,32 @@ async function request<T>(
     }
 
     if (!res.ok) {
-        let errMsg = `HTTP ${res.status}`;
+        let errMsg = "";
+        
+        // Mapped user-friendly Vietnamese messages based on HTTP Status Codes
+        switch (res.status) {
+            case 400:
+                errMsg = "Yêu cầu không hợp lệ. Vui lòng kiểm tra lại thông tin gửi đi.";
+                break;
+            case 401:
+                errMsg = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.";
+                break;
+            case 403:
+                errMsg = "Bạn không có quyền thực hiện hành động này.";
+                break;
+            case 404:
+                errMsg = "Không tìm thấy dữ liệu yêu cầu trên hệ thống.";
+                break;
+            case 500:
+            case 502:
+            case 503:
+            case 504:
+                errMsg = "Hệ thống máy chủ đang gặp sự cố. Vui lòng thử lại sau ít phút.";
+                break;
+            default:
+                errMsg = `Đã xảy ra sự cố kết nối (Mã lỗi: HTTP ${res.status})`;
+        }
+
         try {
             const txt = await res.text();
             if (txt) {
@@ -132,11 +157,13 @@ async function request<T>(
                         } else {
                             errMsg = data?.message || data?.title || data?.error || errMsg;
                         }
-                    } else {
-                        errMsg = data?.message || data?.title || data?.error || errMsg;
+                    } else if (data?.message || data?.title || data?.error) {
+                        errMsg = data.message || data.title || data.error;
                     }
                 } catch {
-                    errMsg = txt;
+                    if (txt.length < 150) {
+                        errMsg = txt;
+                    }
                 }
             }
         } catch {

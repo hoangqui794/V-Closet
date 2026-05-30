@@ -33,6 +33,8 @@ import {
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useState, useEffect } from "react";
+import { getAdminUsers, AdminUser } from "@/lib/api";
 
 const data = [
     { name: "Tháng 1", total: 1500, users: 120, affiliate: 450 },
@@ -43,13 +45,6 @@ const data = [
     { name: "Tháng 6", total: 4800, users: 420, affiliate: 1540 },
 ];
 
-const recentUsers = [
-    { name: "Nguyễn Văn A", email: "vana@gmail.com", status: "Active", time: "2 phút trước", avatar: "NP" },
-    { name: "Trần Thị B", email: "thib@hotmail.com", status: "Premium", time: "15 phút trước", avatar: "TB" },
-    { name: "Lê Văn C", email: "vanc@yahoo.com", status: "Active", time: "1 giờ trước", avatar: "LC" },
-    { name: "Phạm Minh D", email: "minhd@gmail.com", status: "Standard", time: "3 giờ trước", avatar: "PD" },
-];
-
 const systemAlerts = [
     { id: 1, type: "warning", message: "Số dư tài khoản FASHN AI API còn dưới $15. Vui lòng nạp thêm tiền.", time: "10 phút trước" },
     { id: 2, type: "success", message: "Crawler tự động cào 12 sản phẩm trending Shopee hoàn tất.", time: "2 giờ trước" },
@@ -58,6 +53,59 @@ const systemAlerts = [
 ];
 
 export function Dashboard() {
+    const [totalUsers, setTotalUsers] = useState<number | null>(null);
+    const [recentUsers, setRecentUsers] = useState<AdminUser[]>([]);
+    const [newUsersTodayCount, setNewUsersTodayCount] = useState<number>(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+        async function fetchDashboardData() {
+            try {
+                // Fetch the latest 50 users from the API
+                const data = await getAdminUsers({ page: 1, pageSize: 50 });
+                if (!isMounted) return;
+
+                const usersList = data.items || data.users || [];
+                setTotalUsers(data.totalCount || usersList.length);
+                setRecentUsers(usersList.slice(0, 5)); // Show top 5 recent users in widget
+
+                // Count users registered in the last 24 hours
+                const oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
+                const todaySignups = usersList.filter(user => {
+                    if (!user.createdAt) return false;
+                    return new Date(user.createdAt).getTime() > oneDayAgo;
+                });
+                setNewUsersTodayCount(todaySignups.length);
+            } catch (err) {
+                console.error("Lỗi khi tải thông tin Dashboard:", err);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        }
+
+        fetchDashboardData();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    // Time ago formatter helper
+    const formatTimeAgo = (dateStr: string) => {
+        try {
+            const diffMs = new Date().getTime() - new Date(dateStr).getTime();
+            const diffMins = Math.floor(diffMs / (60 * 1000));
+            if (diffMins < 1) return "Vừa xong";
+            if (diffMins < 60) return `${diffMins} phút trước`;
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours} giờ trước`;
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays} ngày trước`;
+        } catch {
+            return "Gần đây";
+        }
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in duration-500 font-poppins">
             {/* Header */}
@@ -83,10 +131,16 @@ export function Dashboard() {
                         <Users className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-foreground">12,482</div>
+                        <div className="text-2xl font-bold text-foreground">
+                            {loading ? (
+                                <span className="inline-block w-16 h-6 bg-muted animate-pulse rounded" />
+                            ) : (
+                                totalUsers?.toLocaleString() ?? "0"
+                            )}
+                        </div>
                         <div className="flex items-center mt-1 text-xs text-green-500 font-medium">
                             <ArrowUpRight className="w-3 h-3 mr-1" />
-                            +12% so với tháng trước
+                            {loading ? "Đang tải..." : `+${newUsersTodayCount} đăng ký mới 24h qua`}
                         </div>
                     </CardContent>
                 </Card>
@@ -140,7 +194,7 @@ export function Dashboard() {
             {/* Hàng 2: Biểu đồ và Cảnh báo máy chủ */}
             <div className="grid gap-6 md:grid-cols-7">
                 {/* 1. Biểu đồ doanh thu & tăng trưởng */}
-                <Card className="lg:col-span-4 shadow-sm border-muted bg-card">
+                <Card className="md:col-span-4 lg:col-span-4 shadow-sm border-muted bg-card">
                     <CardHeader>
                         <CardTitle className="text-[#4a3728] text-lg">Biến động Tài chính & Tăng trưởng</CardTitle>
                         <CardDescription>
@@ -209,7 +263,7 @@ export function Dashboard() {
                 </Card>
 
                 {/* 2. Cảnh báo hệ thống & Người dùng mới */}
-                <div className="lg:col-span-3 flex flex-col gap-6">
+                <div className="md:col-span-3 lg:col-span-3 flex flex-col gap-6">
                     {/* Hộp cảnh báo AI và Hệ thống */}
                     <Card className="shadow-sm border-muted">
                         <CardHeader className="pb-3">
@@ -236,28 +290,50 @@ export function Dashboard() {
                     {/* Danh sách người dùng mới */}
                     <Card className="shadow-sm border-muted bg-card">
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-semibold text-[#4a3728]">Đăng ký mới hôm nay</CardTitle>
+                            <CardTitle className="text-sm font-semibold text-[#4a3728]">Đăng ký mới gần đây</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                {recentUsers.map((user, i) => (
-                                    <div key={i} className="flex items-center gap-3">
-                                        <Avatar className="h-8 w-8 border">
-                                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} />
-                                            <AvatarFallback>{user.avatar}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-semibold text-foreground truncate">{user.name}</p>
-                                            <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                                {loading ? (
+                                    // Hiệu ứng xương (Skeleton) khi đang tải dữ liệu
+                                    Array.from({ length: 4 }).map((_, i) => (
+                                        <div key={i} className="flex items-center gap-3 animate-pulse">
+                                            <div className="h-8 w-8 bg-muted rounded-full" />
+                                            <div className="flex-1 space-y-1">
+                                                <div className="h-3 bg-muted rounded w-1/3" />
+                                                <div className="h-2 bg-muted rounded w-1/2" />
+                                            </div>
+                                            <div className="h-4 bg-muted rounded w-10" />
                                         </div>
-                                        <div className="text-right">
-                                            <Badge variant={user.status === "Premium" ? "default" : "secondary"} className="font-normal text-[9px] py-0.5">
-                                                {user.status}
-                                            </Badge>
-                                            <p className="text-[9px] text-muted-foreground mt-0.5">{user.time}</p>
+                                    ))
+                                ) : recentUsers.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground text-center py-4">Chưa có người dùng đăng ký gần đây</p>
+                                ) : (
+                                    recentUsers.map((user, i) => (
+                                        <div key={i} className="flex items-center gap-3">
+                                            <Avatar className="h-8 w-8 border">
+                                                <AvatarImage src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.displayName || user.email}`} />
+                                                <AvatarFallback className="bg-[#4a3728] text-white text-[10px]">
+                                                    {(user.displayName || "US").slice(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-semibold text-foreground truncate">
+                                                    {user.displayName || user.email.split('@')[0]}
+                                                </p>
+                                                <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <Badge variant={user.role === "admin" || user.role === "superadmin" ? "default" : "secondary"} className="font-normal text-[9px] py-0.5 capitalize">
+                                                    {user.role === "admin" || user.role === "superadmin" ? "Admin" : user.role === "moderator" ? "Moderator" : "Customer"}
+                                                </Badge>
+                                                <p className="text-[9px] text-muted-foreground mt-0.5">
+                                                    {user.createdAt ? formatTimeAgo(user.createdAt) : "Gần đây"}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                         </CardContent>
                     </Card>
