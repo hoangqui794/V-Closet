@@ -1,4 +1,4 @@
-const BASE_URL = "https://api.vcloset.vn";
+const BASE_URL = import.meta.env.VITE_API_URL || "https://api.vcloset.vn";
 
 export function getToken(): string | null {
     return localStorage.getItem("accessToken");
@@ -8,8 +8,68 @@ export function setToken(token: string) {
     localStorage.setItem("accessToken", token);
 }
 
+export function getRefreshToken(): string | null {
+    return localStorage.getItem("refreshToken");
+}
+
+export function setRefreshToken(token: string) {
+    localStorage.setItem("refreshToken", token);
+}
+
 export function clearToken() {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+}
+
+let refreshPromise: Promise<string | null> | null = null;
+
+async function performRefresh(): Promise<string | null> {
+    const accessToken = getToken();
+    const refreshToken = getRefreshToken();
+    if (!accessToken || !refreshToken) {
+        return null;
+    }
+
+    try {
+        console.debug("[API] Calling refresh token endpoint...");
+        const response = await fetch(`${BASE_URL}/api/auth/refresh-token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            body: JSON.stringify({
+                accessToken,
+                refreshToken,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Refresh failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.accessToken && data.refreshToken) {
+            console.debug("[API] Token refreshed successfully.");
+            setToken(data.accessToken);
+            setRefreshToken(data.refreshToken);
+            return data.accessToken;
+        }
+        return null;
+    } catch (error) {
+        console.error("[API] Failed to refresh token:", error);
+        clearToken();
+        return null;
+    }
+}
+
+async function getOrRefreshPromise(): Promise<string | null> {
+    if (!refreshPromise) {
+        refreshPromise = performRefresh().finally(() => {
+            refreshPromise = null;
+        });
+    }
+    return refreshPromise;
 }
 
 async function request<T>(
@@ -35,10 +95,28 @@ async function request<T>(
         // ignore logging failures
     }
 
-    const res = await fetch(`${BASE_URL}${path}`, {
+    let res = await fetch(`${BASE_URL}${path}`, {
         ...options,
         headers: hdrs,
     });
+
+    if (res.status === 401 && !path.includes("/api/auth/refresh-token") && !path.includes("/api/auth/login")) {
+        console.debug("[API] 401 Unauthorized detected. Trying to refresh token...");
+        const newToken = await getOrRefreshPromise();
+        if (newToken) {
+            hdrs.set("Authorization", `Bearer ${newToken}`);
+            console.debug("[API] Retrying original request with new token...");
+            res = await fetch(`${BASE_URL}${path}`, {
+                ...options,
+                headers: hdrs,
+            });
+        } else {
+            console.warn("[API] Token refresh unsuccessful, redirecting to login...");
+            if (typeof window !== "undefined") {
+                window.location.href = "/";
+            }
+        }
+    }
 
     if (!res.ok) {
         let errMsg = `HTTP ${res.status}`;
@@ -47,7 +125,16 @@ async function request<T>(
             if (txt) {
                 try {
                     const data = JSON.parse(txt);
-                    errMsg = data?.message || data?.title || data?.error || errMsg;
+                    if (data?.errors && typeof data.errors === "object") {
+                        const errorList = Object.values(data.errors).flat();
+                        if (errorList.length > 0) {
+                            errMsg = errorList.join("\n");
+                        } else {
+                            errMsg = data?.message || data?.title || data?.error || errMsg;
+                        }
+                    } else {
+                        errMsg = data?.message || data?.title || data?.error || errMsg;
+                    }
                 } catch {
                     errMsg = txt;
                 }
@@ -61,8 +148,15 @@ async function request<T>(
     // Some endpoints return 204 No Content
     if (res.status === 204) return undefined as unknown as T;
 
-    return res.json() as Promise<T>;
+    const contentType = res.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+        return res.json() as Promise<T>;
+    } else {
+        const text = await res.text();
+        return text as unknown as T;
+    }
 }
+
 
 // ─── AdminUsers API ────────────────────────────────────────────────────────────
 
@@ -455,5 +549,57 @@ export async function importAffiliateConversions(file: File): Promise<void> {
     return request<void>("/api/admin/products/import-conversions", {
         method: "POST",
         body: formData,
+    });
+}
+
+export async function logoutAdmin(): Promise<void> {
+    const refreshToken = getRefreshToken();
+    try {
+        if (refreshToken) {
+            await request<void>("/api/auth/logout", {
+                method: "POST",
+                body: JSON.stringify({ refreshToken }),
+            });
+        }
+    } catch (err) {
+        console.error("[API] Error calling logout endpoint:", err);
+    } finally {
+        clearToken();
+    }
+}
+
+export interface ForgotPasswordPayload {
+    email: string;
+}
+
+export async function forgotPassword(payload: ForgotPasswordPayload): Promise<string> {
+    return request<string>("/api/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export interface ResetPasswordPayload {
+    email: string;
+    otpCode: string;
+    newPassword: string;
+}
+
+export async function resetPassword(payload: ResetPasswordPayload): Promise<string> {
+    return request<string>("/api/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export interface ChangePasswordPayload {
+    oldPassword: string;
+    newPassword: string;
+}
+
+export async function changePassword(payload: ChangePasswordPayload): Promise<string> {
+    return request<string>("/api/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify(payload),
     });
 }
