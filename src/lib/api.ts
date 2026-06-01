@@ -579,6 +579,15 @@ export async function importAffiliateConversions(file: File): Promise<void> {
     });
 }
 
+export async function removeBgAndUploadProductImage(file: File): Promise<{ imageUrl: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    return request<{ imageUrl: string }>("/api/admin/products/remove-bg-upload", {
+        method: "POST",
+        body: formData,
+    });
+}
+
 export async function logoutAdmin(): Promise<void> {
     const refreshToken = getRefreshToken();
     try {

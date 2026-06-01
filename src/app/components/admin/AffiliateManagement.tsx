@@ -45,6 +45,7 @@ import {
     updateAdminProduct,
     deleteAdminProduct,
     importAffiliateConversions,
+    removeBgAndUploadProductImage,
     AffiliateProduct
 } from "@/lib/api";
 
@@ -75,6 +76,8 @@ export function AffiliateManagement() {
     const [formIsTrending, setFormIsTrending] = useState(false);
     const [formIsActive, setFormIsActive] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [bgRemovalLoading, setBgRemovalLoading] = useState(false);
+    const [bgRemovalError, setBgRemovalError] = useState<string | null>(null);
 
     // CSV Import states
     const [selectedCsvFile, setSelectedCsvFile] = useState<File | null>(null);
@@ -152,6 +155,25 @@ export function AffiliateManagement() {
             alert(`Lỗi khi tải thông tin chi tiết: ${err.message || err}`);
         } finally {
             setActionLoading(false);
+        }
+    };
+
+    const handleRemoveBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+        setBgRemovalLoading(true);
+        setBgRemovalError(null);
+        try {
+            const res = await removeBgAndUploadProductImage(file);
+            setFormImageUrl(res.imageUrl);
+            alert("Tách nền và tải lên Cloud thành công!");
+        } catch (err: any) {
+            console.error("Lỗi tách nền/tải ảnh:", err);
+            setBgRemovalError(err.message || err.toString());
+            alert(`Lỗi tách nền: ${err.message || err}`);
+        } finally {
+            setBgRemovalLoading(false);
+            e.target.value = "";
         }
     };
 
@@ -1161,14 +1183,55 @@ export function AffiliateManagement() {
                                 </Select>
                             </div>
 
-                            <div className="space-y-1.5">
+                            <div className="space-y-1.5 col-span-2">
                                 <Label>Đường dẫn ảnh sản phẩm *</Label>
-                                <Input
-                                    placeholder="https://example.com/image.jpg"
-                                    value={formImageUrl}
-                                    onChange={(e) => setFormImageUrl(e.target.value)}
-                                    required
-                                />
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="https://example.com/image.jpg"
+                                        value={formImageUrl}
+                                        onChange={(e) => setFormImageUrl(e.target.value)}
+                                        required
+                                        className="flex-1"
+                                    />
+                                    <div className="relative shrink-0 w-44">
+                                        <Input
+                                            type="file"
+                                            accept="image/*"
+                                            disabled={bgRemovalLoading}
+                                            onChange={handleRemoveBgUpload}
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            title="Tải ảnh và tách nền"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="w-full text-xs h-9 border-[#4a3728]/35 text-[#4a3728] hover:bg-[#4a3728]/5 flex items-center justify-center gap-1"
+                                            disabled={bgRemovalLoading}
+                                        >
+                                            {bgRemovalLoading ? (
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                            ) : (
+                                                <>Tách nền & Tải lên S3</>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
+                                {bgRemovalError && (
+                                    <p className="text-[10px] text-destructive mt-0.5">{bgRemovalError}</p>
+                                )}
+                                {formImageUrl && (
+                                    <div className="mt-2 relative w-16 h-16 rounded border bg-muted/20 flex items-center justify-center overflow-hidden">
+                                        <img src={formImageUrl} alt="Preview" className="w-full h-full object-contain" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormImageUrl("")}
+                                            className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-black"
+                                            title="Xóa ảnh"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
