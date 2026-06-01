@@ -12,7 +12,8 @@ import {
     Sparkles,
     KeyRound,
     Flag,
-    Lock
+    Lock,
+    Megaphone
 } from "lucide-react";
 import {
     Dialog, DialogContent, DialogHeader,
@@ -57,6 +58,11 @@ const menuItems = [
         title: "Báo cáo vi phạm",
         url: "/admin/reports",
         icon: Flag,
+    },
+    {
+        title: "Chiến dịch quảng cáo",
+        url: "/admin/campaigns",
+        icon: Megaphone,
     },
     {
         title: "Sản phẩm Affiliate",

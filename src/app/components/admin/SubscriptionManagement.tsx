@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     CreditCard,
     DollarSign,
@@ -18,7 +18,8 @@ import {
     HelpCircle,
     UserCheck,
     Percent,
-    Sliders
+    Sliders,
+    Loader2
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
@@ -26,6 +27,23 @@ import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import {
+    Dialog, DialogContent, DialogHeader,
+    DialogTitle, DialogFooter, DialogDescription
+} from "../ui/dialog";
+import {
+    Select, SelectContent, SelectItem,
+    SelectTrigger, SelectValue
+} from "../ui/select";
+import {
+    getAdminSubscriptionPlans,
+    createAdminSubscriptionPlan,
+    updateAdminSubscriptionPlan,
+    deleteAdminSubscriptionPlan,
+    SubscriptionPlanResponse
+} from "../../../lib/api";
 
 // Mockup data giao dịch nâng cấp tài khoản
 const initialSubscriptions = [
@@ -43,7 +61,7 @@ const initialCoupons = [
 ];
 
 export function SubscriptionManagement() {
-    const [activeTab, setActiveTab] = useState<"billing" | "coupons" | "limits">("billing");
+    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons">("limits");
     const [subscriptions] = useState(initialSubscriptions);
     const [coupons, setCoupons] = useState(initialCoupons);
     
@@ -54,10 +72,129 @@ export function SubscriptionManagement() {
     const [newMaxUses, setNewMaxUses] = useState(100);
     const [newExpiry, setNewExpiry] = useState("2026-12-31");
 
-    // States cấu hình định giá & giới hạn tủ đồ
+    // States cấu hình giới hạn tủ đồ
     const [freeItemLimit, setFreeItemLimit] = useState(50);
-    const [monthlyPrice, setMonthlyPrice] = useState(9.99);
-    const [yearlyPrice, setYearlyPrice] = useState(89.99);
+
+    // States quản lý gói Premium thực tế từ Backend
+    const [plans, setPlans] = useState<SubscriptionPlanResponse[]>([]);
+    const [loadingPlans, setLoadingPlans] = useState(false);
+    const [errorPlans, setErrorPlans] = useState("");
+    const [showCreatePlan, setShowCreatePlan] = useState(false);
+    const [editingPlan, setEditingPlan] = useState<SubscriptionPlanResponse | null>(null);
+
+    // Form state cho gói Premium
+    const [planForm, setPlanForm] = useState({
+        name: "",
+        description: "",
+        price: 0,
+        currency: "VND",
+        durationDays: 30,
+        isActive: true
+    });
+
+    const loadPlans = useCallback(async () => {
+        setLoadingPlans(true);
+        setErrorPlans("");
+        try {
+            const data = await getAdminSubscriptionPlans();
+            setPlans(Array.isArray(data) ? data : []);
+        } catch (err: any) {
+            console.error("Failed to load subscription plans:", err);
+            setErrorPlans(err.message || "Không thể tải danh sách gói dịch vụ");
+        } finally {
+            setLoadingPlans(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (activeTab === "limits") {
+            loadPlans();
+        }
+    }, [activeTab, loadPlans]);
+
+    const handleOpenCreatePlan = () => {
+        setPlanForm({
+            name: "",
+            description: "",
+            price: 0,
+            currency: "VND",
+            durationDays: 30,
+            isActive: true
+        });
+        setErrorPlans("");
+        setShowCreatePlan(true);
+    };
+
+    const handleOpenEditPlan = (plan: SubscriptionPlanResponse) => {
+        setEditingPlan(plan);
+        setPlanForm({
+            name: plan.name,
+            description: plan.description || "",
+            price: plan.price,
+            currency: plan.currency,
+            durationDays: plan.durationDays,
+            isActive: plan.isActive
+        });
+        setErrorPlans("");
+    };
+
+    const handleCreatePlan = async () => {
+        if (!planForm.name) {
+            setErrorPlans("Tên gói là bắt buộc");
+            return;
+        }
+        if (planForm.price < 0) {
+            setErrorPlans("Giá tiền phải lớn hơn hoặc bằng 0");
+            return;
+        }
+        if (planForm.durationDays < 1) {
+            setErrorPlans("Số ngày hiệu lực phải lớn hơn 0");
+            return;
+        }
+
+        try {
+            await createAdminSubscriptionPlan(planForm);
+            setShowCreatePlan(false);
+            loadPlans();
+        } catch (err: any) {
+            setErrorPlans(err.message || "Tạo gói Premium thất bại");
+        }
+    };
+
+    const handleUpdatePlan = async () => {
+        if (!editingPlan) return;
+        if (!planForm.name) {
+            setErrorPlans("Tên gói là bắt buộc");
+            return;
+        }
+        if (planForm.price < 0) {
+            setErrorPlans("Giá tiền phải lớn hơn hoặc bằng 0");
+            return;
+        }
+        if (planForm.durationDays < 1) {
+            setErrorPlans("Số ngày hiệu lực phải lớn hơn 0");
+            return;
+        }
+
+        try {
+            await updateAdminSubscriptionPlan(editingPlan.id, planForm);
+            setEditingPlan(null);
+            loadPlans();
+        } catch (err: any) {
+            setErrorPlans(err.message || "Cập nhật gói Premium thất bại");
+        }
+    };
+
+    const handleDeletePlan = async (id: string) => {
+        if (window.confirm("Bạn có chắc chắn muốn ẩn/xóa (soft delete) gói Premium này?")) {
+            try {
+                await deleteAdminSubscriptionPlan(id);
+                loadPlans();
+            } catch (err: any) {
+                alert(err.message || "Không thể ẩn/xóa gói Premium");
+            }
+        }
+    };
 
     const handleCreateCoupon = () => {
         if (newCode.trim()) {
@@ -96,7 +233,7 @@ export function SubscriptionManagement() {
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-[#4a3728]">Quản lý Tài chính & Gói dịch vụ</h2>
                     <p className="text-muted-foreground mt-1">
-                        Thống kê doanh thu, quản lý mã coupon giảm giá và thiết lập hạn ngạch cho mô hình Freemium.
+                        Thống kê doanh thu, quản lý mã coupon giảm giá và thiết lập các gói dịch vụ Premium.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -106,6 +243,16 @@ export function SubscriptionManagement() {
 
             {/* Điều hướng Tab bằng State */}
             <div className="flex border-b border-muted">
+                <button
+                    onClick={() => setActiveTab("limits")}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
+                        activeTab === "limits"
+                            ? "border-[#4a3728] text-[#4a3728]"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                    }`}
+                >
+                    Gói dịch vụ Premium
+                </button>
                 <button
                     onClick={() => setActiveTab("billing")}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
@@ -125,16 +272,6 @@ export function SubscriptionManagement() {
                     }`}
                 >
                     Mã giảm giá (Coupons)
-                </button>
-                <button
-                    onClick={() => setActiveTab("limits")}
-                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
-                        activeTab === "limits"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
-                    }`}
-                >
-                    Cấu hình Giới hạn Tủ đồ & Giá gói
                 </button>
             </div>
 
@@ -377,89 +514,271 @@ export function SubscriptionManagement() {
                 </div>
             )}
 
-            {/* TAB 3: GIỚI HẠN TỦ ĐỒ & ĐỊNH GIÁ */}
+            {/* TAB 3: QUẢN LÝ GÓI DỊCH VỤ PREMIUM */}
             {activeTab === "limits" && (
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-3">
                     {/* Cấu hình giới hạn tủ đồ Free */}
-                    <Card className="shadow-sm border-muted">
-                        <CardHeader>
-                            <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
-                                <Sliders className="w-5 h-5" /> Giới hạn Tủ đồ Gói Free
-                            </CardTitle>
-                            <CardDescription>
-                                Thiết lập số trang phục tối đa được tải lên cho tài khoản miễn phí để thúc đẩy chuyển đổi nâng cấp Premium.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-xs font-semibold text-muted-foreground uppercase">Số vật phẩm tối đa (Free Items Limit)</label>
-                                <div className="flex gap-3">
-                                    <Input
-                                        type="number"
-                                        value={freeItemLimit}
-                                        onChange={(e) => setFreeItemLimit(Number(e.target.value))}
-                                        className="bg-background border-muted"
-                                    />
-                                    <Badge className="bg-orange-500 text-white border-none shrink-0 self-center py-2 px-3">
-                                        Mặc định: 50
-                                    </Badge>
+                    <div className="md:col-span-1">
+                        <Card className="shadow-sm border-muted">
+                            <CardHeader>
+                                <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                                    <Sliders className="w-5 h-5" /> Giới hạn Tủ đồ Gói Free
+                                </CardTitle>
+                                <CardDescription>
+                                    Thiết lập số trang phục tối đa được tải lên cho tài khoản miễn phí để thúc đẩy chuyển đổi nâng cấp Premium.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Số vật phẩm tối đa</label>
+                                    <div className="flex gap-3">
+                                        <Input
+                                            type="number"
+                                            value={freeItemLimit}
+                                            onChange={(e) => setFreeItemLimit(Number(e.target.value))}
+                                            className="bg-background border-muted"
+                                        />
+                                        <Badge className="bg-orange-500 text-white border-none shrink-0 self-center py-2 px-3">
+                                            Mặc định: 50
+                                        </Badge>
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                        Khi người dùng đạt giới hạn này, ứng dụng di động sẽ tự động gợi ý nâng cấp lên Premium.
+                                    </p>
                                 </div>
-                                <p className="text-[10px] text-muted-foreground mt-1">
-                                    Khi người dùng đạt giới hạn này, ứng dụng di động sẽ tự động hiển thị popup gợi ý nâng cấp lên Premium.
-                                </p>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="border-t border-muted bg-muted/10 p-4 flex justify-end">
-                            <Button className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">Lưu cấu hình</Button>
-                        </CardFooter>
-                    </Card>
+                            </CardContent>
+                            <CardFooter className="border-t border-muted bg-muted/10 p-4 flex justify-end">
+                                <Button className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">Lưu cấu hình</Button>
+                            </CardFooter>
+                        </Card>
+                    </div>
 
-                    {/* Thiết lập biểu giá gói Premium */}
-                    <Card className="shadow-sm border-muted">
-                        <CardHeader>
-                            <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
-                                <CreditCard className="w-5 h-5" /> Cài đặt định giá gói dịch vụ
-                            </CardTitle>
-                            <CardDescription>
-                                Thay đổi định mức giá bán cho gói Premium thời hạn Hàng tháng (Monthly) và Hàng năm (Yearly).
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Gói Tháng (USD)</label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        value={monthlyPrice}
-                                        onChange={(e) => setMonthlyPrice(Number(e.target.value))}
-                                        className="bg-background border-muted"
-                                    />
+                    {/* Danh sách các gói Premium thực tế */}
+                    <div className="md:col-span-2">
+                        <Card className="shadow-sm border-muted">
+                            <CardHeader className="flex flex-row items-center justify-between pb-3">
+                                <div>
+                                    <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                                        <CreditCard className="w-5 h-5" /> Danh sách gói dịch vụ Premium
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Danh sách các gói Premium được đồng bộ từ cơ sở dữ liệu hệ thống.
+                                    </CardDescription>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Gói Năm (USD)</label>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        value={yearlyPrice}
-                                        onChange={(e) => setYearlyPrice(Number(e.target.value))}
-                                        className="bg-background border-muted"
-                                    />
-                                </div>
-                            </div>
-                            <div className="p-3 bg-muted/30 border border-muted rounded-xl flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                                <HelpCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                                <span>
-                                    Giá trị thay đổi sẽ được đồng bộ trực tiếp lên cổng thanh toán In-App Purchase (Google Play & App Store) thông qua Backend.
-                                </span>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="border-t border-muted bg-muted/10 p-4 flex justify-end">
-                            <Button className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">Lưu định giá</Button>
-                        </CardFooter>
-                    </Card>
+                                <Button
+                                    onClick={handleOpenCreatePlan}
+                                    className="bg-[#4a3728] hover:bg-[#3d2d21] text-white size-sm"
+                                >
+                                    <Plus className="w-4 h-4 mr-1.5" /> Tạo gói mới
+                                </Button>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                {loadingPlans ? (
+                                    <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
+                                        <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                        <span className="text-sm">Đang tải các gói Premium từ máy chủ...</span>
+                                    </div>
+                                ) : errorPlans ? (
+                                    <div className="p-6 text-center text-sm text-red-600 bg-red-50 border-t">
+                                        {errorPlans}
+                                    </div>
+                                ) : !Array.isArray(plans) || plans.length === 0 ? (
+                                    <div className="p-12 text-center text-sm text-muted-foreground">
+                                        Chưa có gói Premium nào trên hệ thống. Hãy bấm nút "Tạo gói mới".
+                                    </div>
+                                ) : (
+                                    <Table>
+                                        <TableHeader className="bg-muted/50 border-t">
+                                            <TableRow>
+                                                <TableHead>Tên gói & Mô tả</TableHead>
+                                                <TableHead>Giá bán</TableHead>
+                                                <TableHead>Hiệu lực</TableHead>
+                                                <TableHead>Trạng thái</TableHead>
+                                                <TableHead className="text-right">Thao tác</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {(plans || []).map((plan) => (
+                                                <TableRow key={plan.id} className="hover:bg-muted/30 transition-colors">
+                                                    <TableCell className="max-w-[200px]">
+                                                        <p className="font-semibold text-sm text-[#4a3728]">{plan.name || "Chưa có tên"}</p>
+                                                        {plan.description && (
+                                                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                                                                {plan.description}
+                                                            </p>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm font-semibold">
+                                                        {(plan.price ?? 0).toLocaleString("vi-VN")} {plan.currency || "VND"}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm font-medium">
+                                                        {plan.durationDays ?? 0} ngày
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge
+                                                            variant={plan.isActive ? "default" : "secondary"}
+                                                            className={plan.isActive 
+                                                                ? "bg-green-100 text-green-800 hover:bg-green-200 border-none"
+                                                                : "bg-gray-100 text-gray-500"
+                                                            }
+                                                        >
+                                                            {plan.isActive ? "Active" : "Inactive"}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex items-center justify-end gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 text-[#4a3728] hover:bg-stone-100"
+                                                                onClick={() => handleOpenEditPlan(plan)}
+                                                                title="Chỉnh sửa thông tin gói"
+                                                            >
+                                                                <Edit className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                                onClick={() => handleDeletePlan(plan.id)}
+                                                                title="Ẩn/Xóa (soft-delete)"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             )}
+
+            {/* Modal Tạo/Sửa gói Premium */}
+            <Dialog 
+                open={showCreatePlan || editingPlan !== null} 
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setShowCreatePlan(false);
+                        setEditingPlan(null);
+                    }
+                }}
+            >
+                <DialogContent className="sm:max-w-md font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="text-[#4a3728] font-bold">
+                            {editingPlan ? "Cập nhật gói Premium" : "Tạo gói Premium mới"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Điền đầy đủ thông tin để lưu cấu hình gói cước Premium lên hệ thống.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex flex-col gap-4 py-2">
+                        {errorPlans && (
+                            <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                                <X className="w-4 h-4 shrink-0" />
+                                <span>{errorPlans}</span>
+                            </div>
+                        )}
+
+                        <div className="flex flex-col gap-1.5">
+                            <Label>Tên gói dịch vụ</Label>
+                            <Input
+                                placeholder="Ví dụ: Premium Monthly"
+                                value={planForm.name}
+                                onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <Label>Mô tả gói</Label>
+                            <Textarea
+                                placeholder="Mô tả các đặc quyền khi nâng cấp gói..."
+                                value={planForm.description}
+                                onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                                className="min-h-[80px]"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <Label>Giá tiền</Label>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={planForm.price}
+                                    onChange={(e) => setPlanForm({ ...planForm, price: Number(e.target.value) })}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label>Đơn vị tiền tệ</Label>
+                                <Select 
+                                    value={planForm.currency} 
+                                    onValueChange={(val) => setPlanForm({ ...planForm, currency: val })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="VND">VND</SelectItem>
+                                        <SelectItem value="USD">USD</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <Label>Thời gian hiệu lực (ngày)</Label>
+                                <Input
+                                    type="number"
+                                    min={1}
+                                    value={planForm.durationDays}
+                                    onChange={(e) => setPlanForm({ ...planForm, durationDays: Number(e.target.value) })}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label>Trạng thái kích hoạt</Label>
+                                <Select 
+                                    value={planForm.isActive ? "true" : "false"} 
+                                    onValueChange={(val) => setPlanForm({ ...planForm, isActive: val === "true" })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="true">Active (Đang chạy)</SelectItem>
+                                        <SelectItem value="false">Inactive (Tạm ẩn)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => {
+                                setShowCreatePlan(false);
+                                setEditingPlan(null);
+                            }}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={editingPlan ? handleUpdatePlan : handleCreatePlan}
+                            className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                        >
+                            {editingPlan ? "Cập nhật gói" : "Tạo gói"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

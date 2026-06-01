@@ -639,3 +639,143 @@ export async function changePassword(payload: ChangePasswordPayload): Promise<st
         body: JSON.stringify(payload),
     });
 }
+
+// ─── Admin Campaigns API ──────────────────────────────────────────────────────
+
+export interface SponsoredCampaign {
+    campaignId: string;
+    brandName: string;
+    productName: string;
+    productImageUrl: string;
+    displayRank: number;
+    dailyBudget: number;
+    totalSpent: number;
+    impressionCount: number;
+    clickCount: number;
+    isActive: boolean;
+    startAt: string;
+    endAt: string;
+    createdAt: string;
+}
+
+export async function getAdminCampaigns(): Promise<SponsoredCampaign[]> {
+    return request<SponsoredCampaign[]>("/api/admin/campaigns");
+}
+
+export async function stopAdminCampaign(campaignId: string): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/campaigns/${campaignId}/stop`, {
+        method: "POST"
+    });
+}
+
+// ─── Admin Permissions API ───────────────────────────────────────────────────
+
+export interface PermissionResponse {
+    id: number;
+    code: string;
+    name: string;
+    description: string | null;
+    grp: string;
+}
+
+export interface AdminUserPermissionResponse {
+    userId: string;
+    displayName: string;
+    email: string;
+    roleName: string;
+    grantedPermissions: PermissionResponse[];
+}
+
+export async function getAdminPermissionsAll(): Promise<PermissionResponse[]> {
+    return request<PermissionResponse[]>("/api/admin/permissions/all");
+}
+
+export async function getAdminUserPermissions(userId: string): Promise<AdminUserPermissionResponse> {
+    return request<AdminUserPermissionResponse>(`/api/admin/permissions/${userId}`);
+}
+
+export async function getAdminMyPermissions(): Promise<AdminUserPermissionResponse> {
+    return request<AdminUserPermissionResponse>("/api/admin/permissions/me");
+}
+
+export interface UpdatePermissionRequestPayload {
+    permissionIds: number[];
+}
+
+export async function grantAdminUserPermissions(
+    userId: string,
+    payload: UpdatePermissionRequestPayload
+): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/permissions/${userId}/grant`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function revokeAdminUserPermissions(
+    userId: string,
+    payload: UpdatePermissionRequestPayload
+): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/permissions/${userId}/revoke`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function resetAdminUserPermissions(userId: string): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/permissions/${userId}/reset`, {
+        method: "POST",
+    });
+}
+
+// ─── Admin Subscriptions API ──────────────────────────────────────────────────
+
+export interface SubscriptionPlanResponse {
+    id: string;
+    name: string;
+    description: string | null;
+    price: number;
+    currency: string;
+    durationDays: number;
+    isActive: boolean;
+}
+
+export interface CreateOrUpdatePlanPayload {
+    name: string;
+    description?: string | null;
+    price: number;
+    currency: string;
+    durationDays: number;
+    isActive: boolean;
+}
+
+export async function getAdminSubscriptionPlans(): Promise<SubscriptionPlanResponse[]> {
+    return request<SubscriptionPlanResponse[]>("/api/admin/subscriptions/plans");
+}
+
+export async function getAdminSubscriptionPlanDetail(id: string): Promise<SubscriptionPlanResponse> {
+    return request<SubscriptionPlanResponse>(`/api/admin/subscriptions/plans/${id}`);
+}
+
+export async function createAdminSubscriptionPlan(payload: CreateOrUpdatePlanPayload): Promise<SubscriptionPlanResponse> {
+    return request<SubscriptionPlanResponse>("/api/admin/subscriptions/plans", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function updateAdminSubscriptionPlan(
+    id: string,
+    payload: CreateOrUpdatePlanPayload
+): Promise<SubscriptionPlanResponse> {
+    return request<SubscriptionPlanResponse>(`/api/admin/subscriptions/plans/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function deleteAdminSubscriptionPlan(id: string): Promise<{ success: boolean; message: string }> {
+    return request<{ success: boolean; message: string }>(`/api/admin/subscriptions/plans/${id}`, {
+        method: "DELETE",
+    });
+}

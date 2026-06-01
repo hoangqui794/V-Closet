@@ -24,9 +24,10 @@ import { Label } from "../ui/label";
 import {
     getAdminUsers, createAdminUser, getAdminUserDetail,
     deactivateAdminUser, banAdminUser, unbanAdminUser,
-    grantAdminPermission, revokeAdminPermission, updateUserRole,
-    reactivateAdminUser, resetAdminPermissions,
-    AdminUser, GetUsersParams
+    updateUserRole, reactivateAdminUser,
+    grantAdminUserPermissions, revokeAdminUserPermissions, resetAdminUserPermissions,
+    getAdminPermissionsAll, getAdminUserPermissions,
+    AdminUser, GetUsersParams, PermissionResponse
 } from "../../../lib/api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -419,124 +420,114 @@ function ConfirmDeactivateModal({
 function GrantPermissionModal({
     user, open, onClose, onSuccess
 }: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: (msg: string) => void }) {
-    const [activeTab, setActiveTab] = useState<"grant" | "revoke" | "reset">("grant");
-    const [permissionCode, setPermissionCode] = useState("admin.create");
-    const [customCode, setCustomCode] = useState("");
+    const [allPermissions, setAllPermissions] = useState<PermissionResponse[]>([]);
+    const [originalCheckedIds, setOriginalCheckedIds] = useState<Set<number>>(new Set());
+    const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    
-    // User details with actual permissions
-    const [detailedUser, setDetailedUser] = useState<AdminUser | null>(null);
-    const [loadingDetails, setLoadingDetails] = useState(false);
+    const [loadingData, setLoadingData] = useState(false);
 
-    const loadUserDetails = useCallback(async () => {
+    const loadPermissionsData = useCallback(async () => {
         if (!user) return;
-        setLoadingDetails(true);
+        setLoadingData(true);
+        setError("");
         try {
-            const details = await getAdminUserDetail(user.userId);
-            setDetailedUser(details);
-            console.log("LOADED USER DETAILS:", details); // Let the developer view full user details json in F12
-        } catch (err) {
-            console.error("Failed to load user details for permissions", err);
+            const [allPerms, userPermsResponse] = await Promise.all([
+                getAdminPermissionsAll(),
+                getAdminUserPermissions(user.userId)
+            ]);
+            setAllPermissions(Array.isArray(allPerms) ? allPerms : []);
+            
+            const initialIds = new Set(
+                (userPermsResponse.grantedPermissions || []).map(p => p.id)
+            );
+            setOriginalCheckedIds(new Set(initialIds));
+            setCheckedIds(new Set(initialIds));
+        } catch (err: any) {
+            console.error("Failed to load permissions:", err);
+            setError(err.message || "Không thể tải danh sách quyền hạn");
         } finally {
-            setLoadingDetails(false);
+            setLoadingData(false);
         }
     }, [user]);
 
     useEffect(() => {
         if (open && user) {
-            setActiveTab("grant");
-            setPermissionCode("admin.create");
-            setCustomCode("");
+            setAllPermissions([]);
+            setOriginalCheckedIds(new Set());
+            setCheckedIds(new Set());
             setError("");
-            setDetailedUser(null);
-            loadUserDetails();
+            loadPermissionsData();
         }
-    }, [open, user, loadUserDetails]);
+    }, [open, user, loadPermissionsData]);
 
-    const getExistingPermissions = useCallback((): string[] => {
-        if (!detailedUser) return [];
-        const list = detailedUser.permissions || (detailedUser as any).permissionCodes || (detailedUser as any).userPermissions || [];
-        if (Array.isArray(list)) {
-            return list.map((item: any) => {
-                if (typeof item === "string") return item;
-                if (item && typeof item === "object") {
-                    return item.permissionCode || item.code || item.name || JSON.stringify(item);
-                }
-                return String(item);
-            });
-        }
-        return [];
-    }, [detailedUser]);
-
-    const existingPermissions = getExistingPermissions();
-
-    useEffect(() => {
-        if (open && detailedUser) {
-            if (activeTab === "revoke") {
-                const list = getExistingPermissions();
-                if (list.length > 0) {
-                    setPermissionCode(list[0]);
-                } else {
-                    setPermissionCode("custom");
-                }
+    const handleTogglePermission = (id: number) => {
+        setCheckedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
             } else {
-                setPermissionCode("admin.create");
+                next.add(id);
             }
+            return next;
+        });
+    };
+
+    const handleResetToDefault = async () => {
+        if (!user) return;
+        setLoading(true);
+        setError("");
+        try {
+            await resetAdminUserPermissions(user.userId);
+            onSuccess(`Đã khôi phục quyền mặc định cho ${user.displayName} thành công!`);
+            onClose();
+        } catch (e: any) {
+            setError(e.message || "Khôi phục quyền mặc định thất bại");
+        } finally {
+            setLoading(false);
         }
-    }, [open, detailedUser, activeTab, getExistingPermissions]);
+    };
 
     const handleAction = async () => {
         if (!user) return;
         setLoading(true);
         setError("");
 
-        try {
-            if (activeTab === "grant") {
-                const finalCode = permissionCode === "custom" ? customCode.trim() : permissionCode;
-                if (!finalCode) {
-                    setError("Vui lòng chọn hoặc nhập mã quyền.");
-                    setLoading(false);
-                    return;
-                }
-                await grantAdminPermission(user.userId, { permissionCode: finalCode });
-                onSuccess(`Đã cấp quyền '${finalCode}' cho ${user.displayName} thành công!`);
-            } else if (activeTab === "revoke") {
-                const finalCode = permissionCode === "custom" ? customCode.trim() : permissionCode;
-                if (!finalCode) {
-                    setError("Vui lòng chọn hoặc nhập mã quyền.");
-                    setLoading(false);
-                    return;
-                }
-                await revokeAdminPermission(user.userId, finalCode);
-                onSuccess(`Đã thu hồi quyền '${finalCode}' của ${user.displayName} thành công!`);
-            } else if (activeTab === "reset") {
-                await resetAdminPermissions(user.userId);
-                onSuccess(`Đã khôi phục quyền về mặc định cho ${user.displayName} thành công!`);
-            }
+        const addedIds = Array.from(checkedIds).filter(id => !originalCheckedIds.has(id));
+        const removedIds = Array.from(originalCheckedIds).filter(id => !checkedIds.has(id));
+
+        if (addedIds.length === 0 && removedIds.length === 0) {
             onClose();
-        } catch (e: unknown) {
-            const actionText = activeTab === "grant" ? "Cấp quyền" : activeTab === "revoke" ? "Thu hồi quyền" : "Khôi phục";
-            setError(e instanceof Error ? e.message : `${actionText} thất bại`);
-        } finally { setLoading(false); }
+            return;
+        }
+
+        try {
+            if (addedIds.length > 0) {
+                await grantAdminUserPermissions(user.userId, { permissionIds: addedIds });
+            }
+            if (removedIds.length > 0) {
+                await revokeAdminUserPermissions(user.userId, { permissionIds: removedIds });
+            }
+            onSuccess(`Đã cập nhật quyền hạn cho ${user.displayName} thành công!`);
+            onClose();
+        } catch (e: any) {
+            setError(e.message || "Cập nhật quyền hạn thất bại");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleDirectRevoke = async (code: string) => {
-        if (!user) return;
-        setLoading(true);
-        setError("");
-        try {
-            await revokeAdminPermission(user.userId, code);
-            onSuccess(`Đã thu hồi quyền '${code}' của ${user.displayName} thành công!`);
-            onClose();
-        } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : "Thu hồi quyền thất bại");
-        } finally { setLoading(false); }
-    };
+    // Group permissions by 'grp'
+    const grouped = (allPermissions || []).reduce((acc, p) => {
+        const group = p.grp || "Quyền hạn khác";
+        if (!acc[group]) acc[group] = [];
+        acc[group].push(p);
+        return acc;
+    }, {} as Record<string, PermissionResponse[]>);
 
     return (
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 font-semibold text-[#4a3728]">
                         <Shield className="w-5 h-5 shrink-0 text-purple-600" /> Quản lý quyền hạn
@@ -548,43 +539,10 @@ function GrantPermissionModal({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex border-b border-muted mt-2 mb-4 bg-muted/20 rounded-t-lg">
-                    <button
-                        onClick={() => { setActiveTab("grant"); setError(""); }}
-                        className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition-all duration-200 ${
-                            activeTab === "grant"
-                                ? "border-purple-600 text-purple-600 bg-purple-50/50"
-                                : "border-transparent text-muted-foreground hover:text-foreground"
-                        }`}
-                    >
-                        Cấp quyền
-                    </button>
-                    <button
-                        onClick={() => { setActiveTab("revoke"); setError(""); }}
-                        className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition-all duration-200 ${
-                            activeTab === "revoke"
-                                ? "border-red-600 text-red-600 bg-red-50/50"
-                                : "border-transparent text-muted-foreground hover:text-foreground"
-                        }`}
-                    >
-                        Thu hồi quyền
-                    </button>
-                    <button
-                        onClick={() => { setActiveTab("reset"); setError(""); }}
-                        className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition-all duration-200 ${
-                            activeTab === "reset"
-                                ? "border-amber-600 text-amber-600 bg-amber-50/50"
-                                : "border-transparent text-muted-foreground hover:text-foreground"
-                        }`}
-                    >
-                        Khôi phục
-                    </button>
-                </div>
-
-                {loadingDetails ? (
+                {loadingData ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground">
                         <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
-                        <span className="text-xs">Đang tải thông tin quyền hạn hiện có...</span>
+                        <span className="text-xs">Đang tải thông tin quyền hạn...</span>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-4 py-2">
@@ -595,127 +553,73 @@ function GrantPermissionModal({
                             </div>
                         )}
 
-                        {activeTab === "grant" && (
-                            <>
-                                <div className="flex flex-col gap-1.5">
-                                    <Label>Chọn mã quyền</Label>
-                                    <Select value={permissionCode} onValueChange={setPermissionCode}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="user.view">Xem danh sách user (user.view)</SelectItem>
-                                            <SelectItem value="user.ban">Khoá chat/post của user (user.ban)</SelectItem>
-                                            <SelectItem value="user.deactivate">Vô hiệu hoá tài khoản (user.deactivate)</SelectItem>
-                                            <SelectItem value="brand.create">Tạo tài khoản brand partner (brand.create)</SelectItem>
-                                            <SelectItem value="brand.verify">Duyệt brand partner (brand.verify)</SelectItem>
-                                            <SelectItem value="brand.suspend">Đình chỉ brand partner (brand.suspend)</SelectItem>
-                                            <SelectItem value="content.moderate">Kiểm duyệt nội dung (content.moderate)</SelectItem>
-                                            <SelectItem value="content.report">Xử lý report vi phạm (content.report)</SelectItem>
-                                            <SelectItem value="analytics.view">Xem báo cáo doanh thu (analytics.view)</SelectItem>
-                                            <SelectItem value="analytics.export">Xuất báo cáo (analytics.export)</SelectItem>
-                                            <SelectItem value="admin.create">Tạo tài khoản admin/moderator (admin.create)</SelectItem>
-                                            <SelectItem value="permission.grant">Cấp/thu hồi quyền (permission.grant)</SelectItem>
-                                            <SelectItem value="product.manage">Quản lý sản phẩm Shopee (product.manage)</SelectItem>
-                                            <SelectItem value="custom">Tự nhập mã quyền khác...</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {permissionCode === "custom" && (
-                                    <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <Label>Nhập mã quyền</Label>
-                                        <Input
-                                            placeholder="Ví dụ: order.manage"
-                                            value={customCode}
-                                            onChange={e => setCustomCode(e.target.value)}
-                                        />
+                        <div className="max-h-[380px] overflow-y-auto pr-1 flex flex-col gap-4">
+                            {Object.entries(grouped).map(([groupName, permissions]) => (
+                                <div key={groupName} className="flex flex-col">
+                                    <h5 className="font-semibold text-xs text-purple-800 uppercase tracking-wider mb-2 border-b pb-1 border-purple-100">
+                                        {groupName}
+                                    </h5>
+                                    <div className="grid grid-cols-1 gap-2.5">
+                                        {permissions.map((p) => {
+                                            const isChecked = checkedIds.has(p.id);
+                                            return (
+                                                <label
+                                                    key={p.id}
+                                                    className={`flex items-start gap-3 p-2.5 rounded-xl border transition-all cursor-pointer select-none
+                                                        ${isChecked 
+                                                            ? "border-purple-200 bg-purple-50/20 hover:bg-purple-50/30" 
+                                                            : "border-[#f5efe6] bg-[#fdfaf7] hover:bg-stone-50"
+                                                        }`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isChecked}
+                                                        onChange={() => handleTogglePermission(p.id)}
+                                                        className="mt-1 h-4 w-4 rounded border-stone-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                                                    />
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-semibold text-[#4a3728]">
+                                                            {p.name}
+                                                        </span>
+                                                        <span className="text-xs font-mono text-purple-600 font-semibold mt-0.5">
+                                                            {p.code}
+                                                        </span>
+                                                        {p.description && (
+                                                            <span className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                                                {p.description}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </label>
+                                            );
+                                        })}
                                     </div>
-                                )}
-                            </>
-                        )}
-
-                        {activeTab === "revoke" && (
-                            <>
-                                <div className="flex flex-col gap-3">
-                                    {existingPermissions.length > 0 ? (
-                                        <>
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label className="text-xs font-semibold text-muted-foreground uppercase">Các quyền hiện có ({existingPermissions.length})</Label>
-                                                <div className="flex flex-wrap gap-1.5 p-3 bg-[#fdfaf7] border border-[#f5efe6] rounded-xl min-h-[50px]">
-                                                    {existingPermissions.map((code) => (
-                                                        <Badge key={code} className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors">
-                                                            <span>{code}</span>
-                                                            <button
-                                                                onClick={() => handleDirectRevoke(code)}
-                                                                disabled={loading}
-                                                                className="text-purple-400 hover:text-red-600 transition-colors ml-1 p-0.5 rounded-full hover:bg-red-50"
-                                                                title={`Thu hồi quyền ${code}`}
-                                                            >
-                                                                <X className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label>Chọn mã quyền cần thu hồi</Label>
-                                                <Select value={permissionCode} onValueChange={setPermissionCode}>
-                                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                                    <SelectContent>
-                                                        {existingPermissions.map(code => (
-                                                            <SelectItem key={code} value={code}>{code}</SelectItem>
-                                                        ))}
-                                                        <SelectItem value="custom">Tự nhập mã quyền khác...</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-1.5 p-5 bg-stone-50 border border-stone-200 rounded-xl text-center">
-                                            <Shield className="w-8 h-8 opacity-25 text-stone-400" />
-                                            <p className="text-sm font-medium text-stone-600">Người dùng này chưa có quyền hạn đặc thù nào.</p>
-                                            <p className="text-xs text-muted-foreground">Tài khoản này chỉ có các quyền mặc định dựa theo vai trò {user?.role}.</p>
-                                        </div>
-                                    )}
-
-                                    {(existingPermissions.length === 0 || permissionCode === "custom") && (
-                                        <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            <Label>Nhập mã quyền cần thu hồi thủ công</Label>
-                                            <Input
-                                                placeholder="Ví dụ: admin.create"
-                                                value={customCode}
-                                                onChange={e => setCustomCode(e.target.value)}
-                                            />
-                                        </div>
-                                    )}
                                 </div>
-                            </>
-                        )}
+                            ))}
+                        </div>
 
-                        {activeTab === "reset" && (
-                            <div className="flex flex-col items-center gap-3 p-5 bg-amber-50/50 border border-amber-200 rounded-xl text-center animate-in fade-in duration-200">
-                                <AlertCircle className="w-8 h-8 text-amber-600 animate-bounce mt-2" />
-                                <p className="text-sm font-semibold text-amber-900">Xác nhận khôi phục quyền mặc định</p>
-                                <p className="text-xs text-amber-700 leading-relaxed">
-                                    Hành động này sẽ **thu hồi toàn bộ các quyền hạn đặc thù** đã cấp riêng lẻ trước đó, đưa danh sách quyền của <strong>{user?.displayName}</strong> về các giá trị **mặc định theo vai trò {user?.role}**.
-                                </p>
-                            </div>
-                        )}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full text-amber-700 hover:text-amber-800 border-amber-200 hover:bg-amber-50 gap-1.5 mt-2"
+                            onClick={handleResetToDefault}
+                            disabled={loading || loadingData}
+                        >
+                            <AlertCircle className="w-4 h-4" />
+                            Khôi phục quyền mặc định theo vai trò ({user?.role})
+                        </Button>
                     </div>
                 )}
 
                 <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                    <Button variant="outline" onClick={onClose} disabled={loading || loadingDetails}>Hủy</Button>
+                    <Button variant="outline" onClick={onClose} disabled={loading || loadingData}>Hủy</Button>
                     <Button
                         onClick={handleAction}
-                        disabled={loading || loadingDetails || (activeTab === "revoke" && existingPermissions.length === 0 && !customCode)}
-                        className={`gap-2 text-white transition-all ${activeTab === "grant"
-                                ? "bg-purple-600 hover:bg-purple-700"
-                                : "bg-red-600 hover:bg-red-700"
-                            }`}
+                        disabled={loading || loadingData}
+                        className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
                     >
                         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                        {activeTab === "grant" ? "Xác nhận cấp quyền" : "Xác nhận thu hồi"}
+                        Xác nhận lưu thay đổi
                     </Button>
                 </DialogFooter>
             </DialogContent>
