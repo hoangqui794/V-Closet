@@ -66,6 +66,7 @@ export function AffiliateManagement() {
     const [productDialogOpen, setProductDialogOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<AffiliateProduct | null>(null);
     const [formName, setFormName] = useState("");
+    const [formDescription, setFormDescription] = useState("");
     const [formCategory, setFormCategory] = useState("Top");
     const [formPrice, setFormPrice] = useState("");
     const [formOriginalPrice, setFormOriginalPrice] = useState("");
@@ -122,6 +123,7 @@ export function AffiliateManagement() {
     const handleOpenAddDialog = () => {
         setEditingProduct(null);
         setFormName("");
+        setFormDescription("");
         setFormCategory("Top");
         setFormPrice("");
         setFormOriginalPrice("");
@@ -140,6 +142,7 @@ export function AffiliateManagement() {
             const detail = await getAdminProductDetail(product.id);
             setEditingProduct(detail);
             setFormName(detail.name || "");
+            setFormDescription(detail.description || "");
             setFormCategory(detail.category || "Top");
             setFormPrice(String(detail.price));
             setFormOriginalPrice(detail.originalPrice ? String(detail.originalPrice) : "");
@@ -191,6 +194,7 @@ export function AffiliateManagement() {
             if (editingProduct) {
                 await updateAdminProduct(editingProduct.id, {
                     name: formName,
+                    description: formDescription || null,
                     category: formCategory,
                     price: priceNum,
                     originalPrice: origPriceNum,
@@ -203,6 +207,7 @@ export function AffiliateManagement() {
             } else {
                 await createAdminProduct({
                     name: formName,
+                    description: formDescription || null,
                     category: formCategory,
                     price: priceNum,
                     originalPrice: origPriceNum,
@@ -552,6 +557,11 @@ export function AffiliateManagement() {
                                                     <span className="font-semibold text-sm line-clamp-1 text-foreground">
                                                         {product.name}
                                                     </span>
+                                                    {product.description && (
+                                                        <span className="text-xs text-muted-foreground line-clamp-1 italic mt-0.5" title={product.description}>
+                                                            {product.description}
+                                                        </span>
+                                                    )}
                                                     <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                                                         Shop: {product.shopeeShopId || "Shopee Partner"}
                                                         {product.affiliateLink && (
@@ -1226,8 +1236,9 @@ export function AffiliateManagement() {
                                             type="button"
                                             onClick={() => setFormImageUrl("")}
                                             className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-black"
-                                            title="Xóa ảnh"
-                                        >
+                                             title="Xóa ảnh"
+                                         >
+
                                             <X className="w-3 h-3" />
                                         </button>
                                     </div>
@@ -1266,6 +1277,16 @@ export function AffiliateManagement() {
                                     required
                                 />
                             </div>
+
+                             <div className="space-y-1.5 col-span-2">
+                                 <Label>Mô tả sản phẩm</Label>
+                                 <textarea
+                                     placeholder="Nhập mô tả sản phẩm..."
+                                     value={formDescription}
+                                     onChange={(e) => setFormDescription(e.target.value)}
+                                     className="flex min-h-[80px] w-full rounded-md border border-[#4a3728]/25 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4a3728]/35 disabled:cursor-not-allowed disabled:opacity-50"
+                                 />
+                             </div>
 
                             {!editingProduct && (
                                 <>
