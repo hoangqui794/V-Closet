@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import {
     Search, UserPlus, Filter, Eye, Ban, ShieldOff, UserX,
     RefreshCw, ChevronLeft, ChevronRight, X, CheckCircle,
-    AlertCircle, Loader2, Shield, UserCog, UserCheck
+    AlertCircle, Loader2, Shield, UserCog, UserCheck,
+    Phone, MapPin, Calendar, Ruler, Shirt, Activity, Info, Mail, User, Globe
 } from "lucide-react";
 import {
     Table, TableBody, TableCell, TableHead,
@@ -167,51 +168,173 @@ function UserDetailModal({
 
     return (
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto pr-2 font-poppins">
                 <DialogHeader>
-                    <DialogTitle className="text-[#4a3728]">Chi tiết người dùng</DialogTitle>
+                    <DialogTitle className="text-[#4a3728] font-bold text-xl flex items-center gap-2">
+                        <Info className="w-5.5 h-5.5 text-amber-600" /> Chi tiết người dùng
+                    </DialogTitle>
                 </DialogHeader>
                 {loading ? (
-                    <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" /></div>
+                    <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" /></div>
                 ) : user ? (
-                    <div className="flex flex-col gap-5 py-2">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="h-16 w-16 border-2 border-[#dccbb5]">
+                    <div className="flex flex-col gap-6 py-2">
+                        {/* Header Profile Info */}
+                        <div className="flex flex-col sm:flex-row items-center gap-4 bg-muted/20 p-4 rounded-2xl border border-stone-200/60">
+                            <Avatar className="h-20 w-20 border-2 border-[#dccbb5]">
                                 <AvatarImage src={user.avatarUrl ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} />
-                                <AvatarFallback className="text-lg bg-[#f5efe6] text-[#4a3728]">
+                                <AvatarFallback className="text-2xl bg-[#f5efe6] text-[#4a3728]">
                                     {user.displayName?.charAt(0) ?? "?"}
                                 </AvatarFallback>
                             </Avatar>
-                            <div>
-                                <p className="font-bold text-lg text-[#4a3728]">{user.displayName}</p>
-                                <p className="text-sm text-muted-foreground">{user.email}</p>
-                                <div className="flex gap-2 mt-1">
+                            <div className="text-center sm:text-left flex-1 space-y-1">
+                                <h3 className="font-bold text-xl text-[#4a3728] leading-tight">{user.displayName}</h3>
+                                <p className="text-sm text-muted-foreground flex items-center justify-center sm:justify-start gap-1.5 font-mono">
+                                    <Mail className="w-3.5 h-3.5 text-stone-400" /> {user.email}
+                                </p>
+                                <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
                                     <Badge className={`text-xs border ${getRoleBadge(user.role)}`}>{user.role}</Badge>
                                     {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
                                     {!user.isActive && <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-300">Inactive</Badge>}
+                                    {user.isEmailVerified ? (
+                                        <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 border text-xs">Email Verified</Badge>
+                                    ) : (
+                                        <Badge className="bg-rose-50 text-rose-800 border-rose-200 border text-xs">Unverified Email</Badge>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                            {[
-                                { label: "User ID", value: user.userId.slice(0, 8) + "..." },
-                                { label: "Ngày tạo", value: formatDate(user.createdAt) },
-                                { label: "Email đã xác thực", value: user.isEmailVerified ? "✅ Có" : "❌ Chưa" },
-                                { label: "Loại ban", value: user.activeBanType ?? "—" },
-                                { label: "Ban hết hạn", value: user.bannedUntil ? formatDate(user.bannedUntil) : "—" },
-                            ].map(({ label, value }) => (
-                                <div key={label} className="bg-muted/30 rounded-lg p-3">
-                                    <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
-                                    <p className="font-medium text-foreground">{value}</p>
+
+                        {/* Detail sections in grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Personal & Contact Details */}
+                            <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
+                                <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
+                                    <User className="w-4 h-4 text-[#4a3728]" /> Thông tin liên hệ
+                                </h3>
+                                <div className="space-y-3 text-xs">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">User ID:</span>
+                                        <span className="font-mono bg-muted/65 px-1.5 py-0.5 rounded text-[10px] select-all">{user.userId}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-stone-400" /> Số điện thoại:</span>
+                                        <span className="font-semibold text-[#4a3728]">{user.phoneNumber ?? "—"}</span>
+                                    </div>
+                                    <div className="flex justify-between items-start gap-4">
+                                        <span className="text-muted-foreground flex items-center gap-1 shrink-0"><MapPin className="w-3.5 h-3.5 text-stone-400" /> Địa chỉ:</span>
+                                        <span className="font-semibold text-[#4a3728] text-right break-words max-w-[180px]">{user.address ?? "—"}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-stone-400" /> Ngày sinh:</span>
+                                        <span className="font-semibold text-[#4a3728]">{user.dateOfBirth ? formatDate(user.dateOfBirth) : "—"}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Giới tính:</span>
+                                        <span className="font-semibold text-[#4a3728] bg-muted/50 px-2 py-0.5 rounded-full">{user.gender ?? "—"}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground flex items-center gap-1"><Globe className="w-3.5 h-3.5 text-stone-400" /> Quốc gia:</span>
+                                        <span className="font-semibold text-[#4a3728]">{user.country ?? "—"}</span>
+                                    </div>
                                 </div>
-                            ))}
+                            </div>
+
+                            {/* Body Profile & Wardrobe */}
+                            <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
+                                <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
+                                    <Activity className="w-4 h-4 text-purple-600" /> Chỉ số & Tủ đồ
+                                </h3>
+                                <div className="space-y-3 text-xs">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground flex items-center gap-1"><Ruler className="w-3.5 h-3.5 text-stone-400" /> Chiều cao:</span>
+                                        <span className="font-bold text-[#4a3728]">{user.heightCm ? `${user.heightCm} cm` : "—"}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Cân nặng:</span>
+                                        <span className="font-bold text-[#4a3728]">{user.weightKg ? `${user.weightKg} kg` : "—"}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground flex items-center gap-1"><Shirt className="w-3.5 h-3.5 text-stone-400" /> Số đồ trong tủ:</span>
+                                        <span className="font-bold text-[#4a3728] bg-orange-50 text-orange-800 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
+                                            {user.wardrobeItemCount ?? 0} món đồ
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Trạng thái HĐ:</span>
+                                        <span className={`font-semibold ${user.isActive ? "text-green-600" : "text-amber-600"}`}>
+                                            {user.isActive ? "🟢 Hoạt động" : "🟡 Inactive"}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Ngày đăng ký:</span>
+                                        <span className="font-medium text-[#4a3728]">{formatDate(user.createdAt)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Ban / Violation History List */}
+                        <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
+                            <h3 className="text-xs font-bold text-red-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
+                                <Ban className="w-4 h-4 text-red-500" /> Lịch sử cấm quyền ({user.banHistory?.length ?? 0})
+                            </h3>
+                            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+                                {!user.banHistory || user.banHistory.length === 0 ? (
+                                    <p className="text-center text-xs text-muted-foreground py-6">Thành viên này có lý lịch sạch, chưa từng bị cấm.</p>
+                                ) : (
+                                    user.banHistory.map((ban, index) => (
+                                        <div key={ban.id || index} className="p-3 bg-white border border-stone-200 rounded-xl space-y-2.5 text-xs shadow-2xs">
+                                            <div className="flex items-center justify-between">
+                                                <span className="flex items-center gap-2">
+                                                    <span className="text-[10px] text-muted-foreground font-mono">#{index + 1}</span>
+                                                    <Badge className="bg-red-50 text-red-700 border-red-200 border text-[10px] font-normal uppercase">
+                                                        Ban: {ban.banType}
+                                                    </Badge>
+                                                </span>
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    Tạo lúc: {ban.createdAt ? formatDate(ban.createdAt) : "—"}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2.5 text-[11px] bg-stone-50/50 p-2.5 rounded-lg border border-stone-100">
+                                                <div>
+                                                    <p className="text-muted-foreground text-[10px]">Lý do cấm:</p>
+                                                    <p className="font-semibold text-stone-850">{ban.reason || "Không ghi rõ"}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-muted-foreground text-[10px]">Thời hạn cấm:</p>
+                                                    <p className="font-semibold text-stone-850">
+                                                        {ban.bannedUntil ? formatDate(ban.bannedUntil) : "Vĩnh viễn"}
+                                                    </p>
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <p className="text-muted-foreground text-[10px]">Người cấm:</p>
+                                                    <p className="font-semibold text-[#4a3728]">{ban.bannedByDisplayName || "Hệ thống"}</p>
+                                                </div>
+                                            </div>
+                                            {ban.isLifted ? (
+                                                <div className="p-2.5 bg-emerald-50/60 border border-emerald-100 rounded-lg text-[10px] text-emerald-800">
+                                                    <div className="flex justify-between font-bold">
+                                                        <span>✅ ĐÃ GỠ CẤM</span>
+                                                        <span>Lúc: {ban.liftedAt ? formatDate(ban.liftedAt) : "—"}</span>
+                                                    </div>
+                                                    <p className="mt-1 leading-relaxed"><span className="font-semibold text-emerald-950">Lý do gỡ:</span> {ban.liftReason || "Không có ghi chú"}</p>
+                                                </div>
+                                            ) : (
+                                                <div className="p-2 bg-rose-50 border border-rose-100 rounded-lg text-[10px] text-rose-800 flex justify-between font-bold">
+                                                    <span>⚠️ ĐANG HIỆU LỰC KHÓA</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
                     </div>
                 ) : (
                     <p className="text-center text-muted-foreground py-8">Không tải được thông tin người dùng.</p>
                 )}
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>Đóng</Button>
+                <DialogFooter className="border-t pt-3 mt-2">
+                    <Button variant="outline" className="w-full sm:w-auto" onClick={onClose}>Đóng</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -889,7 +1012,7 @@ export function UserManagement() {
             )}
 
             {/* Table */}
-            <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>

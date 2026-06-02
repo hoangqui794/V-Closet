@@ -36,22 +36,37 @@
     }
 }
 
-/* Hide scrollbars globally for a cleaner app look */
+/* Elegant custom scrollbar for desktop pages and tables */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(74, 55, 40, 0.2);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(74, 55, 40, 0.45);
+}
+
+/* Firefox scrollbar support */
 * {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(74, 55, 40, 0.2) transparent;
 }
 
-*::-webkit-scrollbar {
-    display: none;
+/* Hide scrollbars inside mobile previews for a clean simulated app look */
+.mobile-frame * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
 }
 
-/* Hide scrollbars for a cleaner mobile look */
-* {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-*::-webkit-scrollbar {
-    display: none;
+.mobile-frame *::-webkit-scrollbar {
+    display: none !important;
 }

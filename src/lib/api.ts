@@ -200,6 +200,25 @@ export interface AdminUser {
     activeBanType: string | null;
     bannedUntil: string | null;
     permissions?: string[] | any[];
+    country?: string | null;
+    phoneNumber?: string | null;
+    address?: string | null;
+    gender?: string | null;
+    heightCm?: number | null;
+    weightKg?: number | null;
+    dateOfBirth?: string | null;
+    wardrobeItemCount?: number;
+    banHistory?: Array<{
+        id: string;
+        banType: string;
+        reason: string;
+        bannedUntil: string | null;
+        isLifted: boolean;
+        liftReason: string | null;
+        liftedAt: string | null;
+        createdAt: string;
+        bannedByDisplayName: string;
+    }>;
 }
 
 export interface PaginatedUsers {

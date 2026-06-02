@@ -541,7 +541,7 @@ export function ReportManagement() {
             )}
 
             {/* Responsive Reports Table */}
-            <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>

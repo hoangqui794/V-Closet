@@ -506,7 +506,7 @@ export function AffiliateManagement() {
                         </Button>
                     </div>
 
-                    <div className="rounded-xl border bg-card shadow-sm overflow-hidden border-muted">
+                    <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
                         <Table>
                             <TableHeader className="bg-muted/30">
                                 <TableRow>
@@ -888,7 +888,7 @@ export function AffiliateManagement() {
                     )}
 
                     {/* Bảng danh sách */}
-                    <div className="rounded-xl border bg-card shadow-sm overflow-hidden border-muted">
+                    <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
                         <Table>
                             <TableHeader className="bg-muted/30">
                                 <TableRow>

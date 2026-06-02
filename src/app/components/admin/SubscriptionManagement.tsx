@@ -322,7 +322,7 @@ export function SubscriptionManagement() {
                     </div>
 
                     {/* Danh sách giao dịch */}
-                    <div className="rounded-xl border bg-card shadow-sm overflow-hidden border-muted">
+                    <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
                         <Table>
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
@@ -439,7 +439,7 @@ export function SubscriptionManagement() {
                         </Card>
                     )}
 
-                    <div className="rounded-xl border bg-card shadow-sm overflow-hidden border-muted">
+                    <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
                         <Table>
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
@@ -587,70 +587,72 @@ export function SubscriptionManagement() {
                                         Chưa có gói Premium nào trên hệ thống. Hãy bấm nút "Tạo gói mới".
                                     </div>
                                 ) : (
-                                    <Table>
-                                        <TableHeader className="bg-muted/50 border-t">
-                                            <TableRow>
-                                                <TableHead>Tên gói & Mô tả</TableHead>
-                                                <TableHead>Giá bán</TableHead>
-                                                <TableHead>Hiệu lực</TableHead>
-                                                <TableHead>Trạng thái</TableHead>
-                                                <TableHead className="text-right">Thao tác</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {(plans || []).map((plan) => (
-                                                <TableRow key={plan.id} className="hover:bg-muted/30 transition-colors">
-                                                    <TableCell className="max-w-[200px]">
-                                                        <p className="font-semibold text-sm text-[#4a3728]">{plan.name || "Chưa có tên"}</p>
-                                                        {plan.description && (
-                                                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
-                                                                {plan.description}
-                                                            </p>
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell className="text-sm font-semibold">
-                                                        {(plan.price ?? 0).toLocaleString("vi-VN")} {plan.currency || "VND"}
-                                                    </TableCell>
-                                                    <TableCell className="text-sm font-medium">
-                                                        {plan.durationDays ?? 0} ngày
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Badge
-                                                            variant={plan.isActive ? "default" : "secondary"}
-                                                            className={plan.isActive 
-                                                                ? "bg-green-100 text-green-800 hover:bg-green-200 border-none"
-                                                                : "bg-gray-100 text-gray-500"
-                                                            }
-                                                        >
-                                                            {plan.isActive ? "Active" : "Inactive"}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <div className="flex items-center justify-end gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8 text-[#4a3728] hover:bg-stone-100"
-                                                                onClick={() => handleOpenEditPlan(plan)}
-                                                                title="Chỉnh sửa thông tin gói"
-                                                            >
-                                                                <Edit className="w-4 h-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                                onClick={() => handleDeletePlan(plan.id)}
-                                                                title="Ẩn/Xóa (soft-delete)"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </TableCell>
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <TableHeader className="bg-muted/50 border-t">
+                                                <TableRow>
+                                                    <TableHead>Tên gói & Mô tả</TableHead>
+                                                    <TableHead>Giá bán</TableHead>
+                                                    <TableHead>Hiệu lực</TableHead>
+                                                    <TableHead>Trạng thái</TableHead>
+                                                    <TableHead className="text-right">Thao tác</TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {(plans || []).map((plan) => (
+                                                    <TableRow key={plan.id} className="hover:bg-muted/30 transition-colors">
+                                                        <TableCell className="max-w-[200px]">
+                                                            <p className="font-semibold text-sm text-[#4a3728]">{plan.name || "Chưa có tên"}</p>
+                                                            {plan.description && (
+                                                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
+                                                                    {plan.description}
+                                                                </p>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell className="text-sm font-semibold">
+                                                            {(plan.price ?? 0).toLocaleString("vi-VN")} {plan.currency || "VND"}
+                                                        </TableCell>
+                                                        <TableCell className="text-sm font-medium">
+                                                            {plan.durationDays ?? 0} ngày
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                variant={plan.isActive ? "default" : "secondary"}
+                                                                className={plan.isActive 
+                                                                    ? "bg-green-100 text-green-800 hover:bg-green-200 border-none"
+                                                                    : "bg-gray-100 text-gray-500"
+                                                                }
+                                                            >
+                                                                {plan.isActive ? "Active" : "Inactive"}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-[#4a3728] hover:bg-stone-100"
+                                                                    onClick={() => handleOpenEditPlan(plan)}
+                                                                    title="Chỉnh sửa thông tin gói"
+                                                                >
+                                                                    <Edit className="w-4 h-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                                    onClick={() => handleDeletePlan(plan.id)}
+                                                                    title="Ẩn/Xóa (soft-delete)"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
