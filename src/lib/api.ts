@@ -798,3 +798,19 @@ export async function deleteAdminSubscriptionPlan(id: string): Promise<{ success
         method: "DELETE",
     });
 }
+
+// ─── Admin Dashboard Metrics API ───────────────────────────────────────────────
+
+export interface DashboardMetrics {
+    totalUserCount: number;
+    pendingBrandCount: number;
+    pendingReportCount: number;
+    totalSystemAdCredits: number;
+    activePremiumSubscriptionCount: number;
+    totalPremiumRevenue: number;
+}
+
+export async function getAdminDashboardMetrics(): Promise<DashboardMetrics> {
+    return request<DashboardMetrics>("/api/admin/dashboard/metrics");
+}
+

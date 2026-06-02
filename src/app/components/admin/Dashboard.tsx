@@ -11,7 +11,8 @@ import {
     AlertTriangle,
     CheckCircle,
     Bell,
-    DollarSign
+    DollarSign,
+    Shield
 } from "lucide-react";
 import {
     Card,
@@ -34,7 +35,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useState, useEffect } from "react";
-import { getAdminUsers, AdminUser } from "@/lib/api";
+import { getAdminUsers, getAdminDashboardMetrics, AdminUser, DashboardMetrics } from "@/lib/api";
 
 const data = [
     { name: "Tháng 1", total: 1500, users: 120, affiliate: 450 },
@@ -56,18 +57,22 @@ export function Dashboard() {
     const [totalUsers, setTotalUsers] = useState<number | null>(null);
     const [recentUsers, setRecentUsers] = useState<AdminUser[]>([]);
     const [newUsersTodayCount, setNewUsersTodayCount] = useState<number>(0);
+    const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         let isMounted = true;
         async function fetchDashboardData() {
             try {
-                // Fetch the latest 50 users from the API
-                const data = await getAdminUsers({ page: 1, pageSize: 50 });
+                // Fetch the latest 50 users from the API and dashboard metrics in parallel
+                const [usersData, dashboardMetrics] = await Promise.all([
+                    getAdminUsers({ page: 1, pageSize: 50 }),
+                    getAdminDashboardMetrics()
+                ]);
                 if (!isMounted) return;
 
-                const usersList = data.items || data.users || [];
-                setTotalUsers(data.totalCount || usersList.length);
+                const usersList = usersData.items || usersData.users || [];
+                setTotalUsers(usersData.totalCount || usersList.length);
                 setRecentUsers(usersList.slice(0, 5)); // Show top 5 recent users in widget
 
                 // Count users registered in the last 24 hours
@@ -77,6 +82,7 @@ export function Dashboard() {
                     return new Date(user.createdAt).getTime() > oneDayAgo;
                 });
                 setNewUsersTodayCount(todaySignups.length);
+                setMetrics(dashboardMetrics);
             } catch (err) {
                 console.error("Lỗi khi tải thông tin Dashboard:", err);
             } finally {
@@ -122,70 +128,125 @@ export function Dashboard() {
                 </div>
             </div>
 
-            {/* Hàng chỉ số KPI chính (4 Cards) */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {/* Hàng chỉ số KPI chính (6 Cards) */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 {/* 1. Tổng người dùng */}
-                <Card className="hover:shadow-md transition-shadow border-muted">
+                <Card className="hover:shadow-md transition-shadow border-stone-200 bg-[#fdfaf7]/50">
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Tổng người dùng</CardTitle>
-                        <Users className="w-4 h-4 text-muted-foreground" />
+                        <CardTitle className="text-xs font-semibold text-stone-600">Tổng người dùng</CardTitle>
+                        <Users className="w-4 h-4 text-[#4a3728]" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-foreground">
+                        <div className="text-xl font-bold text-foreground font-mono">
                             {loading ? (
                                 <span className="inline-block w-16 h-6 bg-muted animate-pulse rounded" />
                             ) : (
-                                totalUsers?.toLocaleString() ?? "0"
+                                (metrics?.totalUserCount ?? totalUsers ?? 0).toLocaleString()
                             )}
                         </div>
-                        <div className="flex items-center mt-1 text-xs text-green-500 font-medium">
-                            <ArrowUpRight className="w-3 h-3 mr-1" />
-                            {loading ? "Đang tải..." : `+${newUsersTodayCount} đăng ký mới 24h qua`}
+                        <div className="flex items-center mt-1 text-[10px] text-green-600 font-medium">
+                            <ArrowUpRight className="w-3 h-3 mr-0.5 shrink-0" />
+                            {loading ? "Đang tải..." : `+${newUsersTodayCount} mới (24h)`}
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* 2. Doanh thu Premium */}
-                <Card className="hover:shadow-md transition-shadow border-muted">
+                <Card className="hover:shadow-md transition-shadow border-stone-200 bg-[#fdfaf7]/50">
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Doanh thu Premium</CardTitle>
-                        <CreditCard className="w-4 h-4 text-muted-foreground" />
+                        <CardTitle className="text-xs font-semibold text-stone-600">Doanh thu Premium</CardTitle>
+                        <DollarSign className="w-4 h-4 text-emerald-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-foreground">$12,234</div>
-                        <div className="flex items-center mt-1 text-xs text-green-500 font-medium">
-                            <ArrowUpRight className="w-3 h-3 mr-1" />
-                            +15.3% so với tháng trước
+                        <div className="text-xl font-bold text-foreground font-mono truncate">
+                            {loading ? (
+                                <span className="inline-block w-20 h-6 bg-muted animate-pulse rounded" />
+                            ) : (
+                                `${(metrics?.totalPremiumRevenue ?? 0).toLocaleString("vi-VN")} ₫`
+                            )}
+                        </div>
+                        <div className="flex items-center mt-1 text-[10px] text-stone-500 font-medium truncate">
+                            Giao dịch gói nâng cấp
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* 3. Hoa hồng Affiliate Shopee */}
-                <Card className="hover:shadow-md transition-shadow border-muted">
+                {/* 3. Gói Premium hoạt động */}
+                <Card className="hover:shadow-md transition-shadow border-stone-200 bg-[#fdfaf7]/50">
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Hoa hồng Shopee (Affiliate)</CardTitle>
-                        <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+                        <CardTitle className="text-xs font-semibold text-stone-600">Premium hiệu lực</CardTitle>
+                        <CreditCard className="w-4 h-4 text-purple-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-green-600 font-mono">+ $4,850</div>
-                        <div className="flex items-center mt-1 text-xs text-green-500 font-medium">
-                            <ArrowUpRight className="w-3 h-3 mr-1" />
-                            +24.1% lượt nhấn Canvas
+                        <div className="text-xl font-bold text-foreground font-mono">
+                            {loading ? (
+                                <span className="inline-block w-12 h-6 bg-muted animate-pulse rounded" />
+                            ) : (
+                                metrics?.activePremiumSubscriptionCount ?? 0
+                            )}
+                        </div>
+                        <div className="flex items-center mt-1 text-[10px] text-stone-500 font-medium">
+                            Tài khoản đang gia hạn
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* 4. Chi phí dịch vụ API AI */}
-                <Card className="hover:shadow-md transition-shadow border-muted">
+                {/* 4. Tín dụng quảng cáo */}
+                <Card className="hover:shadow-md transition-shadow border-stone-200 bg-[#fdfaf7]/50">
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium">Chi phí API AI (Photoroom/FASHN)</CardTitle>
-                        <Cpu className="w-4 h-4 text-muted-foreground" />
+                        <CardTitle className="text-xs font-semibold text-stone-600">Tín dụng Quảng cáo</CardTitle>
+                        <Activity className="w-4 h-4 text-blue-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-red-500 font-mono">- $312.80</div>
-                        <div className="flex items-center mt-1 text-xs text-red-500 font-medium">
-                            <ArrowDownRight className="w-3 h-3 mr-1" />
-                            Tách nền & AI Lookbook tăng 18%
+                        <div className="text-xl font-bold text-foreground font-mono truncate">
+                            {loading ? (
+                                <span className="inline-block w-24 h-6 bg-muted animate-pulse rounded" />
+                            ) : (
+                                `${(metrics?.totalSystemAdCredits ?? 0).toLocaleString()}`
+                            )}
+                        </div>
+                        <div className="flex items-center mt-1 text-[10px] text-stone-500 font-medium truncate">
+                            Ngân sách QC hệ thống
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* 5. Thương hiệu chờ duyệt */}
+                <Card className="hover:shadow-md transition-shadow border-stone-200 bg-[#fdfaf7]/50">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-xs font-semibold text-stone-600">Đối tác chờ duyệt</CardTitle>
+                        <Shield className="w-4 h-4 text-amber-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className={`text-xl font-bold font-mono ${!loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-600" : "text-foreground"}`}>
+                            {loading ? (
+                                <span className="inline-block w-12 h-6 bg-muted animate-pulse rounded" />
+                            ) : (
+                                metrics?.pendingBrandCount ?? 0
+                            )}
+                        </div>
+                        <div className={`flex items-center mt-1 text-[10px] font-medium ${!loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-600 animate-pulse" : "text-stone-500"}`}>
+                            {!loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "⚠️ Cần xác minh ngay" : "Đã duyệt hoàn tất"}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* 6. Báo cáo chờ xử lý */}
+                <Card className="hover:shadow-md transition-shadow border-stone-200 bg-[#fdfaf7]/50">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-xs font-semibold text-stone-600">Báo cáo chờ duyệt</CardTitle>
+                        <AlertTriangle className={`w-4 h-4 ${!loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500 animate-bounce" : "text-stone-400"}`} />
+                    </CardHeader>
+                    <CardContent>
+                        <div className={`text-xl font-bold font-mono ${!loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500" : "text-foreground"}`}>
+                            {loading ? (
+                                <span className="inline-block w-12 h-6 bg-muted animate-pulse rounded" />
+                            ) : (
+                                metrics?.pendingReportCount ?? 0
+                            )}
+                        </div>
+                        <div className={`flex items-center mt-1 text-[10px] font-medium ${!loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500" : "text-stone-500"}`}>
+                            {!loading && (metrics?.pendingReportCount ?? 0) > 0 ? "🔴 Có tố cáo chưa duyệt" : "Hệ thống an toàn"}
                         </div>
                     </CardContent>
                 </Card>
