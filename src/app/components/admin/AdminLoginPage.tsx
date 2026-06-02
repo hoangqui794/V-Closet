@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { ShieldAlert, Mail, Lock, ArrowRight, X, KeyRound, CheckCircle2 } from "lucide-react";
@@ -22,6 +22,15 @@ export function AdminLoginPage() {
     const [forgotLoading, setForgotLoading] = useState(false);
     const [forgotError, setForgotError] = useState("");
     const [forgotSuccessMessage, setForgotSuccessMessage] = useState("");
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("expired") === "true") {
+            setError("Tài khoản của bạn đã bị vô hiệu hoá hoặc phiên đăng nhập đã hết hạn!");
+            // Xóa query param trên URL để khi reload không bị báo lại
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

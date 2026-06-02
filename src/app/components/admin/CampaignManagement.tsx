@@ -6,6 +6,8 @@ import {
     Database,
     Tag,
     AlertCircle,
+    CheckCircle,
+    X,
     Loader2,
     Calendar,
     Coins,
@@ -17,12 +19,47 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../ui/dialog";
 import { getAdminCampaigns, stopAdminCampaign, SponsoredCampaign } from "@/lib/api";
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+interface Toast { id: number; type: "success" | "error"; message: string; }
+let toastId = 0;
+
+function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+    return (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+            {toasts.map(t => (
+                <div key={t.id}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white animate-in slide-in-from-right-4 duration-300
+                        ${t.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
+                    {t.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                    <span>{t.message}</span>
+                    <button onClick={() => onRemove(t.id)} className="ml-2 opacity-70 hover:opacity-100">
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export function CampaignManagement() {
     const [campaigns, setCampaigns] = useState<SponsoredCampaign[]>([]);
     const [loading, setLoading] = useState(false);
     const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+    // Toast
+    const [toasts, setToasts] = useState<Toast[]>([]);
+    const addToast = (type: Toast["type"], message: string) => {
+        const id = ++toastId;
+        setToasts(prev => [...prev, { id, type, message }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+    };
+
+    // States cho Confirm Stop Campaign Modal
+    const [stopConfirmOpen, setStopConfirmOpen] = useState(false);
+    const [campaignToStop, setCampaignToStop] = useState<string | null>(null);
 
     const fetchCampaigns = async () => {
         setLoading(true);
@@ -40,18 +77,23 @@ export function CampaignManagement() {
         fetchCampaigns();
     }, []);
 
-    const handleStopCampaign = async (campaignId: string) => {
-        if (!confirm("Bạn có chắc chắn muốn dừng khẩn cấp chiến dịch quảng cáo này? Hành động này không thể hoàn tác.")) {
-            return;
-        }
-        setActionLoadingId(campaignId);
+    const handleOpenStopConfirm = (campaignId: string) => {
+        setCampaignToStop(campaignId);
+        setStopConfirmOpen(true);
+    };
+
+    const handleConfirmStop = async () => {
+        if (!campaignToStop) return;
+        setActionLoadingId(campaignToStop);
         try {
-            await stopAdminCampaign(campaignId);
-            alert("Đã dừng khẩn cấp chiến dịch quảng cáo thành công!");
+            await stopAdminCampaign(campaignToStop);
+            addToast("success", "Đã dừng khẩn cấp chiến dịch quảng cáo thành công!");
+            setStopConfirmOpen(false);
+            setCampaignToStop(null);
             fetchCampaigns();
         } catch (err: any) {
             console.error("Lỗi khi dừng chiến dịch:", err);
-            alert(`Lỗi khi dừng chiến dịch: ${err.message || err}`);
+            addToast("error", `Lỗi khi dừng chiến dịch: ${err.message || err}`);
         } finally {
             setActionLoadingId(null);
         }
@@ -81,6 +123,7 @@ export function CampaignManagement() {
 
     return (
         <div className="space-y-6 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">
+            <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
             <div className="flex flex-col gap-1.5">
                 <h1 className="text-2xl font-bold tracking-tight text-[#4a3728]">Chiến dịch tài trợ (Campaigns)</h1>
                 <p className="text-sm text-muted-foreground">
@@ -285,7 +328,7 @@ export function CampaignManagement() {
                                                             variant="ghost"
                                                             size="sm"
                                                             className="text-rose-600 hover:bg-rose-50 h-8 font-medium text-xs flex items-center justify-center gap-1.5"
-                                                            onClick={() => handleStopCampaign(campaign.campaignId)}
+                                                            onClick={() => handleOpenStopConfirm(campaign.campaignId)}
                                                             disabled={actionLoadingId === campaign.campaignId}
                                                         >
                                                             {actionLoadingId === campaign.campaignId ? (
@@ -310,6 +353,48 @@ export function CampaignManagement() {
                     </div>
                 </CardContent>
             </Card>
+            {/* Modal Xác nhận dừng khẩn cấp chiến dịch */}
+            <Dialog open={stopConfirmOpen} onOpenChange={setStopConfirmOpen}>
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-600">
+                            <StopCircle className="w-5 h-5 shrink-0 text-red-500" /> Xác nhận dừng chiến dịch
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground mt-1">
+                            Bạn có chắc chắn muốn dừng khẩn cấp chiến dịch quảng cáo này? Hành động này không thể hoàn tác và quảng cáo sẽ không hiển thị trên hệ thống nữa.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="border-muted hover:bg-muted/10 text-xs h-9"
+                            onClick={() => {
+                                setStopConfirmOpen(false);
+                                setCampaignToStop(null);
+                            }}
+                            disabled={actionLoadingId !== null}
+                        >
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleConfirmStop}
+                            className="bg-red-600 hover:bg-red-700 text-white text-xs h-9"
+                            disabled={actionLoadingId !== null}
+                        >
+                            {actionLoadingId !== null ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Đang dừng...
+                                </>
+                            ) : (
+                                "Xác nhận dừng"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

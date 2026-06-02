@@ -107,8 +107,7 @@ async function request<T>(
             // Khi chính API refresh token trả về 401 (tài khoản đã bị khoá hoặc refresh token hết hạn)
             clearToken();
             if (typeof window !== "undefined") {
-                alert("Tài khoản của bạn đã bị vô hiệu hoá hoặc phiên đăng nhập đã hết hạn!");
-                window.location.href = "/";
+                window.location.href = "/?expired=true";
             }
         } else {
             console.debug("[API] 401 Unauthorized detected. Trying to refresh token...");
@@ -125,16 +124,14 @@ async function request<T>(
                 if (res.status === 401) {
                     clearToken();
                     if (typeof window !== "undefined") {
-                        alert("Tài khoản của bạn đã bị vô hiệu hoá hoặc phiên đăng nhập đã hết hạn!");
-                        window.location.href = "/";
+                        window.location.href = "/?expired=true";
                     }
                 }
             } else {
                 console.warn("[API] Token refresh unsuccessful, redirecting to login...");
                 clearToken();
                 if (typeof window !== "undefined") {
-                    alert("Tài khoản của bạn đã bị vô hiệu hoá hoặc phiên đăng nhập đã hết hạn!");
-                    window.location.href = "/";
+                    window.location.href = "/?expired=true";
                 }
             }
         }
@@ -518,6 +515,7 @@ export interface AffiliateProduct {
     id: string;
     shopeeProductId: string | null;
     shopeeShopId: string | null;
+    shopeeShopid?: string | null;
     name: string | null;
     description: string | null;
     imageUrl: string | null;
@@ -552,6 +550,7 @@ export interface GetProductsParams {
 export interface CreateProductPayload {
     shopeeProductId?: string | null;
     shopeeShopId?: string | null;
+    shopeeShopid?: string | null;
     name: string;
     description?: string | null;
     imageUrl: string;
@@ -584,18 +583,33 @@ export async function getAdminProducts(params: GetProductsParams = {}): Promise<
     if (params.isActive !== undefined) query.set("isActive", String(params.isActive));
     if (params.search) query.set("search", params.search);
 
-    return request<PaginatedProducts>(`/api/admin/products?${query.toString()}`);
+    const raw = await request<PaginatedProducts>(`/api/admin/products?${query.toString()}`);
+    if (raw && raw.items) {
+        raw.items = raw.items.map(item => ({
+            ...item,
+            shopeeShopId: item.shopeeShopId || (item as any).shopeeShopid
+        }));
+    }
+    return raw;
 }
 
 export async function createAdminProduct(payload: CreateProductPayload): Promise<AffiliateProduct> {
+    const body = {
+        ...payload,
+        shopeeShopid: payload.shopeeShopid || payload.shopeeShopId
+    };
     return request<AffiliateProduct>("/api/admin/products", {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
     });
 }
 
 export async function getAdminProductDetail(id: string): Promise<AffiliateProduct> {
-    return request<AffiliateProduct>(`/api/admin/products/${id}`);
+    const raw = await request<AffiliateProduct>(`/api/admin/products/${id}`);
+    if (raw) {
+        raw.shopeeShopId = raw.shopeeShopId || (raw as any).shopeeShopid;
+    }
+    return raw;
 }
 
 export async function updateAdminProduct(id: string, payload: UpdateProductPayload): Promise<AffiliateProduct> {

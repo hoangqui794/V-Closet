@@ -19,7 +19,9 @@ import {
     UserCheck,
     Percent,
     Sliders,
-    Loader2
+    Loader2,
+    AlertCircle,
+    CheckCircle
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
@@ -45,6 +47,28 @@ import {
     SubscriptionPlanResponse
 } from "../../../lib/api";
 
+// ─── Toast ────────────────────────────────────────────────────────────────────
+interface Toast { id: number; type: "success" | "error"; message: string; }
+let toastId = 0;
+
+function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+    return (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+            {toasts.map(t => (
+                <div key={t.id}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white animate-in slide-in-from-right-4 duration-300
+                        ${t.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
+                    {t.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                    <span>{t.message}</span>
+                    <button onClick={() => onRemove(t.id)} className="ml-2 opacity-70 hover:opacity-100">
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 // Mockup data giao dịch nâng cấp tài khoản
 const initialSubscriptions = [
     { id: "1", user: "Nguyễn Văn A", plan: "Premium Monthly", amount: "$9.99", status: "Active", date: "2024-03-01", nextBilling: "2024-04-01" },
@@ -64,6 +88,19 @@ export function SubscriptionManagement() {
     const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons">("limits");
     const [subscriptions] = useState(initialSubscriptions);
     const [coupons, setCoupons] = useState(initialCoupons);
+    
+    // Toast
+    const [toasts, setToasts] = useState<Toast[]>([]);
+    const addToast = (type: Toast["type"], message: string) => {
+        const id = ++toastId;
+        setToasts(prev => [...prev, { id, type, message }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+    };
+
+    // States cho Confirm Delete Plan Modal
+    const [deletePlanConfirmOpen, setDeletePlanConfirmOpen] = useState(false);
+    const [planToDelete, setPlanToDelete] = useState<string | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     
     // States tạo Coupon mới
     const [showCreateCoupon, setShowCreateCoupon] = useState(false);
@@ -185,14 +222,25 @@ export function SubscriptionManagement() {
         }
     };
 
-    const handleDeletePlan = async (id: string) => {
-        if (window.confirm("Bạn có chắc chắn muốn ẩn/xóa (soft delete) gói Premium này?")) {
-            try {
-                await deleteAdminSubscriptionPlan(id);
-                loadPlans();
-            } catch (err: any) {
-                alert(err.message || "Không thể ẩn/xóa gói Premium");
-            }
+    const handleOpenDeletePlanConfirm = (id: string) => {
+        setPlanToDelete(id);
+        setDeletePlanConfirmOpen(true);
+    };
+
+    const handleConfirmDeletePlan = async () => {
+        if (!planToDelete) return;
+        setDeleteLoading(true);
+        try {
+            await deleteAdminSubscriptionPlan(planToDelete);
+            addToast("success", "Đã ẩn/xóa gói Premium thành công!");
+            setDeletePlanConfirmOpen(false);
+            setPlanToDelete(null);
+            loadPlans();
+        } catch (err: any) {
+            console.error("Lỗi khi xóa gói Premium:", err);
+            addToast("error", err.message || "Không thể ẩn/xóa gói Premium");
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -229,6 +277,7 @@ export function SubscriptionManagement() {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins">
+            <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-[#4a3728]">Quản lý Tài chính & Gói dịch vụ</h2>
@@ -641,7 +690,7 @@ export function SubscriptionManagement() {
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                                    onClick={() => handleDeletePlan(plan.id)}
+                                                                    onClick={() => handleOpenDeletePlanConfirm(plan.id)}
                                                                     title="Ẩn/Xóa (soft-delete)"
                                                                 >
                                                                     <Trash2 className="w-4 h-4" />
@@ -777,6 +826,48 @@ export function SubscriptionManagement() {
                             className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
                         >
                             {editingPlan ? "Cập nhật gói" : "Tạo gói"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            {/* Modal Xác nhận xóa mềm gói Premium */}
+            <Dialog open={deletePlanConfirmOpen} onOpenChange={setDeletePlanConfirmOpen}>
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-600">
+                            <Trash2 className="w-5 h-5 shrink-0 text-red-500" /> Xác nhận xóa gói Premium
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground mt-1">
+                            Bạn có chắc chắn muốn ẩn/xóa (soft delete) gói Premium này? Gói cước sẽ ngừng hoạt động và không hiển thị cho người dùng nữa.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="border-muted hover:bg-muted/10 text-xs h-9"
+                            onClick={() => {
+                                setDeletePlanConfirmOpen(false);
+                                setPlanToDelete(null);
+                            }}
+                            disabled={deleteLoading}
+                        >
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleConfirmDeletePlan}
+                            className="bg-red-600 hover:bg-red-700 text-white text-xs h-9"
+                            disabled={deleteLoading}
+                        >
+                            {deleteLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                "Xác nhận xóa"
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -16,6 +16,7 @@ import {
     Database,
     Tag,
     AlertCircle,
+    CheckCircle,
     TrendingUp,
     ExternalLink,
     Globe,
@@ -49,8 +50,43 @@ import {
     AffiliateProduct
 } from "@/lib/api";
 
+// ─── Toast ────────────────────────────────────────────────────────────────────
+interface Toast { id: number; type: "success" | "error"; message: string; }
+let toastId = 0;
+
+function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+    return (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+            {toasts.map(t => (
+                <div key={t.id}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white animate-in slide-in-from-right-4 duration-300
+                        ${t.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
+                    {t.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                    <span>{t.message}</span>
+                    <button onClick={() => onRemove(t.id)} className="ml-2 opacity-70 hover:opacity-100">
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export function AffiliateManagement() {
     const [activeTab, setActiveTab] = useState<"products" | "crawler" | "brands">("products");
+    
+    // Toast
+    const [toasts, setToasts] = useState<Toast[]>([]);
+    const addToast = (type: Toast["type"], message: string) => {
+        const id = ++toastId;
+        setToasts(prev => [...prev, { id, type, message }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+    };
+    
+    // States cho Delete Confirmation Dialog
+    const [deleteProductConfirmOpen, setDeleteProductConfirmOpen] = useState(false);
+    const [productToDelete, setProductToDelete] = useState<string | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     
     // States cho Affiliate Products (API real)
     const [products, setProducts] = useState<AffiliateProduct[]>([]);
@@ -120,6 +156,19 @@ export function AffiliateManagement() {
         }
     };
 
+    const generateRandomId = (length: number): string => {
+        let result = "";
+        const characters = "0123456789";
+        for (let i = 0; i < length; i++) {
+            if (i === 0) {
+                result += characters.charAt(Math.floor(Math.random() * 9) + 1);
+            } else {
+                result += characters.charAt(Math.floor(Math.random() * 10));
+            }
+        }
+        return result;
+    };
+
     const handleOpenAddDialog = () => {
         setEditingProduct(null);
         setFormName("");
@@ -129,8 +178,8 @@ export function AffiliateManagement() {
         setFormOriginalPrice("");
         setFormImageUrl("");
         setFormAffiliateLink("");
-        setFormShopeeProductId("");
-        setFormShopeeShopId("");
+        setFormShopeeProductId(generateRandomId(11));
+        setFormShopeeShopId(generateRandomId(9));
         setFormIsTrending(false);
         setFormIsActive(true);
         setProductDialogOpen(true);
@@ -155,7 +204,7 @@ export function AffiliateManagement() {
             setProductDialogOpen(true);
         } catch (err: any) {
             console.error("Lỗi khi tải chi tiết sản phẩm:", err);
-            alert(`Lỗi khi tải thông tin chi tiết: ${err.message || err}`);
+            addToast("error", `Lỗi khi tải thông tin chi tiết: ${err.message || err}`);
         } finally {
             setActionLoading(false);
         }
@@ -169,11 +218,11 @@ export function AffiliateManagement() {
         try {
             const res = await removeBgAndUploadProductImage(file);
             setFormImageUrl(res.imageUrl);
-            alert("Tách nền và tải lên Cloud thành công!");
+            addToast("success", "Tách nền và tải lên Cloud thành công!");
         } catch (err: any) {
             console.error("Lỗi tách nền/tải ảnh:", err);
             setBgRemovalError(err.message || err.toString());
-            alert(`Lỗi tách nền: ${err.message || err}`);
+            addToast("error", `Lỗi tách nền: ${err.message || err}`);
         } finally {
             setBgRemovalLoading(false);
             e.target.value = "";
@@ -185,7 +234,7 @@ export function AffiliateManagement() {
         const priceNum = parseFloat(formPrice);
         const origPriceNum = formOriginalPrice ? parseFloat(formOriginalPrice) : null;
         if (isNaN(priceNum) || priceNum < 0) {
-            alert("Vui lòng nhập giá bán hợp lệ.");
+            addToast("error", "Vui lòng nhập giá bán hợp lệ.");
             return;
         }
 
@@ -203,7 +252,7 @@ export function AffiliateManagement() {
                     isTrending: formIsTrending,
                     isActive: formIsActive
                 });
-                alert("Đã cập nhật sản phẩm thành công!");
+                addToast("success", "Đã cập nhật sản phẩm thành công!");
             } else {
                 await createAdminProduct({
                     name: formName,
@@ -218,46 +267,54 @@ export function AffiliateManagement() {
                     isTrending: formIsTrending,
                     isActive: formIsActive
                 });
-                alert("Đã thêm sản phẩm mới thành công!");
+                addToast("success", "Đã thêm sản phẩm mới thành công!");
             }
             setProductDialogOpen(false);
             fetchProducts(currentPage);
         } catch (err: any) {
             console.error("Lỗi khi lưu sản phẩm:", err);
-            alert(`Lỗi khi lưu sản phẩm: ${err.message || err}`);
+            addToast("error", `Lỗi khi lưu sản phẩm: ${err.message || err}`);
         } finally {
             setActionLoading(false);
         }
     };
 
-    const handleDeleteProduct = async (id: string) => {
-        if (!confirm("Bạn có chắc chắn muốn xóa mềm sản phẩm này không (chuyển sang trạng thái ẩn)?")) {
-            return;
-        }
+    const handleOpenDeleteConfirm = (id: string) => {
+        setProductToDelete(id);
+        setDeleteProductConfirmOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!productToDelete) return;
+        setDeleteLoading(true);
         try {
-            await deleteAdminProduct(id);
-            alert("Đã xóa sản phẩm thành công!");
+            await deleteAdminProduct(productToDelete);
+            addToast("success", "Đã xóa sản phẩm thành công!");
+            setDeleteProductConfirmOpen(false);
+            setProductToDelete(null);
             fetchProducts(currentPage);
         } catch (err: any) {
             console.error("Lỗi khi xóa sản phẩm:", err);
-            alert(`Lỗi khi xóa: ${err.message || err}`);
+            addToast("error", `Lỗi khi xóa: ${err.message || err}`);
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
     const handleImportCsv = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedCsvFile) {
-            alert("Vui lòng chọn một tệp CSV.");
+            addToast("error", "Vui lòng chọn một tệp CSV.");
             return;
         }
         setCsvUploading(true);
         try {
             await importAffiliateConversions(selectedCsvFile);
-            alert("Đã tải lên và nhập dữ liệu đối soát Shopee Affiliate thành công!");
+            addToast("success", "Đã tải lên và nhập dữ liệu đối soát Shopee Affiliate thành công!");
             setSelectedCsvFile(null);
         } catch (err: any) {
             console.error("Lỗi khi import CSV đối soát:", err);
-            alert(`Lỗi khi tải tệp CSV: ${err.message || err}`);
+            addToast("error", `Lỗi khi tải tệp CSV: ${err.message || err}`);
         } finally {
             setCsvUploading(false);
         }
@@ -301,9 +358,10 @@ export function AffiliateManagement() {
                 notes: `Cập nhật trạng thái đối tác sang ${newStatus} bởi Admin.`
             });
             setBrands(prev => prev.map(b => b.brandId === brandId ? { ...b, status: newStatus } : b));
+            addToast("success", `Cập nhật trạng thái đối tác sang ${newStatus} thành công!`);
         } catch (err: any) {
             console.error("Lỗi khi cập nhật trạng thái đối tác thương hiệu:", err);
-            alert(`Lỗi khi cập nhật trạng thái đối tác thương hiệu: ${err.message || err}`);
+            addToast("error", `Lỗi khi cập nhật trạng thái đối tác thương hiệu: ${err.message || err}`);
         }
     };
 
@@ -329,7 +387,7 @@ export function AffiliateManagement() {
                     : b
             ));
             
-            alert(`Đã nạp ${amt.toLocaleString("vi-VN")} đ vào tài khoản quảng cáo thành công!`);
+            addToast("success", `Đã nạp ${amt.toLocaleString("vi-VN")} đ vào tài khoản quảng cáo thành công!`);
             setCreditModalOpen(false);
             setSelectedBrand(null);
             setDepositAmount("");
@@ -374,10 +432,11 @@ export function AffiliateManagement() {
                 isTrending: nextIsTrending,
                 isActive: nextIsActive
             });
+            addToast("success", "Đã cập nhật trạng thái sản phẩm!");
             fetchProducts(currentPage);
         } catch (err: any) {
             console.error("Lỗi khi đổi trạng thái sản phẩm:", err);
-            alert(`Lỗi khi đổi trạng thái: ${err.message || err}`);
+            addToast("error", `Lỗi khi đổi trạng thái: ${err.message || err}`);
         }
     };
 
@@ -419,6 +478,7 @@ export function AffiliateManagement() {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins">
+            <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-[#4a3728]">Quản lý Sản phẩm Affiliate</h2>
@@ -631,7 +691,7 @@ export function AffiliateManagement() {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                        onClick={() => handleDeleteProduct(product.id)}
+                                                        onClick={() => handleOpenDeleteConfirm(product.id)}
                                                         title="Xóa sản phẩm"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -1291,21 +1351,42 @@ export function AffiliateManagement() {
                             {!editingProduct && (
                                 <>
                                     <div className="space-y-1.5">
-                                        <Label>Shopee Product ID (Tùy chọn)</Label>
+                                        <div className="flex items-center justify-between">
+                                            <Label>Shopee Product ID *</Label>
+                                        </div>
                                         <Input
                                             placeholder="Ví dụ: 123456789"
                                             value={formShopeeProductId}
                                             onChange={(e) => setFormShopeeProductId(e.target.value)}
+                                            required
                                         />
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <Label>Shopee Shop ID (Tùy chọn)</Label>
+                                        <div className="flex items-center justify-between">
+                                            <Label>Shopee Shop ID (Tùy chọn)</Label>
+                                        </div>
                                         <Input
                                             placeholder="Ví dụ: 987654321"
                                             value={formShopeeShopId}
                                             onChange={(e) => setFormShopeeShopId(e.target.value)}
                                         />
+                                    </div>
+
+                                    <div className="col-span-2 flex justify-end">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 text-xs border-[#4a3728]/35 text-[#4a3728] hover:bg-[#4a3728]/5 flex items-center gap-1.5"
+                                            onClick={() => {
+                                                setFormShopeeProductId(generateRandomId(11));
+                                                setFormShopeeShopId(generateRandomId(9));
+                                            }}
+                                        >
+                                            <RefreshCw className="w-3.5 h-3.5" />
+                                            Tự sinh cả 2 mã ID
+                                        </Button>
                                     </div>
                                 </>
                             )}
@@ -1347,6 +1428,49 @@ export function AffiliateManagement() {
                             </Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Xác nhận xóa mềm sản phẩm */}
+            <Dialog open={deleteProductConfirmOpen} onOpenChange={setDeleteProductConfirmOpen}>
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-650 text-red-650 flex items-center gap-2 font-bold text-lg text-red-600">
+                            <Trash2 className="w-5 h-5 shrink-0 text-red-500" /> Xác nhận xóa sản phẩm
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground mt-1">
+                            Bạn có chắc chắn muốn xóa mềm sản phẩm này không? Sản phẩm sẽ chuyển sang trạng thái ẩn (Hidden) và không hiển thị với người dùng.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="border-muted hover:bg-muted/10 text-xs h-9"
+                            onClick={() => {
+                                setDeleteProductConfirmOpen(false);
+                                setProductToDelete(null);
+                            }}
+                            disabled={deleteLoading}
+                        >
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleConfirmDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white text-xs h-9"
+                            disabled={deleteLoading}
+                        >
+                            {deleteLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                "Xác nhận xóa"
+                            )}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>
