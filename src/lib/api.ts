@@ -100,20 +100,42 @@ async function request<T>(
         headers: hdrs,
     });
 
-    if (res.status === 401 && !path.includes("/api/auth/refresh-token") && !path.includes("/api/auth/login")) {
-        console.debug("[API] 401 Unauthorized detected. Trying to refresh token...");
-        const newToken = await getOrRefreshPromise();
-        if (newToken) {
-            hdrs.set("Authorization", `Bearer ${newToken}`);
-            console.debug("[API] Retrying original request with new token...");
-            res = await fetch(`${BASE_URL}${path}`, {
-                ...options,
-                headers: hdrs,
-            });
-        } else {
-            console.warn("[API] Token refresh unsuccessful, redirecting to login...");
+    if (res.status === 401) {
+        if (path.includes("/api/auth/login")) {
+            // Nhập sai tài khoản/mật khẩu, trả về lỗi bình thường để Form đăng nhập hiển thị lỗi
+        } else if (path.includes("/api/auth/refresh-token")) {
+            // Khi chính API refresh token trả về 401 (tài khoản đã bị khoá hoặc refresh token hết hạn)
+            clearToken();
             if (typeof window !== "undefined") {
+                alert("Tài khoản của bạn đã bị vô hiệu hoá hoặc phiên đăng nhập đã hết hạn!");
                 window.location.href = "/";
+            }
+        } else {
+            console.debug("[API] 401 Unauthorized detected. Trying to refresh token...");
+            const newToken = await getOrRefreshPromise();
+            if (newToken) {
+                hdrs.set("Authorization", `Bearer ${newToken}`);
+                console.debug("[API] Retrying original request with new token...");
+                res = await fetch(`${BASE_URL}${path}`, {
+                    ...options,
+                    headers: hdrs,
+                });
+                
+                // Nếu sau khi thử lại bằng token mới vẫn bị 401 (ví dụ vừa bị ban/thu hồi quyền)
+                if (res.status === 401) {
+                    clearToken();
+                    if (typeof window !== "undefined") {
+                        alert("Tài khoản của bạn đã bị vô hiệu hoá hoặc phiên đăng nhập đã hết hạn!");
+                        window.location.href = "/";
+                    }
+                }
+            } else {
+                console.warn("[API] Token refresh unsuccessful, redirecting to login...");
+                clearToken();
+                if (typeof window !== "undefined") {
+                    alert("Tài khoản của bạn đã bị vô hiệu hoá hoặc phiên đăng nhập đã hết hạn!");
+                    window.location.href = "/";
+                }
             }
         }
     }
