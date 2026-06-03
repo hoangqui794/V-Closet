@@ -697,6 +697,20 @@ export async function changePassword(payload: ChangePasswordPayload): Promise<st
 
 // ─── Admin Campaigns API ──────────────────────────────────────────────────────
 
+export interface CampaignMetrics {
+    activeCampaignsCount: number;
+    totalCampaignsCount: number;
+    totalDailyBudget: number;
+    totalSpent: number;
+    totalImpressions: number;
+    totalClicks: number;
+    overallCtr: number;
+}
+
+export async function getAdminCampaignMetrics(): Promise<CampaignMetrics> {
+    return request<CampaignMetrics>("/api/admin/campaigns/metrics");
+}
+
 export interface SponsoredCampaign {
     campaignId: string;
     brandName: string;
@@ -721,6 +735,79 @@ export async function stopAdminCampaign(campaignId: string): Promise<{ message: 
     return request<{ message: string }>(`/api/admin/campaigns/${campaignId}/stop`, {
         method: "POST"
     });
+}
+
+export async function resumeAdminCampaign(campaignId: string): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/campaigns/${campaignId}/resume`, {
+        method: "POST"
+    });
+}
+
+export interface AdjustCampaignPayload {
+    dailyBudget: number;
+    displayRank: number;
+}
+
+export async function adjustAdminCampaign(campaignId: string, payload: AdjustCampaignPayload): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/campaigns/${campaignId}/adjust`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}
+
+export interface SearchCampaignsParams {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    isActive?: boolean;
+}
+
+export interface PaginatedCampaigns {
+    campaigns: SponsoredCampaign[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export async function searchAdminCampaigns(params: SearchCampaignsParams = {}): Promise<PaginatedCampaigns> {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+    if (params.search) query.set("search", params.search);
+    if (params.isActive !== undefined) query.set("isActive", String(params.isActive));
+    return request<PaginatedCampaigns>(`/api/admin/campaigns/search?${query.toString()}`);
+}
+
+export async function deleteAdminCampaign(campaignId: string): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/campaigns/${campaignId}`, {
+        method: "DELETE",
+    });
+}
+
+export async function exportAdminCampaigns(): Promise<void> {
+    const token = getToken();
+    const res = await fetch(`${BASE_URL}/api/admin/campaigns/export`, {
+        headers: {
+            "Accept": "*/*",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
+    });
+    if (!res.ok) throw new Error(`Xuất báo cáo thất bại (HTTP ${res.status})`);
+
+    // Lấy tên file từ header Content-Disposition nếu có
+    const disposition = res.headers.get("content-disposition") || "";
+    const match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^"';\n]+)/i);
+    const filename = match ? decodeURIComponent(match[1]) : "campaigns-report.csv";
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
 }
 
 // ─── Admin Permissions API ───────────────────────────────────────────────────

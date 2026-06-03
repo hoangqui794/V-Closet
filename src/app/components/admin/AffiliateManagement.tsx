@@ -35,10 +35,10 @@ import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../ui/dialog";
-import { 
-    getAdminBrands, 
-    BrandPartner, 
-    updateBrandStatus, 
+import {
+    getAdminBrands,
+    BrandPartner,
+    updateBrandStatus,
     depositBrandCredit,
     getAdminProducts,
     createAdminProduct,
@@ -74,7 +74,7 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
 
 export function AffiliateManagement() {
     const [activeTab, setActiveTab] = useState<"products" | "crawler" | "brands">("products");
-    
+
     // Toast
     const [toasts, setToasts] = useState<Toast[]>([]);
     const addToast = (type: Toast["type"], message: string) => {
@@ -82,12 +82,12 @@ export function AffiliateManagement() {
         setToasts(prev => [...prev, { id, type, message }]);
         setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
     };
-    
+
     // States cho Delete Confirmation Dialog
     const [deleteProductConfirmOpen, setDeleteProductConfirmOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
-    
+
     // States cho Affiliate Products (API real)
     const [products, setProducts] = useState<AffiliateProduct[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(false);
@@ -119,7 +119,7 @@ export function AffiliateManagement() {
     // CSV Import states
     const [selectedCsvFile, setSelectedCsvFile] = useState<File | null>(null);
     const [csvUploading, setCsvUploading] = useState(false);
-    
+
     // States cho Brand Partner
     const [brands, setBrands] = useState<BrandPartner[]>([]);
     const [brandsLoading, setBrandsLoading] = useState(false);
@@ -380,13 +380,13 @@ export function AffiliateManagement() {
                 amount: amt,
                 description: depositDesc || undefined
             });
-            
-            setBrands(prev => prev.map(b => 
-                b.brandId === selectedBrand.brandId 
-                    ? { ...b, creditBalance: b.creditBalance + amt } 
+
+            setBrands(prev => prev.map(b =>
+                b.brandId === selectedBrand.brandId
+                    ? { ...b, creditBalance: b.creditBalance + amt }
                     : b
             ));
-            
+
             addToast("success", `Đã nạp ${amt.toLocaleString("vi-VN")} đ vào tài khoản quảng cáo thành công!`);
             setCreditModalOpen(false);
             setSelectedBrand(null);
@@ -399,7 +399,7 @@ export function AffiliateManagement() {
             setDepositLoading(false);
         }
     };
-    
+
     // States cho Crawler (Mock)
     const [keywords, setKeywords] = useState(["váy dạ hội", "áo tweed nữ", "baby tee hè", "jeans cạp cao"]);
     const [newKeyword, setNewKeyword] = useState("");
@@ -413,22 +413,18 @@ export function AffiliateManagement() {
         "System: Lưu thành công 12 sản phẩm mới vào cơ sở dữ liệu."
     ]);
 
-    const handleToggleStatus = async (id: string, currentIsTrending: boolean, currentIsActive: boolean) => {
+    const handleToggleStatus = async (product: AffiliateProduct, newStatus: "pinned" | "public" | "hidden") => {
+        const nextIsTrending = newStatus === "pinned";
+        const nextIsActive = newStatus !== "hidden";
         try {
-            let nextIsTrending = currentIsTrending;
-            let nextIsActive = currentIsActive;
-
-            // Cycle: Public -> Pinned -> Hidden -> Public
-            if (currentIsActive && !currentIsTrending) {
-                nextIsTrending = true; // Pin it
-            } else if (currentIsActive && currentIsTrending) {
-                nextIsTrending = false;
-                nextIsActive = false; // Hide it
-            } else {
-                nextIsActive = true; // Make it public
-            }
-
-            await updateAdminProduct(id, {
+            await updateAdminProduct(product.id, {
+                name: product.name || "",
+                imageUrl: product.imageUrl || "",
+                affiliateLink: product.affiliateLink || "",
+                price: product.price,
+                category: product.category,
+                description: product.description || null,
+                originalPrice: product.originalPrice || null,
                 isTrending: nextIsTrending,
                 isActive: nextIsActive
             });
@@ -454,7 +450,7 @@ export function AffiliateManagement() {
     const handleStartCrawl = () => {
         setIsCrawling(true);
         setCrawlLog(prev => [...prev, `System: Admin kích hoạt cào sản phẩm thủ công vào lúc ${new Date().toLocaleTimeString()}.`]);
-        
+
         setTimeout(() => {
             setIsCrawling(false);
             setCrawlLog(prev => [
@@ -469,10 +465,10 @@ export function AffiliateManagement() {
     };
 
     const filteredProducts = products.filter(product => {
-        const matchesStatus = statusFilter === "all" || 
-                              (statusFilter === "pinned" && product.isTrending) ||
-                              (statusFilter === "public" && product.isActive && !product.isTrending) ||
-                              (statusFilter === "hidden" && !product.isActive);
+        const matchesStatus = statusFilter === "all" ||
+            (statusFilter === "pinned" && product.isTrending) ||
+            (statusFilter === "public" && product.isActive && !product.isTrending) ||
+            (statusFilter === "hidden" && !product.isActive);
         return matchesStatus;
     });
 
@@ -497,31 +493,28 @@ export function AffiliateManagement() {
             <div className="flex border-b border-muted">
                 <button
                     onClick={() => setActiveTab("products")}
-                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
-                        activeTab === "products"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
-                    }`}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${activeTab === "products"
+                        ? "border-[#4a3728] text-[#4a3728]"
+                        : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                        }`}
                 >
                     Danh sách sản phẩm Shopee ({totalCount})
                 </button>
                 <button
                     onClick={() => setActiveTab("crawler")}
-                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
-                        activeTab === "crawler"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
-                    }`}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${activeTab === "crawler"
+                        ? "border-[#4a3728] text-[#4a3728]"
+                        : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                        }`}
                 >
                     Cấu hình Crawler & Đối soát
                 </button>
                 <button
                     onClick={() => setActiveTab("brands")}
-                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
-                        activeTab === "brands"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
-                    }`}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${activeTab === "brands"
+                        ? "border-[#4a3728] text-[#4a3728]"
+                        : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                        }`}
                 >
                     Đối tác Brand Partner
                 </button>
@@ -654,30 +647,39 @@ export function AffiliateManagement() {
                                                 {product.ctr ?? 0}%
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <Badge
-                                                    className={`font-normal ${
-                                                        product.isTrending
-                                                            ? "bg-[#4a3728] text-white hover:bg-[#3d2d21]"
-                                                            : product.isActive
-                                                            ? "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
-                                                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                                                    }`}
+                                                <Select
+                                                    value={product.isTrending ? "pinned" : product.isActive ? "public" : "hidden"}
+                                                    onValueChange={(val) => handleToggleStatus(product, val as "pinned" | "public" | "hidden")}
                                                 >
-                                                    {product.isTrending && <Pin className="w-2.5 h-2.5 mr-1 inline" />}
-                                                    {product.isTrending ? "Pinned" : product.isActive ? "Public" : "Hidden"}
-                                                </Badge>
+                                                    <SelectTrigger className={`h-7 w-24 text-xs border font-medium mx-auto ${product.isTrending
+                                                        ? "bg-[#4a3728] text-white border-[#4a3728] hover:bg-[#3d2d21]"
+                                                        : product.isActive
+                                                            ? "bg-green-50 text-green-700 border-green-400 hover:bg-green-100"
+                                                            : "bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200"
+                                                        }`}>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-card">
+                                                        <SelectItem value="pinned" className="text-xs">
+                                                            <span className="flex items-center gap-1.5">
+                                                                <Pin className="w-3 h-3" />Pin
+                                                            </span>
+                                                        </SelectItem>
+                                                        <SelectItem value="public" className="text-xs">
+                                                            <span className="flex items-center gap-1.5">
+                                                                <Eye className="w-3 h-3" />Public
+                                                            </span>
+                                                        </SelectItem>
+                                                        <SelectItem value="hidden" className="text-xs">
+                                                            <span className="flex items-center gap-1.5">
+                                                                <ArrowUpRight className="w-3 h-3 opacity-40" />Hidden
+                                                            </span>
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex items-center justify-end gap-1.5">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                                        onClick={() => handleToggleStatus(product.id, product.isTrending, product.isActive)}
-                                                        title="Đổi trạng thái Ghim/Công khai/Ẩn"
-                                                    >
-                                                        <Pin className="h-4 w-4" />
-                                                    </Button>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -1040,13 +1042,12 @@ export function AffiliateManagement() {
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Badge
-                                                    className={`font-medium border text-xs px-2.5 py-1 ${
-                                                        brand.status === "Verified"
-                                                            ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100/70"
-                                                            : brand.status === "Pending"
+                                                    className={`font-medium border text-xs px-2.5 py-1 ${brand.status === "Verified"
+                                                        ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100/70"
+                                                        : brand.status === "Pending"
                                                             ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100/70"
                                                             : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100/70"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {brand.status === "Verified" && <Check className="w-3 h-3 mr-1 inline stroke-[2.5]" />}
                                                     {brand.status}
@@ -1233,7 +1234,7 @@ export function AffiliateManagement() {
                                     required
                                 />
                             </div>
-                            
+
                             <div className="space-y-1.5">
                                 <Label>Thể loại *</Label>
                                 <Select value={formCategory} onValueChange={setFormCategory}>
@@ -1296,8 +1297,8 @@ export function AffiliateManagement() {
                                             type="button"
                                             onClick={() => setFormImageUrl("")}
                                             className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-black"
-                                             title="Xóa ảnh"
-                                         >
+                                            title="Xóa ảnh"
+                                        >
 
                                             <X className="w-3 h-3" />
                                         </button>
@@ -1338,15 +1339,15 @@ export function AffiliateManagement() {
                                 />
                             </div>
 
-                             <div className="space-y-1.5 col-span-2">
-                                 <Label>Mô tả sản phẩm</Label>
-                                 <textarea
-                                     placeholder="Nhập mô tả sản phẩm..."
-                                     value={formDescription}
-                                     onChange={(e) => setFormDescription(e.target.value)}
-                                     className="flex min-h-[80px] w-full rounded-md border border-[#4a3728]/25 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4a3728]/35 disabled:cursor-not-allowed disabled:opacity-50"
-                                 />
-                             </div>
+                            <div className="space-y-1.5 col-span-2">
+                                <Label>Mô tả sản phẩm</Label>
+                                <textarea
+                                    placeholder="Nhập mô tả sản phẩm..."
+                                    value={formDescription}
+                                    onChange={(e) => setFormDescription(e.target.value)}
+                                    className="flex min-h-[80px] w-full rounded-md border border-[#4a3728]/25 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4a3728]/35 disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                            </div>
 
                             {!editingProduct && (
                                 <>
