@@ -44,7 +44,11 @@ import {
     createAdminSubscriptionPlan,
     updateAdminSubscriptionPlan,
     deleteAdminSubscriptionPlan,
-    SubscriptionPlanResponse
+    SubscriptionPlanResponse,
+    getAdminPremiumSubscriptions,
+    revokeAdminPremiumSubscription,
+    PremiumSubscriptionListItem,
+    ManualPaymentListItem
 } from "../../../lib/api";
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
@@ -85,17 +89,35 @@ const initialCoupons = [
 ];
 
 export function SubscriptionManagement() {
-    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons">("limits");
-    const [subscriptions] = useState(initialSubscriptions);
+    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons" | "manual-payments">("limits");
     const [coupons, setCoupons] = useState(initialCoupons);
+
+    // States quản lý gói Premium của người dùng (billing tab)
+    const [premiumSubscriptions, setPremiumSubscriptions] = useState<PremiumSubscriptionListItem[]>([]);
+    const [loadingSubscriptions, setLoadingSubscriptions] = useState(false);
+    const [totalSubscriptions, setTotalSubscriptions] = useState(0);
+    const [subPage, setSubPage] = useState(1);
+    const [subPageSize] = useState(10);
+    const [subSearch, setSubSearch] = useState("");
+    const [subStatusFilter, setSubStatusFilter] = useState<string>("all");
+    const [subPlanTypeFilter, setSubPlanTypeFilter] = useState<string>("all");
+    
+    // States cho hủy/thu hồi gói Premium
+    const [revokeConfirmOpen, setRevokeConfirmOpen] = useState(false);
+    const [subToRevoke, setSubToRevoke] = useState<PremiumSubscriptionListItem | null>(null);
+    const [revokeNote, setRevokeNote] = useState("");
+    const [revokeLoading, setRevokeLoading] = useState(false);
+
+    // States cho Duyệt chuyển khoản thủ công
+    const [pendingPayments, setPendingPayments] = useState<ManualPaymentListItem[]>([]);
     
     // Toast
     const [toasts, setToasts] = useState<Toast[]>([]);
-    const addToast = (type: Toast["type"], message: string) => {
+    const addToast = useCallback((type: Toast["type"], message: string) => {
         const id = ++toastId;
         setToasts(prev => [...prev, { id, type, message }]);
         setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
-    };
+    }, []);
 
     // States cho Confirm Delete Plan Modal
     const [deletePlanConfirmOpen, setDeletePlanConfirmOpen] = useState(false);
@@ -143,11 +165,59 @@ export function SubscriptionManagement() {
         }
     }, []);
 
+    const loadPremiumSubscriptions = useCallback(async () => {
+        setLoadingSubscriptions(true);
+        try {
+            const isActive = subStatusFilter === "all" ? undefined : (subStatusFilter === "active");
+            const planType = subPlanTypeFilter === "all" ? undefined : subPlanTypeFilter;
+            
+            const response = await getAdminPremiumSubscriptions({
+                page: subPage,
+                pageSize: subPageSize,
+                search: subSearch || undefined,
+                isActive,
+                planType
+            });
+            
+            setPremiumSubscriptions(response?.subscriptions || []);
+            setTotalSubscriptions(response?.totalCount || 0);
+        } catch (err: any) {
+            console.error("Failed to load premium subscriptions:", err);
+            addToast("error", err.message || "Không thể tải danh sách tài khoản đăng ký gói");
+        } finally {
+            setLoadingSubscriptions(false);
+        }
+    }, [subPage, subPageSize, subSearch, subStatusFilter, subPlanTypeFilter, addToast]);
+
+    const handleRevokePremium = async () => {
+        if (!subToRevoke) return;
+        setRevokeLoading(true);
+        try {
+            const res = await revokeAdminPremiumSubscription(subToRevoke.subscriptionId, revokeNote);
+            if (res.success) {
+                addToast("success", `Thu hồi gói Premium của người dùng ${subToRevoke.displayName} thành công!`);
+                setRevokeConfirmOpen(false);
+                setRevokeNote("");
+                setSubToRevoke(null);
+                loadPremiumSubscriptions();
+            } else {
+                addToast("error", res.message || "Không thể thu hồi gói Premium.");
+            }
+        } catch (err: any) {
+            console.error("Revoke error:", err);
+            addToast("error", err.message || "Lỗi thu hồi gói Premium.");
+        } finally {
+            setRevokeLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (activeTab === "limits") {
             loadPlans();
+        } else if (activeTab === "billing") {
+            loadPremiumSubscriptions();
         }
-    }, [activeTab, loadPlans]);
+    }, [activeTab, loadPlans, loadPremiumSubscriptions]);
 
     const handleOpenCreatePlan = () => {
         setPlanForm({
@@ -331,87 +401,188 @@ export function SubscriptionManagement() {
                     <div className="grid gap-6 md:grid-cols-3">
                         <Card className="shadow-sm border-muted">
                             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium">Doanh thu tháng này</CardTitle>
-                                <DollarSign className="w-4 h-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">$4,231.80</div>
-                                <div className="flex items-center mt-1 text-xs text-green-500">
-                                    <ArrowUpRight className="w-3 h-3 mr-1" />
-                                    +20.1% so với tháng trước
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-sm border-muted">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium">Đăng ký mới (30 ngày)</CardTitle>
+                                <CardTitle className="text-sm font-medium">Người dùng Premium</CardTitle>
                                 <CreditCard className="w-4 h-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">154</div>
-                                <div className="flex items-center mt-1 text-xs text-green-500">
-                                    <ArrowUpRight className="w-3 h-3 mr-1" />
-                                    +12.5% so với tháng trước
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-sm border-muted">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                                <CardTitle className="text-sm font-medium">Tỷ lệ hủy (Churn rate)</CardTitle>
-                                <Clock className="w-4 h-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">2.4%</div>
-                                <div className="flex items-center mt-1 text-xs text-red-500">
-                                    <ArrowDownRight className="w-3 h-3 mr-1" />
-                                    -0.5% so với tháng trước
+                                <div className="text-2xl font-bold">{totalSubscriptions}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                    Tổng cộng bản ghi gói đăng ký Premium
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
 
+                    {/* Bộ lọc & Tìm kiếm */}
+                    <div className="flex flex-col md:flex-row gap-4 justify-between bg-card p-4 rounded-xl border border-muted shadow-sm">
+                        <div className="flex flex-1 gap-2 max-w-md">
+                            <Input
+                                placeholder="Tìm kiếm theo Email, Tên hiển thị..."
+                                value={subSearch}
+                                onChange={(e) => {
+                                    setSubSearch(e.target.value);
+                                    setSubPage(1);
+                                }}
+                                className="flex-1"
+                            />
+                            <Button 
+                                onClick={loadPremiumSubscriptions}
+                                className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                            >
+                                Tìm
+                            </Button>
+                        </div>
+                        <div className="flex gap-3">
+                            <Select
+                                value={subStatusFilter}
+                                onValueChange={(val) => {
+                                    setSubStatusFilter(val);
+                                    setSubPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Trạng thái" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                                    <SelectItem value="active">Đang hoạt động</SelectItem>
+                                    <SelectItem value="inactive">Đã hết hạn/Hủy</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select
+                                value={subPlanTypeFilter}
+                                onValueChange={(val) => {
+                                    setSubPlanTypeFilter(val);
+                                    setSubPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Loại gói" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tất cả loại gói</SelectItem>
+                                    <SelectItem value="monthly">Premium Tháng</SelectItem>
+                                    <SelectItem value="yearly">Premium Năm</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
                     {/* Danh sách giao dịch */}
                     <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
-                        <Table>
-                            <TableHeader className="bg-muted/50">
-                                <TableRow>
-                                    <TableHead>Khách hàng</TableHead>
-                                    <TableHead>Gói dịch vụ</TableHead>
-                                    <TableHead>Tổng cộng</TableHead>
-                                    <TableHead>Trạng thái</TableHead>
-                                    <TableHead>Lần gia hạn tới</TableHead>
-                                    <TableHead className="text-right">Hành động</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {subscriptions.map((sub) => (
-                                    <TableRow key={sub.id} className="hover:bg-muted/30 transition-colors">
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${sub.user}`} />
-                                                    <AvatarFallback>{sub.user.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <span className="font-medium text-sm text-foreground">{sub.user}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-sm">{sub.plan}</TableCell>
-                                        <TableCell className="text-sm font-semibold">{sub.amount}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={sub.status === "Active" ? "default" : (sub.status === "Canceled" ? "secondary" : "destructive")} className="font-normal text-[10px]">
-                                                {sub.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-sm text-muted-foreground font-mono">{sub.nextBilling}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                        {loadingSubscriptions ? (
+                            <div className="flex justify-center items-center py-12">
+                                <Loader2 className="h-8 w-8 animate-spin text-[#4a3728]" />
+                                <span className="ml-2 text-sm text-muted-foreground">Đang tải danh sách...</span>
+                            </div>
+                        ) : premiumSubscriptions.length === 0 ? (
+                            <div className="text-center py-12 text-muted-foreground text-sm">
+                                Không tìm thấy dữ liệu đăng ký nào phù hợp.
+                            </div>
+                        ) : (
+                            <>
+                                <Table>
+                                    <TableHeader className="bg-muted/50">
+                                        <TableRow>
+                                            <TableHead>Khách hàng</TableHead>
+                                            <TableHead>Gói dịch vụ</TableHead>
+                                            <TableHead>Giá gói</TableHead>
+                                            <TableHead>Bắt đầu / Hết hạn</TableHead>
+                                            <TableHead>Cổng / Ref</TableHead>
+                                            <TableHead>Trạng thái</TableHead>
+                                            <TableHead className="text-right">Hành động</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {premiumSubscriptions.map((sub) => (
+                                            <TableRow key={sub.subscriptionId} className="hover:bg-muted/30 transition-colors">
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="h-8 w-8">
+                                                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${sub.email}`} />
+                                                            <AvatarFallback>{sub.displayName.charAt(0)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <div className="font-medium text-sm text-foreground">{sub.displayName}</div>
+                                                            <div className="text-xs text-muted-foreground font-mono">{sub.email}</div>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-sm">
+                                                    <div>
+                                                        <span className="font-semibold">{sub.planName}</span>
+                                                        <span className="text-xs text-muted-foreground block">Gói {sub.planType === "yearly" ? "Năm" : "Tháng"}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-sm font-semibold">
+                                                    {sub.pricePaid.toLocaleString("vi-VN")} {sub.currency}
+                                                </TableCell>
+                                                <TableCell className="text-sm font-mono">
+                                                    <div className="text-xs">
+                                                        <span className="text-green-600 font-semibold">Từ:</span> {new Date(sub.startedAt).toLocaleDateString("vi-VN")}
+                                                    </div>
+                                                    <div className="text-xs">
+                                                        <span className="text-red-500 font-semibold">Đến:</span> {new Date(sub.expiresAt).toLocaleDateString("vi-VN")}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-sm font-mono">
+                                                    <div>{sub.paymentMethod.toUpperCase()}</div>
+                                                    <div className="text-[10px] text-muted-foreground truncate max-w-[120px]" title={sub.paymentRef}>{sub.paymentRef}</div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge variant={sub.isActive ? "default" : "secondary"} className="font-normal text-[10px]">
+                                                        {sub.isActive ? "Active" : "Canceled"}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {sub.isActive ? (
+                                                        <Button 
+                                                            variant="destructive" 
+                                                            size="sm"
+                                                            className="text-xs h-8"
+                                                            onClick={() => {
+                                                                setSubToRevoke(sub);
+                                                                setRevokeConfirmOpen(true);
+                                                            }}
+                                                        >
+                                                            Thu hồi
+                                                        </Button>
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground">Không có</span>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+
+                                {/* Phân trang */}
+                                <div className="flex justify-between items-center p-4 border-t border-muted">
+                                    <span className="text-xs text-muted-foreground">
+                                        Hiển thị {(subPage - 1) * subPageSize + 1} - {Math.min(subPage * subPageSize, totalSubscriptions)} trong {totalSubscriptions} bản ghi
+                                    </span>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={subPage === 1}
+                                            onClick={() => setSubPage(prev => prev - 1)}
+                                        >
+                                            Trước
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={subPage * subPageSize >= totalSubscriptions}
+                                            onClick={() => setSubPage(prev => prev + 1)}
+                                        >
+                                            Sau
+                                        </Button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
@@ -867,6 +1038,60 @@ export function SubscriptionManagement() {
                                 </>
                             ) : (
                                 "Xác nhận xóa"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Xác nhận Thu hồi Premium */}
+            <Dialog open={revokeConfirmOpen} onOpenChange={setRevokeConfirmOpen}>
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-600">
+                            <AlertCircle className="w-5 h-5 text-red-600" />
+                            Xác nhận thu hồi Premium
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground mt-1">
+                            Hành động này sẽ thu hồi (hủy) gói Premium của người dùng <strong>{subToRevoke?.displayName}</strong> ({subToRevoke?.email}).
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex flex-col gap-1.5 py-2">
+                        <Label htmlFor="revoke-reason">Lý do thu hồi (Ghi chú)</Label>
+                        <Input
+                            id="revoke-reason"
+                            placeholder="Nhập lý do thu hồi..."
+                            value={revokeNote}
+                            onChange={(e) => setRevokeNote(e.target.value)}
+                        />
+                    </div>
+                    <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="border-muted hover:bg-muted/10 text-xs h-9"
+                            onClick={() => {
+                                setRevokeConfirmOpen(false);
+                                setRevokeNote("");
+                                setSubToRevoke(null);
+                            }}
+                            disabled={revokeLoading}
+                        >
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleRevokePremium}
+                            className="bg-red-600 hover:bg-red-700 text-white text-xs h-9"
+                            disabled={revokeLoading}
+                        >
+                            {revokeLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Đang thu hồi...
+                                </>
+                            ) : (
+                                "Xác nhận thu hồi"
                             )}
                         </Button>
                     </DialogFooter>
