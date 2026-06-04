@@ -137,8 +137,7 @@ export function SubscriptionManagement() {
     const [newMaxUses, setNewMaxUses] = useState(100);
     const [newExpiry, setNewExpiry] = useState("2026-12-31");
 
-    // States cấu hình giới hạn tủ đồ
-    const [freeItemLimit, setFreeItemLimit] = useState(50);
+
 
     // States quản lý gói Premium thực tế từ Backend
     const [plans, setPlans] = useState<SubscriptionPlanResponse[]>([]);
@@ -871,46 +870,9 @@ export function SubscriptionManagement() {
 
             {/* TAB: QUẢN LÝ GÓI DỊCH VỤ PREMIUM */}
             {activeTab === "limits" && (
-                <div className="grid gap-6 md:grid-cols-3">
-                    {/* Cấu hình giới hạn tủ đồ Free */}
-                    <div className="md:col-span-1">
-                        <Card className="shadow-sm border-muted">
-                            <CardHeader>
-                                <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
-                                    <Sliders className="w-5 h-5" /> Giới hạn Tủ đồ Gói Free
-                                </CardTitle>
-                                <CardDescription>
-                                    Thiết lập số trang phục tối đa được tải lên cho tài khoản miễn phí để thúc đẩy chuyển đổi nâng cấp Premium.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Số vật phẩm tối đa</label>
-                                    <div className="flex gap-3">
-                                        <Input
-                                            type="number"
-                                            value={freeItemLimit}
-                                            onChange={(e) => setFreeItemLimit(Number(e.target.value))}
-                                            className="bg-background border-muted"
-                                        />
-                                        <Badge className="bg-orange-500 text-white border-none shrink-0 self-center py-2 px-3">
-                                            Mặc định: 50
-                                        </Badge>
-                                    </div>
-                                    <p className="text-[10px] text-muted-foreground mt-1">
-                                        Khi người dùng đạt giới hạn này, ứng dụng di động sẽ tự động gợi ý nâng cấp lên Premium.
-                                    </p>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="border-t border-muted bg-muted/10 p-4 flex justify-end">
-                                <Button className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">Lưu cấu hình</Button>
-                            </CardFooter>
-                        </Card>
-                    </div>
-
+                <div className="w-full">
                     {/* Danh sách các gói Premium thực tế */}
-                    <div className="md:col-span-2">
-                        <Card className="shadow-sm border-muted">
+                    <Card className="shadow-sm border-muted">
                             <CardHeader className="flex flex-row items-center justify-between pb-3">
                                 <div>
                                     <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
@@ -1011,7 +973,6 @@ export function SubscriptionManagement() {
                                 )}
                             </CardContent>
                         </Card>
-                    </div>
                 </div>
             )}
 

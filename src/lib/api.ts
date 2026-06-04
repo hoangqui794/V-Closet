@@ -1031,4 +1031,41 @@ export async function revokeAdminPremiumSubscription(
     });
 }
 
+// ─── Admin Subscription Tier Config APIs ─────────────────────────────────
+
+export interface TierConfigResponse {
+    tierName: string;
+    bgRemovalCredits: number;
+    tryOnCredits: number;
+    wardrobeItemLimit: number | null;
+    outfitLimit: number | null;
+    updatedAt: string;
+    updatedBy: string | null;
+}
+
+export interface UpdateTierConfigRequest {
+    bgRemovalCredits: number;
+    tryOnCredits: number;
+    wardrobeItemLimit: number | null;
+    outfitLimit: number | null;
+}
+
+export async function getAdminTierConfigs(): Promise<TierConfigResponse[]> {
+    return request<TierConfigResponse[]>("/api/admin/tier-config");
+}
+
+export async function getAdminTierConfig(tierName: string): Promise<TierConfigResponse> {
+    return request<TierConfigResponse>(`/api/admin/tier-config/${tierName}`);
+}
+
+export async function updateAdminTierConfig(
+    tierName: string,
+    payload: UpdateTierConfigRequest
+): Promise<TierConfigResponse> {
+    return request<TierConfigResponse>(`/api/admin/tier-config/${tierName}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}
+
 

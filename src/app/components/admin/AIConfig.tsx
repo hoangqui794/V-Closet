@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAdminTierConfigs, updateAdminTierConfig } from "@/lib/api";
 import {
     Sparkles,
     Cpu,
@@ -49,15 +50,52 @@ export function AIConfig() {
     const [photoKey, setPhotoKey] = useState("pr_live_45a7b8c9d0e1f2a3b4c5d6e7f8");
     const [fashnKey, setFashnKey] = useState("fashn_sk_90a1b2c3d4e5f6a7b8c9d0e1f2");
 
-    // Hạn ngạch (User Quotas)
-    const [freeUploadLimit, setFreeUploadLimit] = useState(50);
-    const [freeTryOnLimit, setFreeTryOnLimit] = useState(5);
-    const [premiumUploadLimit, setPremiumUploadLimit] = useState(1000);
-    const [premiumTryOnLimit, setPremiumTryOnLimit] = useState(100);
+    // Hạn ngạch (User Quotas) - Free Tier
+    const [freeWardrobeLimit, setFreeWardrobeLimit] = useState<number | "">("");
+    const [freeOutfitLimit, setFreeOutfitLimit] = useState<number | "">("");
+    const [freeBgCredits, setFreeBgCredits] = useState<number>(0);
+    const [freeTryOnCredits, setFreeTryOnCredits] = useState<number>(0);
+
+    // Hạn ngạch (User Quotas) - Premium Tier
+    const [premiumWardrobeLimit, setPremiumWardrobeLimit] = useState<number | "">("");
+    const [premiumOutfitLimit, setPremiumOutfitLimit] = useState<number | "">("");
+    const [premiumBgCredits, setPremiumBgCredits] = useState<number>(0);
+    const [premiumTryOnCredits, setPremiumTryOnCredits] = useState<number>(0);
 
     const [isSavingKeys, setIsSavingKeys] = useState(false);
     const [isSavingQuotas, setIsSavingQuotas] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+
+    // Fetch configurations on mount
+    useEffect(() => {
+        let isMounted = true;
+        async function fetchTierConfigs() {
+            try {
+                const configs = await getAdminTierConfigs();
+                if (!isMounted) return;
+                
+                const free = configs.find(c => c.tierName === "free");
+                if (free) {
+                    setFreeWardrobeLimit(free.wardrobeItemLimit ?? "");
+                    setFreeOutfitLimit(free.outfitLimit ?? "");
+                    setFreeBgCredits(free.bgRemovalCredits);
+                    setFreeTryOnCredits(free.tryOnCredits);
+                }
+                
+                const premium = configs.find(c => c.tierName === "premium");
+                if (premium) {
+                    setPremiumWardrobeLimit(premium.wardrobeItemLimit ?? "");
+                    setPremiumOutfitLimit(premium.outfitLimit ?? "");
+                    setPremiumBgCredits(premium.bgRemovalCredits);
+                    setPremiumTryOnCredits(premium.tryOnCredits);
+                }
+            } catch (err) {
+                console.error("Lỗi khi tải cấu hình hạn ngạch:", err);
+            }
+        }
+        fetchTierConfigs();
+        return () => { isMounted = false; };
+    }, []);
 
     const handleSaveKeys = () => {
         setIsSavingKeys(true);
@@ -67,12 +105,32 @@ export function AIConfig() {
         }, 1500);
     };
 
-    const handleSaveQuotas = () => {
+    const handleSaveQuotas = async () => {
         setIsSavingQuotas(true);
-        setTimeout(() => {
-            setIsSavingQuotas(false);
+        try {
+            // Save Free Tier
+            await updateAdminTierConfig("free", {
+                bgRemovalCredits: freeBgCredits,
+                tryOnCredits: freeTryOnCredits,
+                wardrobeItemLimit: freeWardrobeLimit === "" ? null : Number(freeWardrobeLimit),
+                outfitLimit: freeOutfitLimit === "" ? null : Number(freeOutfitLimit)
+            });
+
+            // Save Premium Tier
+            await updateAdminTierConfig("premium", {
+                bgRemovalCredits: premiumBgCredits,
+                tryOnCredits: premiumTryOnCredits,
+                wardrobeItemLimit: premiumWardrobeLimit === "" ? null : Number(premiumWardrobeLimit),
+                outfitLimit: premiumOutfitLimit === "" ? null : Number(premiumOutfitLimit)
+            });
+
             showToast("Đã cập nhật hạn ngạch người dùng thành công!");
-        }, 1500);
+        } catch (err: any) {
+            console.error("Lỗi khi cập nhật hạn ngạch:", err);
+            alert(err.message || "Đã xảy ra lỗi khi cập nhật hạn ngạch.");
+        } finally {
+            setIsSavingQuotas(false);
+        }
     };
 
     const showToast = (msg: string) => {
@@ -207,17 +265,37 @@ export function AIConfig() {
                                     <label className="text-[10px] font-semibold text-muted-foreground uppercase">Tủ đồ tối đa (Items)</label>
                                     <Input
                                         type="number"
-                                        value={freeUploadLimit}
-                                        onChange={(e) => setFreeUploadLimit(Number(e.target.value))}
+                                        placeholder="Không giới hạn"
+                                        value={freeWardrobeLimit}
+                                        onChange={(e) => setFreeWardrobeLimit(e.target.value === "" ? "" : Number(e.target.value))}
                                         className="bg-background border-muted h-9 text-sm"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">AI Try-On / tháng</label>
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">Phối đồ tối đa (Outfits)</label>
                                     <Input
                                         type="number"
-                                        value={freeTryOnLimit}
-                                        onChange={(e) => setFreeTryOnLimit(Number(e.target.value))}
+                                        placeholder="Không giới hạn"
+                                        value={freeOutfitLimit}
+                                        onChange={(e) => setFreeOutfitLimit(e.target.value === "" ? "" : Number(e.target.value))}
+                                        className="bg-background border-muted h-9 text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">Lượt tách nền (Credits)</label>
+                                    <Input
+                                        type="number"
+                                        value={freeBgCredits}
+                                        onChange={(e) => setFreeBgCredits(Number(e.target.value))}
+                                        className="bg-background border-muted h-9 text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">Lượt thử đồ AI (Credits)</label>
+                                    <Input
+                                        type="number"
+                                        value={freeTryOnCredits}
+                                        onChange={(e) => setFreeTryOnCredits(Number(e.target.value))}
                                         className="bg-background border-muted h-9 text-sm"
                                     />
                                 </div>
@@ -237,17 +315,37 @@ export function AIConfig() {
                                     <label className="text-[10px] font-semibold text-muted-foreground uppercase">Tủ đồ tối đa (Items)</label>
                                     <Input
                                         type="number"
-                                        value={premiumUploadLimit}
-                                        onChange={(e) => setPremiumUploadLimit(Number(e.target.value))}
+                                        placeholder="Không giới hạn"
+                                        value={premiumWardrobeLimit}
+                                        onChange={(e) => setPremiumWardrobeLimit(e.target.value === "" ? "" : Number(e.target.value))}
                                         className="bg-background border-muted h-9 text-sm"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">AI Try-On / tháng</label>
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">Phối đồ tối đa (Outfits)</label>
                                     <Input
                                         type="number"
-                                        value={premiumTryOnLimit}
-                                        onChange={(e) => setPremiumTryOnLimit(Number(e.target.value))}
+                                        placeholder="Không giới hạn"
+                                        value={premiumOutfitLimit}
+                                        onChange={(e) => setPremiumOutfitLimit(e.target.value === "" ? "" : Number(e.target.value))}
+                                        className="bg-background border-muted h-9 text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">Lượt tách nền (Credits)</label>
+                                    <Input
+                                        type="number"
+                                        value={premiumBgCredits}
+                                        onChange={(e) => setPremiumBgCredits(Number(e.target.value))}
+                                        className="bg-background border-muted h-9 text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase">Lượt thử đồ AI (Credits)</label>
+                                    <Input
+                                        type="number"
+                                        value={premiumTryOnCredits}
+                                        onChange={(e) => setPremiumTryOnCredits(Number(e.target.value))}
                                         className="bg-background border-muted h-9 text-sm"
                                     />
                                 </div>
