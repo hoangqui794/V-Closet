@@ -265,7 +265,7 @@ export function AdminLayout() {
                         <SidebarHeader className="h-20 flex items-center px-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 shrink-0 flex items-center justify-center">
-                                    <img src={imgLogoVcloset} alt="V-Closet Logo" className="w-full h-full object-contain" />
+                                    <img src={imgLogoVcloset} alt="V-Closet Logo" className="w-full h-full object-cover rounded-[22%]" />
                                 </div>
                                 <span className="font-bold text-xl tracking-tight text-[#4a3728] group-data-[collapsible=icon]:hidden">
                                     V-Closet Admin

@@ -135,7 +135,7 @@ export function AdminLoginPage() {
                         <img
                             src={imgLogoVcloset}
                             alt="V-Closet Logo"
-                            className="w-full h-full object-contain drop-shadow-[0_8px_16px_rgba(74,55,40,0.1)]"
+                            className="w-full h-full object-cover rounded-[22%] drop-shadow-[0_8px_16px_rgba(74,55,40,0.1)]"
                         />
                     </motion.div>
                     <h2 className="text-2xl font-bold text-[#4a3728] tracking-tight">Cổng Quản Trị V-Closet</h2>
