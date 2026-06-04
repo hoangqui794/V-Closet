@@ -731,6 +731,22 @@ export async function getAdminCampaigns(): Promise<SponsoredCampaign[]> {
     return request<SponsoredCampaign[]>("/api/admin/campaigns");
 }
 
+export interface CreateCampaignPayload {
+    brandId: string;
+    productId: string;
+    displayRank: number;
+    dailyBudget: number;
+    startAt: string;
+    endAt: string;
+}
+
+export async function createAdminCampaign(payload: CreateCampaignPayload): Promise<{ message: string }> {
+    return request<{ message: string }>("/api/admin/campaigns", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
 export async function stopAdminCampaign(campaignId: string): Promise<{ message: string }> {
     return request<{ message: string }>(`/api/admin/campaigns/${campaignId}/stop`, {
         method: "POST"
@@ -935,6 +951,39 @@ export interface DashboardMetrics {
 
 export async function getAdminDashboardMetrics(): Promise<DashboardMetrics> {
     return request<DashboardMetrics>("/api/admin/dashboard/metrics");
+}
+
+export interface RevenueChartItem {
+    timeLabel: string;
+    revenue: number;
+    affiliateCommission: number;
+}
+
+export async function getAdminRevenueChart(period: string = "month"): Promise<RevenueChartItem[]> {
+    return request<RevenueChartItem[]>(`/api/admin/dashboard/revenue-chart?period=${period}`);
+}
+
+export interface RecentSignupItem {
+    userId: string;
+    displayName: string;
+    email: string;
+    avatarUrl: string | null;
+    role: string;
+    createdAt: string;
+}
+
+export async function getAdminRecentSignups(limit: number = 5): Promise<RecentSignupItem[]> {
+    return request<RecentSignupItem[]>(`/api/admin/dashboard/recent-signups?limit=${limit}`);
+}
+
+export interface SystemAlertItem {
+    type: string; // "success" | "warning" | "info" | "error"
+    message: string;
+    createdAt: string;
+}
+
+export async function getAdminSystemAlerts(): Promise<SystemAlertItem[]> {
+    return request<SystemAlertItem[]>("/api/admin/dashboard/system-alerts");
 }
 
 // ─── Admin Manual Payments & Premium Subscriptions APIs ─────────────────────────────────

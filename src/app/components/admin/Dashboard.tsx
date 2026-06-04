@@ -27,62 +27,43 @@ import {
     XAxis,
     YAxis,
     Tooltip as RechartsTooltip,
-    Area,
-    AreaChart,
-    CartesianGrid
+    CartesianGrid,
+    Line,
+    LineChart
 } from "recharts";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useState, useEffect } from "react";
-import { getAdminUsers, getAdminDashboardMetrics, AdminUser, DashboardMetrics } from "@/lib/api";
+import {
+    getAdminDashboardMetrics, getAdminRevenueChart,
+    getAdminRecentSignups, getAdminSystemAlerts,
+    DashboardMetrics, RevenueChartItem, RecentSignupItem, SystemAlertItem
+} from "@/lib/api";
 
-const data = [
-    { name: "Tháng 1", total: 1500, users: 120, affiliate: 450 },
-    { name: "Tháng 2", total: 2300, users: 180, affiliate: 620 },
-    { name: "Tháng 3", total: 1800, users: 150, affiliate: 500 },
-    { name: "Tháng 4", total: 3200, users: 240, affiliate: 890 },
-    { name: "Tháng 5", total: 4100, users: 310, affiliate: 1200 },
-    { name: "Tháng 6", total: 4800, users: 420, affiliate: 1540 },
-];
-
-const systemAlerts = [
-    { id: 1, type: "warning", message: "Số dư tài khoản FASHN AI API còn dưới $15. Vui lòng nạp thêm tiền.", time: "10 phút trước" },
-    { id: 2, type: "success", message: "Crawler tự động cào 12 sản phẩm trending Shopee hoàn tất.", time: "2 giờ trước" },
-    { id: 3, type: "info", message: "User Nguyễn Văn A (Free) vừa đạt giới hạn 5 lượt tách nền trong tháng.", time: "4 giờ trước" },
-    { id: 4, type: "success", message: "Giao dịch thành công gói Premium Yearly từ user Trần Thị B ($89.99).", time: "5 giờ trước" },
-];
 
 export function Dashboard() {
-    const [totalUsers, setTotalUsers] = useState<number | null>(null);
-    const [recentUsers, setRecentUsers] = useState<AdminUser[]>([]);
-    const [newUsersTodayCount, setNewUsersTodayCount] = useState<number>(0);
+    const [recentUsers, setRecentUsers] = useState<RecentSignupItem[]>([]);
     const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+    const [chartData, setChartData] = useState<RevenueChartItem[]>([]);
+    const [systemAlerts, setSystemAlerts] = useState<SystemAlertItem[]>([]);
+    const [period, setPeriod] = useState<"month" | "week">("month");
     const [loading, setLoading] = useState(true);
+    const [chartLoading, setChartLoading] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
         async function fetchDashboardData() {
             try {
-                // Fetch the latest 50 users from the API and dashboard metrics in parallel
-                const [usersData, dashboardMetrics] = await Promise.all([
-                    getAdminUsers({ page: 1, pageSize: 50 }),
-                    getAdminDashboardMetrics()
+                const [dashboardMetrics, recentSignups, alerts] = await Promise.all([
+                    getAdminDashboardMetrics(),
+                    getAdminRecentSignups(5),
+                    getAdminSystemAlerts()
                 ]);
                 if (!isMounted) return;
-
-                const usersList = usersData.items || usersData.users || [];
-                setTotalUsers(usersData.totalCount || usersList.length);
-                setRecentUsers(usersList.slice(0, 5)); // Show top 5 recent users in widget
-
-                // Count users registered in the last 24 hours
-                const oneDayAgo = new Date().getTime() - 24 * 60 * 60 * 1000;
-                const todaySignups = usersList.filter(user => {
-                    if (!user.createdAt) return false;
-                    return new Date(user.createdAt).getTime() > oneDayAgo;
-                });
-                setNewUsersTodayCount(todaySignups.length);
                 setMetrics(dashboardMetrics);
+                setRecentUsers(recentSignups);
+                setSystemAlerts(alerts);
             } catch (err) {
                 console.error("Lỗi khi tải thông tin Dashboard:", err);
             } finally {
@@ -95,6 +76,27 @@ export function Dashboard() {
             isMounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        let isMounted = true;
+        async function fetchChartData() {
+            try {
+                setChartLoading(true);
+                const revenueChartData = await getAdminRevenueChart(period);
+                if (!isMounted) return;
+                setChartData(revenueChartData);
+            } catch (err) {
+                console.error(`Lỗi khi tải biểu đồ theo ${period}:`, err);
+            } finally {
+                if (isMounted) setChartLoading(false);
+            }
+        }
+
+        fetchChartData();
+        return () => {
+            isMounted = false;
+        };
+    }, [period]);
 
     // Time ago formatter helper
     const formatTimeAgo = (dateStr: string) => {
@@ -141,12 +143,12 @@ export function Dashboard() {
                             {loading ? (
                                 <span className="inline-block w-16 h-6 bg-muted animate-pulse rounded" />
                             ) : (
-                                (metrics?.totalUserCount ?? totalUsers ?? 0).toLocaleString()
+                            (metrics?.totalUserCount ?? 0).toLocaleString()
                             )}
                         </div>
                         <div className="flex items-center mt-1 text-[10px] text-green-600 font-medium">
                             <ArrowUpRight className="w-3 h-3 mr-0.5 shrink-0" />
-                            {loading ? "Đang tải..." : `+${newUsersTodayCount} mới (24h)`}
+                            {loading ? "Đang tải..." : `+${metrics?.newUsersTodayCount ?? 0} mới (24h)`}
                         </div>
                     </CardContent>
                 </Card>
@@ -256,29 +258,48 @@ export function Dashboard() {
             <div className="grid gap-6 md:grid-cols-7">
                 {/* 1. Biểu đồ doanh thu & tăng trưởng */}
                 <Card className="md:col-span-4 lg:col-span-4 shadow-sm border-muted bg-card">
-                    <CardHeader>
-                        <CardTitle className="text-[#4a3728] text-lg">Biến động Tài chính & Tăng trưởng</CardTitle>
-                        <CardDescription>
-                            Biểu đồ thống kê Premium Sales vs Hoa hồng Affiliate trong 6 tháng gần nhất.
-                        </CardDescription>
+                    <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4">
+                        <div>
+                            <CardTitle className="text-[#4a3728] text-lg">Biến động Tài chính & Tăng trưởng</CardTitle>
+                            <CardDescription>
+                                Biểu đồ thống kê Premium Sales vs Hoa hồng Affiliate.
+                            </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg text-xs border border-stone-200">
+                            <button
+                                onClick={() => setPeriod("month")}
+                                className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                                    period === "month"
+                                        ? "bg-white text-stone-900 shadow-sm"
+                                        : "text-stone-500 hover:text-stone-900"
+                                }`}
+                            >
+                                Theo tháng
+                            </button>
+                            <button
+                                onClick={() => setPeriod("week")}
+                                className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                                    period === "week"
+                                        ? "bg-white text-stone-900 shadow-sm"
+                                        : "text-stone-500 hover:text-stone-900"
+                                }`}
+                            >
+                                Theo tuần
+                            </button>
+                        </div>
                     </CardHeader>
-                    <CardContent className="pl-2">
+                    <CardContent className="pl-2 relative">
+                        {chartLoading && (
+                            <div className="absolute inset-0 bg-card/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                <span className="text-xs text-[#4a3728] font-medium animate-pulse">Đang cập nhật biểu đồ...</span>
+                            </div>
+                        )}
                         <div className="h-[320px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={data}>
-                                    <defs>
-                                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                                        </linearGradient>
-                                        <linearGradient id="colorAffiliate" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.1} />
-                                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
+                                <LineChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
                                     <XAxis
-                                        dataKey="name"
+                                        dataKey="timeLabel"
                                         stroke="hsl(var(--muted-foreground))"
                                         fontSize={11}
                                         tickLine={false}
@@ -289,7 +310,11 @@ export function Dashboard() {
                                         fontSize={11}
                                         tickLine={false}
                                         axisLine={false}
-                                        tickFormatter={(value) => `$${value}`}
+                                        tickFormatter={(value) => {
+                                            if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)} Tr`;
+                                            if (value >= 1_000) return `${(value / 1_000).toFixed(0)}k`;
+                                            return `${value} ₫`;
+                                        }}
                                     />
                                     <RechartsTooltip
                                         contentStyle={{
@@ -298,26 +323,34 @@ export function Dashboard() {
                                             fontSize: "11px",
                                             borderRadius: "8px"
                                         }}
+                                        formatter={(value: any, name: string) => {
+                                            if (name.includes("Xu hướng")) {
+                                                return [`${Number(value).toLocaleString("vi-VN")} ₫ (Xu hướng)`, name];
+                                            }
+                                            return [`${Number(value).toLocaleString("vi-VN")} ₫`, name];
+                                        }}
                                     />
-                                    <Area
+                                    {/* Actual Lines */}
+                                    <Line
                                         type="monotone"
-                                        dataKey="total"
+                                        dataKey="revenue"
                                         name="Doanh thu Premium"
-                                        stroke="hsl(var(--primary))"
-                                        fillOpacity={1}
-                                        fill="url(#colorTotal)"
-                                        strokeWidth={2}
+                                        stroke="#4a3728"
+                                        strokeWidth={2.5}
+                                        dot={{ r: 4, fill: "#4a3728", strokeWidth: 0 }}
+                                        activeDot={{ r: 7, fill: "#4a3728" }}
                                     />
-                                    <Area
+                                    <Line
                                         type="monotone"
-                                        dataKey="affiliate"
+                                        dataKey="affiliateCommission"
                                         name="Hoa hồng Shopee"
                                         stroke="#22c55e"
-                                        fillOpacity={1}
-                                        fill="url(#colorAffiliate)"
-                                        strokeWidth={2}
+                                        strokeWidth={2.5}
+                                        dot={{ r: 4, fill: "#22c55e", strokeWidth: 0 }}
+                                        activeDot={{ r: 7, fill: "#22c55e" }}
                                     />
-                                </AreaChart>
+
+                                </LineChart>
                             </ResponsiveContainer>
                         </div>
                     </CardContent>
@@ -333,18 +366,32 @@ export function Dashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {systemAlerts.map((alert) => (
-                                <div key={alert.id} className="flex gap-2.5 items-start p-2.5 rounded-lg bg-muted/20 border border-muted text-xs">
-                                    {alert.type === "warning" && <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />}
-                                    {alert.type === "success" && <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />}
-                                    {alert.type === "info" && <Cpu className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />}
-                                    
-                                    <div className="flex-1">
-                                        <p className="font-medium text-foreground leading-relaxed">{alert.message}</p>
-                                        <span className="text-[10px] text-muted-foreground mt-1 block">{alert.time}</span>
+                            {loading ? (
+                                Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="flex gap-2.5 items-start p-2.5 rounded-lg bg-muted/20 border border-muted animate-pulse">
+                                        <div className="w-4 h-4 bg-muted rounded-full shrink-0 mt-0.5" />
+                                        <div className="flex-1 space-y-1.5">
+                                            <div className="h-3 bg-muted rounded w-full" />
+                                            <div className="h-2 bg-muted rounded w-1/3" />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))
+                            ) : systemAlerts.length === 0 ? (
+                                <p className="text-xs text-muted-foreground text-center py-4">Không có cảnh báo nào</p>
+                            ) : (
+                                systemAlerts.map((alert, idx) => (
+                                    <div key={idx} className="flex gap-2.5 items-start p-2.5 rounded-lg bg-muted/20 border border-muted text-xs">
+                                        {alert.type === "warning" && <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />}
+                                        {alert.type === "success" && <CheckCircle className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />}
+                                        {alert.type === "info" && <Cpu className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />}
+                                        {alert.type === "error" && <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />}
+                                        <div className="flex-1">
+                                            <p className="font-medium text-foreground leading-relaxed">{alert.message}</p>
+                                            <span className="text-[10px] text-muted-foreground mt-1 block">{formatTimeAgo(alert.createdAt)}</span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </CardContent>
                     </Card>
 

@@ -18,7 +18,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Trash2,
-    Download
+    Download,
+    Plus
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
@@ -35,9 +36,11 @@ import {
     adjustAdminCampaign,
     deleteAdminCampaign,
     exportAdminCampaigns,
+    createAdminCampaign,
     SponsoredCampaign,
     getAdminCampaignMetrics,
-    CampaignMetrics
+    CampaignMetrics,
+    CreateCampaignPayload
 } from "@/lib/api";
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
@@ -109,6 +112,25 @@ export function CampaignManagement() {
 
     // States cho Export
     const [exportLoading, setExportLoading] = useState(false);
+
+    // States cho Create
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [createLoading, setCreateLoading] = useState(false);
+    const [createForm, setCreateForm] = useState<{
+        brandId: string;
+        productId: string;
+        displayRank: string;
+        dailyBudget: string;
+        startAt: string;
+        endAt: string;
+    }>({
+        brandId: "",
+        productId: "",
+        displayRank: "1",
+        dailyBudget: "",
+        startAt: "",
+        endAt: "",
+    });
 
     // ── Fetch functions ──────────────────────────────────────────────────────
 
@@ -284,6 +306,46 @@ export function CampaignManagement() {
         }
     };
 
+    // ── Create ───────────────────────────────────────────────────────────────
+
+    const handleOpenCreate = () => {
+        setCreateForm({ brandId: "", productId: "", displayRank: "1", dailyBudget: "", startAt: "", endAt: "" });
+        setCreateDialogOpen(true);
+    };
+
+    const handleConfirmCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const budget = parseFloat(createForm.dailyBudget);
+        const rank = parseInt(createForm.displayRank, 10);
+        if (!createForm.brandId.trim()) { addToast("error", "Brand ID không được để trống."); return; }
+        if (!createForm.productId.trim()) { addToast("error", "Product ID không được để trống."); return; }
+        if (isNaN(budget) || budget <= 0) { addToast("error", "Ngân sách hàng ngày phải lớn hơn 0."); return; }
+        if (isNaN(rank) || rank < 1) { addToast("error", "Vị trí hiển thị phải >= 1."); return; }
+        if (!createForm.startAt || !createForm.endAt) { addToast("error", "Vui lòng chọn ngày bắt đầu và kết thúc."); return; }
+        if (new Date(createForm.endAt) <= new Date(createForm.startAt)) { addToast("error", "Ngày kết thúc phải sau ngày bắt đầu."); return; }
+
+        setCreateLoading(true);
+        try {
+            const payload: CreateCampaignPayload = {
+                brandId: createForm.brandId.trim(),
+                productId: createForm.productId.trim(),
+                displayRank: rank,
+                dailyBudget: budget,
+                startAt: new Date(createForm.startAt).toISOString(),
+                endAt: new Date(createForm.endAt).toISOString(),
+            };
+            await createAdminCampaign(payload);
+            addToast("success", "Tạo chiến dịch quảng cáo mới thành công!");
+            setCreateDialogOpen(false);
+            refreshAll(1);
+        } catch (err: any) {
+            console.error("Lỗi khi tạo chiến dịch:", err);
+            addToast("error", `Lỗi khi tạo: ${err.message || err}`);
+        } finally {
+            setCreateLoading(false);
+        }
+    };
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         fetchCampaigns(1, searchTerm, statusFilter);
@@ -395,19 +457,28 @@ export function CampaignManagement() {
 
             {/* Bảng danh sách chiến dịch */}
             <Card className="border border-muted shadow-sm overflow-hidden">
-                <CardHeader className="flex flex-col gap-3 border-b pb-4">
-                    <div className="flex flex-row items-center justify-between">
-                        <div>
+                <CardHeader className="border-b pb-4 space-y-3">
+                    {/* Row 1: Title + Actions */}
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0">
                             <CardTitle className="text-[#4a3728] font-bold text-base">Danh sách chiến dịch quảng cáo</CardTitle>
-                            <CardDescription className="text-xs mt-1">
+                            <CardDescription className="text-xs mt-0.5">
                                 Tổng cộng {totalCount} chiến dịch • Trang {currentPage}/{totalPages}
                             </CardDescription>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
+                            <Button
+                                size="sm"
+                                className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-8 gap-1.5"
+                                onClick={handleOpenCreate}
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                Tạo chiến dịch
+                            </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="border-muted hover:bg-muted/10 text-xs h-8 gap-1"
+                                className="border-muted hover:bg-muted/10 text-xs h-8 gap-1.5"
                                 onClick={handleExport}
                                 disabled={exportLoading || loading}
                             >
@@ -421,7 +492,7 @@ export function CampaignManagement() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="border-muted hover:bg-muted/10 text-xs h-8 gap-1"
+                                className="border-muted hover:bg-muted/10 text-xs h-8 gap-1.5"
                                 onClick={() => refreshAll(1)}
                                 disabled={loading}
                             >
@@ -430,7 +501,7 @@ export function CampaignManagement() {
                             </Button>
                         </div>
                     </div>
-                    {/* Search & Filter bar */}
+                    {/* Row 2: Search & Filter */}
                     <form onSubmit={handleSearch} className="flex gap-2 items-center">
                         <div className="relative flex-1">
                             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
@@ -442,7 +513,7 @@ export function CampaignManagement() {
                             />
                         </div>
                         <Select value={statusFilter} onValueChange={handleStatusChange}>
-                            <SelectTrigger className="w-36 h-8 text-xs bg-background border-muted">
+                            <SelectTrigger className="w-36 h-8 text-xs bg-background border-muted shrink-0">
                                 <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
                                 <SelectValue placeholder="Trạng thái" />
                             </SelectTrigger>
@@ -452,7 +523,7 @@ export function CampaignManagement() {
                                 <SelectItem value="stopped">Đã dừng</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button type="submit" size="sm" className="h-8 bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs px-4">
+                        <Button type="submit" size="sm" className="h-8 bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs px-4 shrink-0">
                             Tìm
                         </Button>
                     </form>
@@ -807,6 +878,106 @@ export function CampaignManagement() {
                                 {adjustLoading ? (
                                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang lưu...</>
                                 ) : "Lưu điều chỉnh"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* ── Dialog Tạo chiến dịch mới ── */}
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-[#4a3728]">
+                            <Plus className="w-5 h-5 shrink-0" /> Tạo chiến dịch quảng cáo mới
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground mt-1">
+                            Điền đầy đủ thông tin để tạo chiến dịch tài trợ cho sản phẩm của đối tác thương hiệu.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleConfirmCreate} className="space-y-3 mt-2">
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold">Brand ID <span className="text-red-500">*</span></Label>
+                            <Input
+                                value={createForm.brandId}
+                                onChange={e => setCreateForm(f => ({ ...f, brandId: e.target.value }))}
+                                className="h-9 text-sm bg-background border-muted font-mono"
+                                placeholder="UUID của thương hiệu..."
+                                required
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold">Product ID <span className="text-red-500">*</span></Label>
+                            <Input
+                                value={createForm.productId}
+                                onChange={e => setCreateForm(f => ({ ...f, productId: e.target.value }))}
+                                className="h-9 text-sm bg-background border-muted font-mono"
+                                placeholder="UUID của sản phẩm..."
+                                required
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold">Ngân sách/ngày (đ) <span className="text-red-500">*</span></Label>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    step="1000"
+                                    value={createForm.dailyBudget}
+                                    onChange={e => setCreateForm(f => ({ ...f, dailyBudget: e.target.value }))}
+                                    className="h-9 text-sm bg-background border-muted"
+                                    placeholder="Vd: 100000"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold">Vị trí hiển thị <span className="text-red-500">*</span></Label>
+                                <Input
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    value={createForm.displayRank}
+                                    onChange={e => setCreateForm(f => ({ ...f, displayRank: e.target.value }))}
+                                    className="h-9 text-sm bg-background border-muted"
+                                    placeholder="1 = ưu tiên cao nhất"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold">Ngày bắt đầu <span className="text-red-500">*</span></Label>
+                                <Input
+                                    type="datetime-local"
+                                    value={createForm.startAt}
+                                    onChange={e => setCreateForm(f => ({ ...f, startAt: e.target.value }))}
+                                    className="h-9 text-xs bg-background border-muted"
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-semibold">Ngày kết thúc <span className="text-red-500">*</span></Label>
+                                <Input
+                                    type="datetime-local"
+                                    value={createForm.endAt}
+                                    onChange={e => setCreateForm(f => ({ ...f, endAt: e.target.value }))}
+                                    className="h-9 text-xs bg-background border-muted"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="border-t border-muted pt-4">
+                            <Button type="button" variant="outline" className="border-muted hover:bg-muted/10 text-xs h-9"
+                                onClick={() => setCreateDialogOpen(false)}
+                                disabled={createLoading}>
+                                Hủy bỏ
+                            </Button>
+                            <Button type="submit"
+                                className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9"
+                                disabled={createLoading}>
+                                {createLoading ? (
+                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang tạo...</>
+                                ) : "Tạo chiến dịch"}
                             </Button>
                         </DialogFooter>
                     </form>
