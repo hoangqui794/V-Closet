@@ -21,7 +21,8 @@ import {
     Sliders,
     Loader2,
     AlertCircle,
-    CheckCircle
+    CheckCircle,
+    Eye
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
@@ -44,8 +45,18 @@ import {
     createAdminSubscriptionPlan,
     updateAdminSubscriptionPlan,
     deleteAdminSubscriptionPlan,
-    SubscriptionPlanResponse
+    SubscriptionPlanResponse,
+    getAdminPendingManualPayments,
+    approveAdminManualPayment,
+    rejectAdminManualPayment,
+    ManualPaymentListItem,
+    getAdminPremiumSubscriptions,
+    revokeAdminPremiumSubscription,
+    PremiumSubscriptionListItem,
+    BASE_URL,
+    getToken
 } from "../../../lib/api";
+import { HubConnectionBuilder, HubConnection, HubConnectionState } from "@microsoft/signalr";
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 interface Toast { id: number; type: "success" | "error"; message: string; }
@@ -69,14 +80,6 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
     );
 }
 
-// Mockup data giao dịch nâng cấp tài khoản
-const initialSubscriptions = [
-    { id: "1", user: "Nguyễn Văn A", plan: "Premium Monthly", amount: "$9.99", status: "Active", date: "2024-03-01", nextBilling: "2024-04-01" },
-    { id: "2", user: "Trần Thị B", plan: "Premium Yearly", amount: "$89.99", status: "Active", date: "2024-01-10", nextBilling: "2025-01-10" },
-    { id: "3", user: "Lê Văn C", plan: "Premium Monthly", amount: "$9.99", status: "Canceled", date: "2023-12-15", nextBilling: "-" },
-    { id: "4", user: "Phạm Minh D", plan: "Premium Monthly", amount: "$9.99", status: "Past Due", date: "2024-02-28", nextBilling: "2024-03-28" },
-];
-
 // Mockup dữ liệu mã giảm giá (Coupons)
 const initialCoupons = [
     { id: "cp-1", code: "WELCOMEVCLOSET", discount: 20, type: "Percentage", used: 145, maxUses: 300, status: "Active", expiry: "2026-12-31" },
@@ -85,17 +88,42 @@ const initialCoupons = [
 ];
 
 export function SubscriptionManagement() {
-    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons">("limits");
-    const [subscriptions] = useState(initialSubscriptions);
+    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons" | "manual-payments">("limits");
     const [coupons, setCoupons] = useState(initialCoupons);
+
+    // States cho Duyệt chuyển khoản thủ công
+    const [pendingPayments, setPendingPayments] = useState<ManualPaymentListItem[]>([]);
+    const [loadingPayments, setLoadingPayments] = useState(false);
+    const [errorPayments, setErrorPayments] = useState("");
+    const [selectedPayment, setSelectedPayment] = useState<ManualPaymentListItem | null>(null);
+    const [reviewAction, setReviewAction] = useState<"approve" | "reject" | null>(null);
+    const [adminNote, setAdminNote] = useState("");
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [zoomImage, setZoomImage] = useState<string | null>(null);
+
+    // States quản lý gói Premium thực tế của người dùng (billing tab)
+    const [premiumSubscriptions, setPremiumSubscriptions] = useState<PremiumSubscriptionListItem[]>([]);
+    const [loadingSubscriptions, setLoadingSubscriptions] = useState(false);
+    const [totalSubscriptions, setTotalSubscriptions] = useState(0);
+    const [subPage, setSubPage] = useState(1);
+    const [subPageSize] = useState(10);
+    const [subSearch, setSubSearch] = useState("");
+    const [subStatusFilter, setSubStatusFilter] = useState<string>("all");
+    const [subPlanTypeFilter, setSubPlanTypeFilter] = useState<string>("all");
+
+    // States cho hủy/thu hồi gói Premium
+    const [revokeConfirmOpen, setRevokeConfirmOpen] = useState(false);
+    const [subToRevoke, setSubToRevoke] = useState<PremiumSubscriptionListItem | null>(null);
+    const [revokeNote, setRevokeNote] = useState("");
+    const [revokeLoading, setRevokeLoading] = useState(false);
     
     // Toast
     const [toasts, setToasts] = useState<Toast[]>([]);
-    const addToast = (type: Toast["type"], message: string) => {
+    const addToast = useCallback((type: Toast["type"], message: string) => {
         const id = ++toastId;
         setToasts(prev => [...prev, { id, type, message }]);
         setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
-    };
+    }, []);
 
     // States cho Confirm Delete Plan Modal
     const [deletePlanConfirmOpen, setDeletePlanConfirmOpen] = useState(false);
@@ -143,11 +171,107 @@ export function SubscriptionManagement() {
         }
     }, []);
 
+    const loadPendingPayments = useCallback(async () => {
+        setLoadingPayments(true);
+        setErrorPayments("");
+        try {
+            const data = await getAdminPendingManualPayments();
+            setPendingPayments(Array.isArray(data) ? data : []);
+        } catch (err: any) {
+            console.error("Failed to load pending manual payments:", err);
+            setErrorPayments(err.message || "Không thể tải danh sách chuyển khoản chờ duyệt");
+        } finally {
+            setLoadingPayments(false);
+        }
+    }, []);
+
+    const loadPremiumSubscriptions = useCallback(async () => {
+        setLoadingSubscriptions(true);
+        try {
+            const isActive = subStatusFilter === "all" ? undefined : (subStatusFilter === "active");
+            const planType = subPlanTypeFilter === "all" ? undefined : subPlanTypeFilter;
+
+            const response = await getAdminPremiumSubscriptions({
+                page: subPage,
+                pageSize: subPageSize,
+                search: subSearch || undefined,
+                isActive,
+                planType
+            });
+
+            setPremiumSubscriptions(response.subscriptions || []);
+            setTotalSubscriptions(response.totalCount || 0);
+        } catch (err: any) {
+            console.error("Failed to load premium subscriptions:", err);
+            addToast("error", err.message || "Không thể tải danh sách tài khoản đăng ký gói");
+        } finally {
+            setLoadingSubscriptions(false);
+        }
+    }, [subPage, subPageSize, subSearch, subStatusFilter, subPlanTypeFilter, addToast]);
+
+    // ─── SignalR Real-time Notifications ───────────────────────────────────────
+    useEffect(() => {
+        let connection: HubConnection | null = null;
+
+        const startSignalR = async () => {
+            const token = getToken();
+            if (!token) return;
+
+            let userId = 0;
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                userId = parseInt(payload.sub || payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || "0");
+            } catch (e) {
+                console.error("Failed to parse JWT token", e);
+            }
+
+            connection = new HubConnectionBuilder()
+                .withUrl(`${BASE_URL}/notificationHub?userId=${userId}`, {
+                    accessTokenFactory: () => token
+                })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("ReceivePendingPayment", (pendingPayment: ManualPaymentListItem) => {
+                console.log("[SignalR] Received pending payment:", pendingPayment);
+                addToast("success", `Có giao dịch chuyển khoản thủ công mới chờ duyệt từ khách hàng ${pendingPayment.userName}!`);
+                loadPendingPayments();
+            });
+
+            try {
+                await connection.start();
+                console.log("[SignalR] Connected successfully.");
+                await connection.invoke("JoinAdminGroup");
+                console.log("[SignalR] Joined AdminGroup.");
+            } catch (err) {
+                console.error("[SignalR] Connection Error:", err);
+            }
+        };
+
+        startSignalR();
+
+        return () => {
+            if (connection) {
+                connection.stop();
+            }
+        };
+    }, [loadPendingPayments, addToast]);
+
     useEffect(() => {
         if (activeTab === "limits") {
             loadPlans();
+        } else if (activeTab === "manual-payments") {
+            loadPendingPayments();
+        } else if (activeTab === "billing") {
+            loadPremiumSubscriptions();
         }
-    }, [activeTab, loadPlans]);
+    }, [activeTab, loadPlans, loadPendingPayments, loadPremiumSubscriptions]);
+
+    useEffect(() => {
+        if (activeTab === "billing") {
+            loadPremiumSubscriptions();
+        }
+    }, [activeTab, subPage, subPageSize, subSearch, subStatusFilter, subPlanTypeFilter, loadPremiumSubscriptions]);
 
     const handleOpenCreatePlan = () => {
         setPlanForm({
@@ -193,6 +317,7 @@ export function SubscriptionManagement() {
             await createAdminSubscriptionPlan(planForm);
             setShowCreatePlan(false);
             loadPlans();
+            addToast("success", "Tạo gói dịch vụ mới thành công!");
         } catch (err: any) {
             setErrorPlans(err.message || "Tạo gói Premium thất bại");
         }
@@ -217,6 +342,7 @@ export function SubscriptionManagement() {
             await updateAdminSubscriptionPlan(editingPlan.id, planForm);
             setEditingPlan(null);
             loadPlans();
+            addToast("success", "Cập nhật gói dịch vụ thành công!");
         } catch (err: any) {
             setErrorPlans(err.message || "Cập nhật gói Premium thất bại");
         }
@@ -259,11 +385,13 @@ export function SubscriptionManagement() {
             setCoupons([...coupons, newCoupon]);
             setNewCode("");
             setShowCreateCoupon(false);
+            addToast("success", "Tạo mã giảm giá thành công!");
         }
     };
 
     const handleDeleteCoupon = (id: string) => {
         setCoupons(coupons.filter(c => c.id !== id));
+        addToast("success", "Đã xóa mã giảm giá!");
     };
 
     const handleToggleCouponStatus = (id: string, currentStatus: string) => {
@@ -273,6 +401,54 @@ export function SubscriptionManagement() {
             }
             return c;
         }));
+        addToast("success", `Đã cập nhật trạng thái coupon thành ${currentStatus === "Active" ? "Hết hạn" : "Hoạt động"}!`);
+    };
+
+    const handleReviewManualPayment = async () => {
+        if (!selectedPayment || !reviewAction) return;
+        setSubmittingReview(true);
+        try {
+            if (reviewAction === "approve") {
+                await approveAdminManualPayment(selectedPayment.transactionId, { adminNote: adminNote || null });
+                addToast("success", `Đã duyệt thành công giao dịch của ${selectedPayment.userName}!`);
+            } else {
+                await rejectAdminManualPayment(selectedPayment.transactionId, { adminNote: adminNote || null });
+                addToast("success", `Đã từ chối giao dịch chuyển khoản của ${selectedPayment.userName}!`);
+            }
+            setSelectedPayment(null);
+            setReviewAction(null);
+            setAdminNote("");
+            loadPendingPayments();
+        } catch (err: any) {
+            console.error("Lỗi duyệt chuyển khoản:", err);
+            addToast("error", err.message || "Xử lý duyệt giao dịch thất bại");
+        } finally {
+            setSubmittingReview(false);
+        }
+    };
+
+    const handleRevokePremium = async () => {
+        if (!subToRevoke) return;
+        setRevokeLoading(true);
+        try {
+            const response = await revokeAdminPremiumSubscription(subToRevoke.subscriptionId, {
+                adminNote: revokeNote || null
+            });
+            if (response.success) {
+                addToast("success", `Đã thu hồi gói Premium của tài khoản ${subToRevoke.email} thành công!`);
+                setRevokeConfirmOpen(false);
+                setSubToRevoke(null);
+                setRevokeNote("");
+                loadPremiumSubscriptions();
+            } else {
+                addToast("error", response.message || "Thu hồi gói Premium thất bại");
+            }
+        } catch (err: any) {
+            console.error("Lỗi thu hồi gói Premium:", err);
+            addToast("error", err.message || "Không thể thu hồi gói Premium");
+        } finally {
+            setRevokeLoading(false);
+        }
     };
 
     return (
@@ -310,7 +486,22 @@ export function SubscriptionManagement() {
                             : "border-transparent text-muted-foreground hover:text-[#4a3728]"
                     }`}
                 >
-                    Doanh thu & Đăng ký nâng cấp
+                    Tài khoản Premium đăng ký
+                </button>
+                <button
+                    onClick={() => setActiveTab("manual-payments")}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 relative ${
+                        activeTab === "manual-payments"
+                            ? "border-[#4a3728] text-[#4a3728]"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                    }`}
+                >
+                    Duyệt chuyển khoản thủ công
+                    {pendingPayments.length > 0 && (
+                        <span className="absolute top-1.5 right-1 bg-red-500 text-white rounded-full text-[9px] font-bold h-4 w-4 flex items-center justify-center animate-pulse">
+                            {pendingPayments.length}
+                        </span>
+                    )}
                 </button>
                 <button
                     onClick={() => setActiveTab("coupons")}
@@ -324,7 +515,7 @@ export function SubscriptionManagement() {
                 </button>
             </div>
 
-            {/* TAB 1: DOANH THU & GIAO DỊCH */}
+            {/* TAB: DOANH THU & GIAO DỊCH */}
             {activeTab === "billing" && (
                 <div className="space-y-6">
                     {/* Thống kê nhanh */}
@@ -335,7 +526,7 @@ export function SubscriptionManagement() {
                                 <DollarSign className="w-4 h-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">$4,231.80</div>
+                                <div className="text-2xl font-bold">4.231.800 đ</div>
                                 <div className="flex items-center mt-1 text-xs text-green-500">
                                     <ArrowUpRight className="w-3 h-3 mr-1" />
                                     +20.1% so với tháng trước
@@ -370,53 +561,168 @@ export function SubscriptionManagement() {
                         </Card>
                     </div>
 
-                    {/* Danh sách giao dịch */}
+                    {/* Filter and Search Bar for Subscriptions */}
+                    <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-card p-4 rounded-xl border border-muted shadow-sm">
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <Input
+                                placeholder="Tìm kiếm theo email, tên..."
+                                value={subSearch}
+                                onChange={(e) => {
+                                    setSubSearch(e.target.value);
+                                    setSubPage(1);
+                                }}
+                                className="w-full md:w-64 bg-background"
+                            />
+                        </div>
+                        <div className="flex gap-4 w-full md:w-auto">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Trạng thái:</span>
+                                <Select value={subStatusFilter} onValueChange={(val) => { setSubStatusFilter(val); setSubPage(1); }}>
+                                    <SelectTrigger className="w-32 bg-background">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tất cả</SelectItem>
+                                        <SelectItem value="active">Đang hoạt động</SelectItem>
+                                        <SelectItem value="expired">Hết hạn</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Thời hạn:</span>
+                                <Select value={subPlanTypeFilter} onValueChange={(val) => { setSubPlanTypeFilter(val); setSubPage(1); }}>
+                                    <SelectTrigger className="w-32 bg-background">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tất cả</SelectItem>
+                                        <SelectItem value="monthly">Theo tháng</SelectItem>
+                                        <SelectItem value="yearly">Theo năm</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Danh sách người dùng Premium thực tế */}
                     <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
-                        <Table>
-                            <TableHeader className="bg-muted/50">
-                                <TableRow>
-                                    <TableHead>Khách hàng</TableHead>
-                                    <TableHead>Gói dịch vụ</TableHead>
-                                    <TableHead>Tổng cộng</TableHead>
-                                    <TableHead>Trạng thái</TableHead>
-                                    <TableHead>Lần gia hạn tới</TableHead>
-                                    <TableHead className="text-right">Hành động</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {subscriptions.map((sub) => (
-                                    <TableRow key={sub.id} className="hover:bg-muted/30 transition-colors">
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${sub.user}`} />
-                                                    <AvatarFallback>{sub.user.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <span className="font-medium text-sm text-foreground">{sub.user}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-sm">{sub.plan}</TableCell>
-                                        <TableCell className="text-sm font-semibold">{sub.amount}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={sub.status === "Active" ? "default" : (sub.status === "Canceled" ? "secondary" : "destructive")} className="font-normal text-[10px]">
-                                                {sub.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-sm text-muted-foreground font-mono">{sub.nextBilling}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                        {loadingSubscriptions ? (
+                            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
+                                <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                <span className="text-sm">Đang tải danh sách tài khoản Premium...</span>
+                            </div>
+                        ) : !Array.isArray(premiumSubscriptions) || premiumSubscriptions.length === 0 ? (
+                            <div className="p-12 text-center text-sm text-muted-foreground">
+                                Không tìm thấy tài khoản Premium nào.
+                            </div>
+                        ) : (
+                            <>
+                                <Table>
+                                    <TableHeader className="bg-muted/50">
+                                        <TableRow>
+                                            <TableHead>Khách hàng</TableHead>
+                                            <TableHead>Gói & Loại</TableHead>
+                                            <TableHead>Đã thanh toán</TableHead>
+                                            <TableHead>Cổng / Mã GD</TableHead>
+                                            <TableHead>Thời hạn sử dụng</TableHead>
+                                            <TableHead>Trạng thái</TableHead>
+                                            <TableHead className="text-right">Hành động</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {premiumSubscriptions.map((sub) => (
+                                            <TableRow key={sub.subscriptionId} className="hover:bg-muted/30 transition-colors">
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="h-8 w-8">
+                                                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${sub.displayName}`} />
+                                                            <AvatarFallback>{sub.displayName.charAt(0)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <span className="font-medium text-sm text-foreground block">{sub.displayName}</span>
+                                                            <span className="text-xs text-muted-foreground font-mono">{sub.email}</span>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="text-sm font-semibold text-[#4a3728]">{sub.planName}</div>
+                                                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{sub.planType}</div>
+                                                </TableCell>
+                                                <TableCell className="text-sm font-semibold">
+                                                    {sub.pricePaid.toLocaleString("vi-VN")} {sub.currency}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="text-xs font-semibold">{sub.paymentMethod.toUpperCase()}</div>
+                                                    <div className="text-[10px] font-mono text-muted-foreground max-w-[120px] truncate" title={sub.paymentRef}>{sub.paymentRef}</div>
+                                                </TableCell>
+                                                <TableCell className="text-xs text-muted-foreground font-mono">
+                                                    <div>BĐ: {new Date(sub.startedAt).toLocaleDateString("vi-VN")}</div>
+                                                    <div>KT: {new Date(sub.expiresAt).toLocaleDateString("vi-VN")}</div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge
+                                                        variant={sub.isActive ? "default" : "secondary"}
+                                                        className={sub.isActive 
+                                                            ? "bg-green-100 text-green-800 hover:bg-green-200 border-none font-normal" 
+                                                            : "bg-gray-100 text-gray-500 font-normal"
+                                                        }
+                                                    >
+                                                        {sub.isActive ? "Active" : "Expired"}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {sub.isActive && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs px-2.5 h-8 font-semibold"
+                                                            onClick={() => {
+                                                                setSubToRevoke(sub);
+                                                                setRevokeConfirmOpen(true);
+                                                            }}
+                                                        >
+                                                            Thu hồi
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+
+                                {/* Phân trang */}
+                                <div className="flex justify-between items-center p-4 border-t">
+                                    <span className="text-xs text-muted-foreground">
+                                        Hiển thị {premiumSubscriptions.length} / {totalSubscriptions} tài khoản Premium
+                                    </span>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setSubPage(p => Math.max(p - 1, 1))}
+                                            disabled={subPage === 1}
+                                            className="h-8 text-xs border-muted"
+                                        >
+                                            Trước
+                                        </Button>
+                                        <span className="self-center text-xs font-semibold px-2">Trang {subPage}</span>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setSubPage(p => p + 1)}
+                                            disabled={subPage * subPageSize >= totalSubscriptions}
+                                            className="h-8 text-xs border-muted"
+                                        >
+                                            Sau
+                                        </Button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
 
-            {/* TAB 2: MÃ GIẢM GIÁ */}
+            {/* TAB: MÃ GIẢM GIÁ */}
             {activeTab === "coupons" && (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-muted shadow-sm">
@@ -563,7 +869,7 @@ export function SubscriptionManagement() {
                 </div>
             )}
 
-            {/* TAB 3: QUẢN LÝ GÓI DỊCH VỤ PREMIUM */}
+            {/* TAB: QUẢN LÝ GÓI DỊCH VỤ PREMIUM */}
             {activeTab === "limits" && (
                 <div className="grid gap-6 md:grid-cols-3">
                     {/* Cấu hình giới hạn tủ đồ Free */}
@@ -709,6 +1015,103 @@ export function SubscriptionManagement() {
                 </div>
             )}
 
+            {/* TAB: DUYỆT CHUYỂN KHOẢN THỦ CÔNG */}
+            {activeTab === "manual-payments" && (
+                <div className="space-y-6">
+                    <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
+                        {loadingPayments ? (
+                            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
+                                <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                <span className="text-sm">Đang tải danh sách chờ duyệt...</span>
+                            </div>
+                        ) : errorPayments ? (
+                            <div className="p-6 text-center text-sm text-red-600 bg-red-50 border-t">
+                                {errorPayments}
+                            </div>
+                        ) : !Array.isArray(pendingPayments) || pendingPayments.length === 0 ? (
+                            <div className="p-12 text-center text-sm text-muted-foreground">
+                                Hiện tại không có giao dịch chuyển khoản thủ công nào đang chờ duyệt.
+                            </div>
+                        ) : (
+                            <Table>
+                                <TableHeader className="bg-muted/50">
+                                    <TableRow>
+                                        <TableHead>Khách hàng</TableHead>
+                                        <TableHead>Gói mua</TableHead>
+                                        <TableHead>Số tiền</TableHead>
+                                        <TableHead>Ảnh minh chứng</TableHead>
+                                        <TableHead>Ghi chú khách hàng</TableHead>
+                                        <TableHead>Ngày gửi</TableHead>
+                                        <TableHead className="text-right font-semibold">Thao tác</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {pendingPayments.map((payment) => (
+                                        <TableRow key={payment.transactionId} className="hover:bg-muted/30 transition-colors">
+                                            <TableCell>
+                                                <div>
+                                                    <span className="font-semibold text-sm text-foreground block">{payment.userName}</span>
+                                                    <span className="text-xs text-muted-foreground font-mono">{payment.userEmail}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-sm font-medium">{payment.planName}</TableCell>
+                                            <TableCell className="text-sm font-semibold text-[#4a3728]">
+                                                {payment.amount.toLocaleString("vi-VN")} {payment.currency}
+                                            </TableCell>
+                                            <TableCell>
+                                                {payment.proofImageUrl ? (
+                                                    <div className="relative group w-12 h-16 rounded border border-muted overflow-hidden bg-muted flex items-center justify-center cursor-pointer shadow-sm hover:shadow"
+                                                        onClick={() => setZoomImage(payment.proofImageUrl || null)}>
+                                                        <img src={payment.proofImageUrl} alt="Proof Bill" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                            <Eye className="w-4 h-4 text-white" />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground italic">Không có ảnh</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-sm max-w-[200px] truncate" title={payment.userNote || ""}>
+                                                {payment.userNote || <span className="text-muted-foreground text-xs italic">Trống</span>}
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground font-mono">
+                                                {new Date(payment.createdAt).toLocaleString("vi-VN")}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-1.5">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 font-semibold text-xs h-8 px-2.5"
+                                                        onClick={() => {
+                                                            setSelectedPayment(payment);
+                                                            setReviewAction("approve");
+                                                        }}
+                                                    >
+                                                        Duyệt
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 font-semibold text-xs h-8 px-2.5"
+                                                        onClick={() => {
+                                                            setSelectedPayment(payment);
+                                                            setReviewAction("reject");
+                                                        }}
+                                                    >
+                                                        Từ chối
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Modal Tạo/Sửa gói Premium */}
             <Dialog 
                 open={showCreatePlan || editingPlan !== null} 
@@ -830,6 +1233,7 @@ export function SubscriptionManagement() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
             {/* Modal Xác nhận xóa mềm gói Premium */}
             <Dialog open={deletePlanConfirmOpen} onOpenChange={setDeletePlanConfirmOpen}>
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
@@ -867,6 +1271,180 @@ export function SubscriptionManagement() {
                                 </>
                             ) : (
                                 "Xác nhận xóa"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Xem ảnh hóa đơn lớn (Zoom) */}
+            <Dialog 
+                open={zoomImage !== null} 
+                onOpenChange={(open) => {
+                    if (!open) setZoomImage(null);
+                }}
+            >
+                <DialogContent className="max-w-2xl bg-black/95 border-none p-0 overflow-hidden flex items-center justify-center">
+                    {zoomImage && (
+                        <div className="relative w-full h-[80vh] p-4 flex items-center justify-center">
+                            <img 
+                                src={zoomImage} 
+                                alt="Hóa đơn phóng to" 
+                                className="max-w-full max-h-full object-contain"
+                            />
+                            <button 
+                                onClick={() => setZoomImage(null)}
+                                className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white p-2 rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Xác nhận Duyệt / Từ chối Chuyển khoản */}
+            <Dialog 
+                open={selectedPayment !== null && reviewAction !== null} 
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedPayment(null);
+                        setReviewAction(null);
+                        setAdminNote("");
+                    }
+                }}
+            >
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className={`flex items-center gap-2 font-bold text-lg ${reviewAction === "approve" ? "text-green-600" : "text-red-500"}`}>
+                            {reviewAction === "approve" ? <CheckCircle className="w-5 h-5 text-green-600" /> : <AlertCircle className="w-5 h-5 text-red-500" />}
+                            {reviewAction === "approve" ? "Duyệt giao dịch chuyển khoản" : "Từ chối giao dịch chuyển khoản"}
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground mt-1">
+                            {reviewAction === "approve" 
+                                ? `Bạn đang chuẩn bị PHÊ DUYỆT giao dịch của khách hàng ${selectedPayment?.userName}. Hệ thống sẽ ngay lập tức kích hoạt/nâng cấp gói Premium tương ứng.` 
+                                : `Bạn đang chuẩn bị TỪ CHỐI giao dịch của khách hàng ${selectedPayment?.userName}. Giao dịch sẽ chuyển sang trạng thái thất bại.`}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-3 py-2">
+                        <div className="bg-muted/30 p-3 rounded-lg text-xs space-y-1">
+                            <div><strong>Khách hàng:</strong> {selectedPayment?.userName} ({selectedPayment?.userEmail})</div>
+                            <div><strong>Gói cước:</strong> {selectedPayment?.planName}</div>
+                            <div><strong>Số tiền chuyển:</strong> {selectedPayment?.amount.toLocaleString("vi-VN")} {selectedPayment?.currency}</div>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase">Ghi chú phản hồi (Không bắt buộc)</Label>
+                            <Textarea 
+                                placeholder={reviewAction === "approve" ? "Nhập lời chúc hoặc lưu ý..." : "Nhập lý do từ chối (ví dụ: Thiếu số tiền, sai thông tin...)"}
+                                value={adminNote}
+                                onChange={(e) => setAdminNote(e.target.value)}
+                                className="min-h-[80px] bg-background text-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="border-muted hover:bg-muted/10 text-xs h-9"
+                            onClick={() => {
+                                setSelectedPayment(null);
+                                setReviewAction(null);
+                                setAdminNote("");
+                            }}
+                            disabled={submittingReview}
+                        >
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleReviewManualPayment}
+                            className={`text-white text-xs h-9 ${reviewAction === "approve" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
+                            disabled={submittingReview}
+                        >
+                            {submittingReview ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Đang xử lý...
+                                </>
+                            ) : (
+                                reviewAction === "approve" ? "Xác nhận duyệt" : "Xác nhận từ chối"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Xác nhận Thu hồi Premium */}
+            <Dialog 
+                open={revokeConfirmOpen} 
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setRevokeConfirmOpen(false);
+                        setSubToRevoke(null);
+                        setRevokeNote("");
+                    }
+                }}
+            >
+                <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-600">
+                            <AlertCircle className="w-5 h-5 text-red-600" />
+                            Xác nhận thu hồi Premium
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground mt-1">
+                            Hành động này sẽ thu hồi (hủy kích hoạt sớm) gói Premium của tài khoản <strong>{subToRevoke?.email}</strong>. Giao dịch mua sẽ chuyển sang trạng thái đã hết hạn hoặc bị hủy.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-3 py-2">
+                        <div className="bg-muted/30 p-3 rounded-lg text-xs space-y-1">
+                            <div><strong>Tài khoản:</strong> {subToRevoke?.displayName} ({subToRevoke?.email})</div>
+                            <div><strong>Gói hiện tại:</strong> {subToRevoke?.planName} ({subToRevoke?.planType})</div>
+                            <div><strong>Ngày hết hạn gốc:</strong> {subToRevoke && new Date(subToRevoke.expiresAt).toLocaleDateString("vi-VN")}</div>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase">Lý do thu hồi (Không bắt buộc)</Label>
+                            <Textarea 
+                                placeholder="Nhập ghi chú lý do thu hồi (ví dụ: Khách hàng yêu cầu hoàn tiền, phát hiện gian lận...)"
+                                value={revokeNote}
+                                onChange={(e) => setRevokeNote(e.target.value)}
+                                className="min-h-[80px] bg-background text-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="border-muted hover:bg-muted/10 text-xs h-9"
+                            onClick={() => {
+                                setRevokeConfirmOpen(false);
+                                setSubToRevoke(null);
+                                setRevokeNote("");
+                            }}
+                            disabled={revokeLoading}
+                        >
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleRevokePremium}
+                            className="bg-red-600 hover:bg-red-700 text-white text-xs h-9"
+                            disabled={revokeLoading}
+                        >
+                            {revokeLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Đang thu hồi...
+                                </>
+                            ) : (
+                                "Xác nhận thu hồi"
                             )}
                         </Button>
                     </DialogFooter>

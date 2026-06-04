@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "https://api.vcloset.vn";
+export const BASE_URL = import.meta.env.VITE_API_URL || "https://api.vcloset.vn";
 
 export function getToken(): string | null {
     return localStorage.getItem("accessToken");
@@ -936,4 +936,99 @@ export interface DashboardMetrics {
 export async function getAdminDashboardMetrics(): Promise<DashboardMetrics> {
     return request<DashboardMetrics>("/api/admin/dashboard/metrics");
 }
+
+// ─── Admin Manual Payments & Premium Subscriptions APIs ─────────────────────────────────
+
+export interface ManualPaymentListItem {
+    transactionId: number;
+    transactionGuid: string;
+    userId: number;
+    userEmail: string;
+    userName: string;
+    planName: string;
+    amount: number;
+    currency: string;
+    proofImageUrl: string | null;
+    userNote: string | null;
+    createdAt: string;
+}
+
+export interface PremiumSubscriptionListItem {
+    subscriptionId: string;
+    userId: string;
+    email: string;
+    displayName: string;
+    planName: string;
+    planType: string;
+    pricePaid: number;
+    currency: string;
+    paymentMethod: string;
+    paymentRef: string;
+    startedAt: string;
+    expiresAt: string;
+    isActive: boolean;
+}
+
+export interface PagedPremiumSubscriptionsResponse {
+    subscriptions: PremiumSubscriptionListItem[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export async function getAdminPendingManualPayments(): Promise<ManualPaymentListItem[]> {
+    return request<ManualPaymentListItem[]>("/api/manual-payments/admin/pending");
+}
+
+export async function approveAdminManualPayment(
+    transactionId: number,
+    body: { adminNote: string | null }
+): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/manual-payments/admin/${transactionId}/approve`, {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
+}
+
+export async function rejectAdminManualPayment(
+    transactionId: number,
+    body: { adminNote: string | null }
+): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/manual-payments/admin/${transactionId}/reject`, {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
+}
+
+export interface GetAdminPremiumSubscriptionsParams {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    isActive?: boolean;
+    planType?: string;
+}
+
+export async function getAdminPremiumSubscriptions(
+    params: GetAdminPremiumSubscriptionsParams = {}
+): Promise<PagedPremiumSubscriptionsResponse> {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+    if (params.search) query.set("search", params.search);
+    if (params.isActive !== undefined) query.set("isActive", String(params.isActive));
+    if (params.planType) query.set("planType", params.planType);
+
+    return request<PagedPremiumSubscriptionsResponse>(`/api/admin/subscriptions?${query.toString()}`);
+}
+
+export async function revokeAdminPremiumSubscription(
+    subscriptionId: string,
+    body: { adminNote: string | null }
+): Promise<{ success: boolean; message: string }> {
+    return request<{ success: boolean; message: string }>(`/api/admin/subscriptions/${subscriptionId}/revoke`, {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
+}
+
 
