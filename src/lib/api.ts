@@ -1068,4 +1068,223 @@ export async function updateAdminTierConfig(
     });
 }
 
+// ─── Admin Notifications API ──────────────────────────────────────────────────
+
+export interface AdminNotificationItem {
+    id: string;
+    type: string;
+    title: string;
+    body: string | null;
+    referenceType?: string | null;
+    referenceId?: number | null;
+    isRead: boolean;
+    userInternalId: number;
+    createdAt: string;
+}
+
+export interface BroadcastNotificationRequest {
+    title: string;
+    body: string;
+    type?: string;
+    referenceType?: string | null;
+    referenceId?: number | null;
+}
+
+export interface SendTargetedNotificationRequest {
+    userId: number;
+    title: string;
+    body: string;
+    type?: string;
+    referenceType?: string | null;
+    referenceId?: number | null;
+}
+
+export interface GetAdminNotificationsParams {
+    targetUserId?: number;
+    type?: string;
+    page?: number;
+    pageSize?: number;
+}
+
+export async function broadcastSystemNotification(payload: BroadcastNotificationRequest): Promise<{ message: string }> {
+    return request<{ message: string }>("/api/notifications/broadcast", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function sendTargetedNotification(payload: SendTargetedNotificationRequest): Promise<{ message: string; data?: AdminNotificationItem }> {
+    return request<{ message: string; data?: AdminNotificationItem }>("/api/notifications/admin/send-to-user", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function getAdminNotifications(params: GetAdminNotificationsParams = {}): Promise<AdminNotificationItem[]> {
+    const query = new URLSearchParams();
+    if (params.targetUserId !== undefined) query.set("targetUserId", String(params.targetUserId));
+    if (params.type) query.set("type", params.type);
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+
+    return request<AdminNotificationItem[]>(`/api/notifications/admin/all?${query.toString()}`);
+}
+
+export async function deleteNotificationByAdmin(id: string): Promise<void> {
+    return request<void>(`/api/notifications/admin/${id}`, {
+        method: "DELETE",
+    });
+}
+
+// ─── Admin Wardrobes API ──────────────────────────────────────────────────────
+
+export interface AdminWardrobeItem {
+    id: string;
+    userInternalId: number;
+    userDisplayName: string;
+    userEmail: string;
+    name: string | null;
+    originalImageUrl: string;
+    removedBgUrl: string | null;
+    brand: string | null;
+    notes: string | null;
+    isActive: boolean;
+    category: string;
+    bgRemovalStatus: string;
+    createdAt: string;
+}
+
+export interface PagedWardrobeResponse {
+    items: AdminWardrobeItem[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export interface GetAdminWardrobeItemsParams {
+    page?: number;
+    pageSize?: number;
+    userInternalId?: number;
+    category?: string;
+    search?: string;
+}
+
+export async function getAdminWardrobeItems(params: GetAdminWardrobeItemsParams = {}): Promise<PagedWardrobeResponse> {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+    if (params.userInternalId !== undefined) query.set("userInternalId", String(params.userInternalId));
+    if (params.category) query.set("category", params.category);
+    if (params.search) query.set("search", params.search);
+
+    return request<PagedWardrobeResponse>(`/api/admin/wardrobe?${query.toString()}`);
+}
+
+export async function toggleDeactivateWardrobeItem(id: string, isActive: boolean): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/wardrobe/${id}/deactivate`, {
+        method: "PUT",
+        body: JSON.stringify(isActive),
+    });
+}
+
+export async function deleteWardrobeItemByAdmin(id: string): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/wardrobe/${id}`, {
+        method: "DELETE",
+    });
+}
+
+// ─── Admin Outfits API ────────────────────────────────────────────────────────
+
+export interface AdminOutfitItem {
+    id: string;
+    userInternalId: number;
+    userDisplayName: string;
+    userEmail: string;
+    title: string | null;
+    canvasSnapshotUrl: string | null;
+    isPublic: boolean;
+    likeCount: number;
+    createdAt: string;
+}
+
+export interface PagedOutfitResponse {
+    items: AdminOutfitItem[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export interface GetAdminOutfitsParams {
+    page?: number;
+    pageSize?: number;
+    userInternalId?: number;
+    isPublic?: boolean;
+    search?: string;
+}
+
+export async function getAdminOutfits(params: GetAdminOutfitsParams = {}): Promise<PagedOutfitResponse> {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+    if (params.userInternalId !== undefined) query.set("userInternalId", String(params.userInternalId));
+    if (params.isPublic !== undefined) query.set("isPublic", String(params.isPublic));
+    if (params.search) query.set("search", params.search);
+
+    return request<PagedOutfitResponse>(`/api/admin/outfits?${query.toString()}`);
+}
+
+export async function deleteOutfitByAdmin(id: string): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/outfits/${id}`, {
+        method: "DELETE",
+    });
+}
+
+// ─── Admin Payments API ───────────────────────────────────────────────────────
+
+export interface AdminPaymentTransaction {
+    id: string;
+    userInternalId: number;
+    userDisplayName: string;
+    userEmail: string;
+    subscriptionPlanName: string;
+    amount: number;
+    currency: string;
+    paymentGateway: string;
+    status: string;
+    gatewayTransactionId: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface PagedPaymentTransactionResponse {
+    items: AdminPaymentTransaction[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export interface GetAdminPaymentTransactionsParams {
+    page?: number;
+    pageSize?: number;
+    gateway?: string;
+    status?: string;
+    userInternalId?: number;
+}
+
+export async function getAdminPaymentTransactions(params: GetAdminPaymentTransactionsParams = {}): Promise<PagedPaymentTransactionResponse> {
+    const query = new URLSearchParams();
+    if (params.page !== undefined) query.set("page", String(params.page));
+    if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
+    if (params.gateway) query.set("gateway", params.gateway);
+    if (params.status) query.set("status", params.status);
+    if (params.userInternalId !== undefined) query.set("userInternalId", String(params.userInternalId));
+
+    return request<PagedPaymentTransactionResponse>(`/api/admin/payments/transactions?${query.toString()}`);
+}
+
+
+
 

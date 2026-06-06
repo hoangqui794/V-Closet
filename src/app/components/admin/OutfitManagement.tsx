@@ -1,0 +1,439 @@
+import { useState, useEffect } from "react";
+import {
+    getAdminOutfits,
+    deleteOutfitByAdmin,
+    AdminOutfitItem
+} from "@/lib/api";
+import {
+    Sparkles,
+    Search,
+    Trash2,
+    CheckCircle,
+    AlertCircle,
+    X,
+    User,
+    Calendar,
+    ChevronLeft,
+    ChevronRight,
+    Loader2,
+    Heart,
+    Eye,
+    Globe,
+    Lock
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../ui/dialog";
+
+// ─── Toast System ────────────────────────────────────────────────────────────
+interface Toast {
+    id: number;
+    type: "success" | "error";
+    message: string;
+}
+let toastId = 0;
+
+function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: number) => void }) {
+    return (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+            {toasts.map(t => (
+                <div key={t.id}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white animate-in slide-in-from-right-4 duration-300
+                        ${t.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
+                    {t.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                    <span>{t.message}</span>
+                    <button onClick={() => onRemove(t.id)} className="ml-2 opacity-70 hover:opacity-100">
+                        <X className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export function OutfitManagement() {
+    // Toasts state
+    const [toasts, setToasts] = useState<Toast[]>([]);
+    const addToast = (type: Toast["type"], message: string) => {
+        const id = ++toastId;
+        setToasts(prev => [...prev, { id, type, message }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+    };
+
+    // State parameters
+    const [outfits, setOutfits] = useState<AdminOutfitItem[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(12);
+
+    // Filters
+    const [search, setSearch] = useState("");
+    const [isPublicFilter, setIsPublicFilter] = useState<string>("");
+    const [userIdFilter, setUserIdFilter] = useState<number | "">("");
+
+    // Modal states
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    // Fetch outfits
+    const fetchOutfits = async () => {
+        setIsLoading(true);
+        try {
+            const params: any = {
+                page,
+                pageSize
+            };
+            if (search.trim()) params.search = search.trim();
+            if (isPublicFilter !== "") params.isPublic = isPublicFilter === "true";
+            if (userIdFilter !== "") params.userInternalId = Number(userIdFilter);
+
+            const res = await getAdminOutfits(params);
+            setOutfits(res.items || []);
+            setTotalCount(res.totalCount || 0);
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Tải danh sách bộ phối đồ thất bại.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOutfits();
+    }, [page, isPublicFilter, userIdFilter]);
+
+    // Handle search form submit
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setPage(1);
+        fetchOutfits();
+    };
+
+    // Reset filters
+    const handleResetFilters = () => {
+        setSearch("");
+        setIsPublicFilter("");
+        setUserIdFilter("");
+        setPage(1);
+    };
+
+    // Handle delete outfit
+    const handleDeleteConfirm = async () => {
+        if (!deleteId) return;
+        setIsDeleting(true);
+        try {
+            await deleteOutfitByAdmin(deleteId);
+            addToast("success", "Đã xóa bộ phối đồ của người dùng thành công!");
+            setDeleteId(null);
+            
+            // Adjust page if necessary
+            if (outfits.length === 1 && page > 1) {
+                setPage(p => p - 1);
+            } else {
+                fetchOutfits();
+            }
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Xóa bộ phối đồ thất bại.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins text-foreground">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] flex items-center gap-2">
+                        <Sparkles className="w-8 h-8" /> Quản lý Bộ phối đồ (Outfit)
+                    </h2>
+                    <p className="text-muted-foreground mt-1">
+                        Quản lý các bộ trang phục tự thiết kế của người dùng ghép từ Canvas 2D.
+                    </p>
+                </div>
+                <Badge className="bg-[#4a3728]/10 text-[#4a3728] hover:bg-[#4a3728]/15 border-[#4a3728]/20 px-3 py-1 text-sm font-semibold">
+                    Tổng số lượng: {totalCount} bộ đồ
+                </Badge>
+            </div>
+
+            {/* Filters */}
+            <Card className="border-[#4a3728]/10 shadow-sm bg-card/60 backdrop-blur-md">
+                <CardContent className="pt-6">
+                    <form onSubmit={handleSearchSubmit} className="grid gap-4 md:grid-cols-12 items-end">
+                        {/* Search Input */}
+                        <div className="md:col-span-4 space-y-1.5">
+                            <label className="text-xs font-bold text-[#4a3728]/80 uppercase tracking-wide">
+                                Tìm theo tiêu đề bộ đồ
+                            </label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    type="text"
+                                    placeholder="Nhập tiêu đề bộ trang phục..."
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    className="pl-9 bg-white border-border"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Visibility Select */}
+                        <div className="md:col-span-3 space-y-1.5">
+                            <label className="text-xs font-bold text-[#4a3728]/80 uppercase tracking-wide">
+                                Trạng thái hiển thị
+                            </label>
+                            <select
+                                value={isPublicFilter}
+                                onChange={e => { setIsPublicFilter(e.target.value); setPage(1); }}
+                                className="w-full flex h-10 rounded-xl border border-input bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="true">Công khai (Public)</option>
+                                <option value="false">Riêng tư (Private)</option>
+                            </select>
+                        </div>
+
+                        {/* User ID Filter */}
+                        <div className="md:col-span-3 space-y-1.5">
+                            <label className="text-xs font-bold text-[#4a3728]/80 uppercase tracking-wide">
+                                ID Thành viên
+                            </label>
+                            <Input
+                                type="number"
+                                placeholder="Nhập ID User thiết kế..."
+                                value={userIdFilter}
+                                onChange={e => { setUserIdFilter(e.target.value === "" ? "" : Number(e.target.value)); setPage(1); }}
+                                className="bg-white border-border"
+                            />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="md:col-span-2 flex gap-2 w-full">
+                            <Button type="submit" className="bg-[#4a3728] hover:bg-[#3d2d21] text-white flex-1 rounded-xl">
+                                Tìm kiếm
+                            </Button>
+                            <Button type="button" variant="outline" onClick={handleResetFilters} className="rounded-xl px-2.5">
+                                Xóa lọc
+                            </Button>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+
+            {/* Grid list */}
+            {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-32 text-muted-foreground bg-white/40 border border-border/50 rounded-2xl">
+                    <Loader2 className="w-10 h-10 animate-spin text-[#4a3728] mb-2" />
+                    <p className="text-sm font-semibold">Đang tải danh sách bộ phối đồ...</p>
+                </div>
+            ) : outfits.length === 0 ? (
+                <div className="text-center py-24 bg-white/40 border border-border/50 rounded-2xl text-muted-foreground space-y-3">
+                    <Sparkles className="w-16 h-16 mx-auto text-muted-foreground/30 animate-pulse" />
+                    <p className="text-base font-semibold">Không tìm thấy bộ phối đồ nào</p>
+                    <p className="text-xs max-w-md mx-auto">
+                        Người dùng chưa tự thiết kế bộ trang phục nào khớp với bộ lọc tìm kiếm này.
+                    </p>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        {outfits.map(outfit => {
+                            const formattedDate = new Date(outfit.createdAt).toLocaleDateString("vi-VN", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit"
+                            });
+
+                            return (
+                                <Card key={outfit.id} className="overflow-hidden border/60 shadow-sm hover:shadow-md transition-all duration-300 bg-white/80 group">
+                                    {/* Snapshot Image Container */}
+                                    <div className="relative aspect-square bg-slate-100 flex items-center justify-center overflow-hidden border-b">
+                                        {outfit.canvasSnapshotUrl ? (
+                                            <img
+                                                src={outfit.canvasSnapshotUrl}
+                                                alt={outfit.title || "Outfit Snapshot"}
+                                                className="w-full h-full object-contain p-2"
+                                            />
+                                        ) : (
+                                            <div className="text-xs text-muted-foreground font-semibold flex flex-col items-center gap-1.5">
+                                                <Sparkles className="w-8 h-8 opacity-25" />
+                                                Không có ảnh chụp
+                                            </div>
+                                        )}
+
+                                        {/* Status badge */}
+                                        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                                            {outfit.isPublic ? (
+                                                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
+                                                    <Globe className="w-2.5 h-2.5" /> Công khai
+                                                </Badge>
+                                            ) : (
+                                                <Badge className="bg-slate-500/10 text-slate-600 border-slate-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
+                                                    <Lock className="w-2.5 h-2.5" /> Riêng tư
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        <div className="absolute top-2 right-2 z-10">
+                                            <Badge className="bg-rose-500/10 text-rose-600 border-rose-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
+                                                <Heart className="w-2.5 h-2.5 fill-rose-500 text-rose-500" /> {outfit.likeCount} thích
+                                            </Badge>
+                                        </div>
+
+                                        {/* Zoom Action */}
+                                        {outfit.canvasSnapshotUrl && (
+                                            <div className="absolute bottom-2 right-2 flex items-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                    size="icon"
+                                                    onClick={() => setPreviewUrl(outfit.canvasSnapshotUrl)}
+                                                    className="w-8 h-8 rounded-full bg-white/95 backdrop-blur shadow hover:bg-white text-[#4a3728]"
+                                                    title="Phóng to ảnh phối đồ"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Card Info Details */}
+                                    <CardContent className="p-4 space-y-3">
+                                        <div className="space-y-0.5">
+                                            <h4 className="font-bold text-slate-800 text-sm truncate" title={outfit.title || "Bộ đồ không tiêu đề"}>
+                                                {outfit.title || "Bộ đồ tự thiết kế"}
+                                            </h4>
+                                        </div>
+
+                                        <div className="text-[11px] bg-slate-50 border p-2 rounded-lg space-y-1 text-slate-600">
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Người thiết kế:</span>
+                                                <span className="font-bold text-[#4a3728] truncate max-w-[120px]" title={`${outfit.userDisplayName} (ID: ${outfit.userInternalId})`}>
+                                                    {outfit.userDisplayName}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Mã ID User:</span>
+                                                <span className="font-bold font-mono text-slate-700">{outfit.userInternalId}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="font-medium">Ngày tạo:</span>
+                                                <span className="font-mono">{formattedDate}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions block */}
+                                        <div className="flex gap-2 pt-1">
+                                            <Button
+                                                onClick={() => setDeleteId(outfit.id)}
+                                                variant="ghost"
+                                                className="w-full rounded-xl h-8 text-xs font-semibold flex items-center justify-center gap-1.5 text-rose-600 hover:bg-rose-50 hover:text-rose-700 border border-rose-200"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                                Xóa bộ đồ vi phạm
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between pt-4 border-t border-border/40">
+                        <p className="text-xs text-muted-foreground font-semibold">
+                            Hiển thị từ {(page - 1) * pageSize + 1} đến {Math.min(page * pageSize, totalCount)} bộ phối đồ (Trang {page}/{totalPages})
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPage(p => Math.max(p - 1, 1))}
+                                disabled={page === 1}
+                                className="h-8 rounded-lg"
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-1" /> Trước
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                                disabled={page === totalPages}
+                                className="h-8 rounded-lg"
+                            >
+                                Sau <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* DIALOG: CONFIRM DELETE */}
+            <Dialog open={deleteId !== null} onOpenChange={open => !open && setDeleteId(null)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-rose-700 font-bold">
+                            <Trash2 className="w-5 h-5 text-rose-600 animate-pulse" /> Xác nhận xóa bộ phối đồ?
+                        </DialogTitle>
+                        <DialogDescription>
+                            Bộ phối đồ này sẽ bị xóa vĩnh viễn khỏi tài khoản của người dùng và cơ sở dữ liệu. Hành động này không thể hoàn tác.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button type="button" variant="outline" onClick={() => setDeleteId(null)} disabled={isDeleting}>
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleDeleteConfirm}
+                            disabled={isDeleting}
+                            className="bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1.5"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Đồng ý Xóa vĩnh viễn
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* DIALOG: FULLIMAGE PREVIEW */}
+            <Dialog open={previewUrl !== null} onOpenChange={open => !open && setPreviewUrl(null)}>
+                <DialogContent className="sm:max-w-md p-4 flex flex-col items-center">
+                    <DialogHeader className="w-full text-left">
+                        <DialogTitle className="text-[#4a3728] font-bold">Hình ảnh thiết kế bộ trang phục</DialogTitle>
+                    </DialogHeader>
+                    {previewUrl && (
+                        <div className="border rounded-xl bg-white flex items-center justify-center p-2 max-w-full max-h-[70vh] aspect-square overflow-hidden shadow-inner mt-2">
+                            <img src={previewUrl} alt="Outfit Canvas Full" className="max-w-full max-h-full object-contain" />
+                        </div>
+                    )}
+                    <DialogFooter className="w-full mt-4">
+                        <Button type="button" onClick={() => setPreviewUrl(null)} className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                            Đóng cửa sổ
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Toast Container */}
+            <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
+        </div>
+    );
+}

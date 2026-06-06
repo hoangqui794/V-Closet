@@ -13,7 +13,9 @@ import {
     KeyRound,
     Flag,
     Lock,
-    Megaphone
+    Megaphone,
+    Shirt,
+    Palette
 } from "lucide-react";
 import {
     Dialog, DialogContent, DialogHeader,
@@ -55,6 +57,16 @@ const menuItems = [
         icon: Users,
     },
     {
+        title: "Tủ đồ thành viên",
+        url: "/admin/wardrobes",
+        icon: Shirt,
+    },
+    {
+        title: "Bộ phối đồ",
+        url: "/admin/outfits",
+        icon: Palette,
+    },
+    {
         title: "Báo cáo vi phạm",
         url: "/admin/reports",
         icon: Flag,
@@ -63,6 +75,11 @@ const menuItems = [
         title: "Chiến dịch quảng cáo",
         url: "/admin/campaigns",
         icon: Megaphone,
+    },
+    {
+        title: "Thông báo",
+        url: "/admin/notifications",
+        icon: Bell,
     },
     {
         title: "Sản phẩm Affiliate",
