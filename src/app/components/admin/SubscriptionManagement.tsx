@@ -1028,7 +1028,18 @@ export function SubscriptionManagement() {
                                                                 {(txPage - 1) * txPageSize + idx + 1}
                                                             </TableCell>
                                                             <TableCell className="font-mono text-xs font-semibold text-[#4a3728]">
-                                                                {tx.gatewayTransactionId || "N/A"}
+                                                                {tx.gatewayTransactionId && (tx.gatewayTransactionId.startsWith("http://") || tx.gatewayTransactionId.startsWith("https://")) ? (
+                                                                    <button
+                                                                        onClick={() => setZoomImage(tx.gatewayTransactionId)}
+                                                                        className="flex items-center gap-1.5 text-amber-800 hover:text-amber-950 hover:underline bg-[#4a3728]/5 hover:bg-[#4a3728]/10 px-2.5 py-1 rounded-lg transition-colors border border-amber-800/10 cursor-pointer font-semibold text-[11px]"
+                                                                        title="Nhấp để xem ảnh minh chứng chuyển khoản"
+                                                                    >
+                                                                        <Eye className="w-3.5 h-3.5 shrink-0" />
+                                                                        Xem minh chứng chuyển khoản
+                                                                    </button>
+                                                                ) : (
+                                                                    tx.gatewayTransactionId || "N/A"
+                                                                )}
                                                             </TableCell>
                                                             <TableCell>
                                                                 <div className="text-xs font-semibold text-slate-800">{tx.userDisplayName}</div>
