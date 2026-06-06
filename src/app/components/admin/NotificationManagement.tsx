@@ -4,6 +4,7 @@ import {
     sendTargetedNotification,
     getAdminNotifications,
     deleteNotificationByAdmin,
+    bulkDeleteNotificationsByAdmin,
     getAdminUsers,
     AdminNotificationItem,
     AdminUser
@@ -110,6 +111,11 @@ export function NotificationManagement() {
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Bulk delete states
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
     // User search debounce effect
     useEffect(() => {
         if (!userSearch || targetType === "broadcast") {
@@ -153,6 +159,7 @@ export function NotificationManagement() {
 
             const res = await getAdminNotifications(params);
             setLogs(res || []);
+            setSelectedIds([]); // Clear selection when logs change
         } catch (err: any) {
             console.error("Lỗi tải lịch sử thông báo:", err);
             addToast("error", err.message || "Tải lịch sử thông báo thất bại.");
@@ -202,8 +209,8 @@ export function NotificationManagement() {
                 addToast("success", "Đã phát loa thông báo thành công tới toàn bộ người dùng!");
             } else {
                 if (!selectedUser) return;
-                // UserId is a string in user record, but API takes a number. Let's parse internal/user id
-                const userIdNum = parseInt(selectedUser.userId);
+                // Use the returned internalId (integer) from the user record
+                const userIdNum = selectedUser.internalId;
                 await sendTargetedNotification({
                     ...payload,
                     userId: userIdNum
@@ -245,6 +252,24 @@ export function NotificationManagement() {
             addToast("error", err.message || "Thu hồi thông báo thất bại.");
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    // Handle bulk delete/revoke notification
+    const handleBulkDeleteConfirm = async () => {
+        if (selectedIds.length === 0) return;
+        setIsBulkDeleting(true);
+        try {
+            await bulkDeleteNotificationsByAdmin(selectedIds);
+            addToast("success", `Đã thu hồi thành công ${selectedIds.length} thông báo khỏi hệ thống!`);
+            setSelectedIds([]);
+            setBulkConfirmOpen(false);
+            fetchLogs();
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Thu hồi hàng loạt thất bại.");
+        } finally {
+            setIsBulkDeleting(false);
         }
     };
 
@@ -644,6 +669,20 @@ export function NotificationManagement() {
                                         <table className="w-full text-left border-collapse text-sm">
                                             <thead>
                                                 <tr className="bg-[#4a3728]/5 border-b border-border/80 text-muted-foreground font-semibold text-xs tracking-wider uppercase">
+                                                    <th className="p-4 w-12 text-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={logs.length > 0 && selectedIds.length === logs.length}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setSelectedIds(logs.map(item => item.id));
+                                                                } else {
+                                                                    setSelectedIds([]);
+                                                                }
+                                                            }}
+                                                            className="w-4 h-4 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728]"
+                                                        />
+                                                    </th>
                                                     <th className="p-4 w-12 text-center">STT</th>
                                                     <th className="p-4 w-28">Phân loại</th>
                                                     <th className="p-4 w-44">Người nhận</th>
@@ -662,8 +701,24 @@ export function NotificationManagement() {
                                                         minute: "2-digit"
                                                     });
 
+                                                    const isChecked = selectedIds.includes(item.id);
+
                                                     return (
-                                                        <tr key={item.id} className="hover:bg-[#4a3728]/5 transition-colors duration-200">
+                                                        <tr key={item.id} className={`hover:bg-[#4a3728]/5 transition-colors duration-200 ${isChecked ? "bg-[#4a3728]/5" : ""}`}>
+                                                            <td className="p-4 text-center">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isChecked}
+                                                                    onChange={(e) => {
+                                                                        if (e.target.checked) {
+                                                                            setSelectedIds(prev => [...prev, item.id]);
+                                                                        } else {
+                                                                            setSelectedIds(prev => prev.filter(id => id !== item.id));
+                                                                        }
+                                                                    }}
+                                                                    className="w-4 h-4 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728]"
+                                                                />
+                                                            </td>
                                                             <td className="p-4 text-center font-mono text-xs text-muted-foreground">
                                                                 {(logsPage - 1) * logsPageSize + index + 1}
                                                             </td>
@@ -858,6 +913,71 @@ export function NotificationManagement() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* DIALOG: CONFIRM BULK DELETE/REVOKE */}
+            <Dialog open={bulkConfirmOpen} onOpenChange={(open) => !open && setBulkConfirmOpen(false)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-rose-700">
+                            <Trash2 className="w-5 h-5 text-rose-600 animate-pulse" /> Xác nhận thu hồi hàng loạt?
+                        </DialogTitle>
+                        <DialogDescription>
+                            Hành động này sẽ xóa cưỡng chế <strong className="text-rose-600">{selectedIds.length} thông báo</strong> đã chọn khỏi cơ sở dữ liệu và hộp thư của tất cả người nhận tương ứng. Họ sẽ không còn thấy các thông báo này nữa.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button type="button" variant="outline" onClick={() => setBulkConfirmOpen(false)} disabled={isBulkDeleting}>
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleBulkDeleteConfirm}
+                            disabled={isBulkDeleting}
+                            className="bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1.5"
+                        >
+                            {isBulkDeleting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Đang thu hồi...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Đồng ý Thu hồi
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Floating Bulk Actions Bar */}
+            {selectedIds.length > 0 && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-[#4a3728]/20 shadow-2xl px-6 py-4 rounded-2xl flex items-center gap-6 z-40 animate-in slide-in-from-bottom-8 duration-300">
+                    <span className="text-sm font-semibold text-slate-800">
+                        Đã chọn <strong className="text-[#4a3728]">{selectedIds.length}</strong> thông báo
+                    </span>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedIds([])}
+                            className="rounded-xl border-[#4a3728]/20 text-slate-700 h-9"
+                        >
+                            Hủy chọn
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={() => setBulkConfirmOpen(true)}
+                            className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl flex items-center gap-1.5 h-9"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Thu hồi hàng loạt
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Toast Container */}
             <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />

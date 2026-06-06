@@ -3,6 +3,7 @@ import {
     getAdminWardrobeItems,
     toggleDeactivateWardrobeItem,
     deleteWardrobeItemByAdmin,
+    bulkDeleteWardrobeItemsByAdmin,
     AdminWardrobeItem
 } from "@/lib/api";
 import {
@@ -83,6 +84,11 @@ export function WardrobeManagement() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [previewItem, setPreviewItem] = useState<AdminWardrobeItem | null>(null);
 
+    // Bulk delete states
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
     // Fetch wardrobe items
     const fetchItems = async () => {
         setIsLoading(true);
@@ -98,6 +104,7 @@ export function WardrobeManagement() {
             const res = await getAdminWardrobeItems(params);
             setItems(res.items || []);
             setTotalCount(res.totalCount || 0);
+            setSelectedIds([]); // Clear selections on load
         } catch (err: any) {
             console.error(err);
             addToast("error", err.message || "Tải dữ liệu tủ đồ thất bại.");
@@ -160,6 +167,30 @@ export function WardrobeManagement() {
             addToast("error", err.message || "Xóa món đồ thất bại.");
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    // Handle bulk delete wardrobe items
+    const handleBulkDeleteConfirm = async () => {
+        if (selectedIds.length === 0) return;
+        setIsBulkDeleting(true);
+        try {
+            await bulkDeleteWardrobeItemsByAdmin(selectedIds);
+            addToast("success", `Đã xóa thành công ${selectedIds.length} món đồ khỏi hệ thống!`);
+            setSelectedIds([]);
+            setBulkConfirmOpen(false);
+            
+            // Adjust page if necessary
+            if (items.length === selectedIds.length && page > 1) {
+                setPage(p => p - 1);
+            } else {
+                fetchItems();
+            }
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Xóa hàng loạt thất bại.");
+        } finally {
+            setIsBulkDeleting(false);
         }
     };
 
@@ -296,6 +327,32 @@ export function WardrobeManagement() {
                 </div>
             ) : (
                 <div className="space-y-6">
+                    <div className="flex items-center justify-between bg-white/60 backdrop-blur-md p-3.5 border border-[#4a3728]/10 rounded-xl">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="selectAllWardrobes"
+                                checked={items.length > 0 && selectedIds.length === items.length}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setSelectedIds(items.map(item => item.id));
+                                    } else {
+                                        setSelectedIds([]);
+                                    }
+                                }}
+                                className="w-4 h-4 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728]"
+                            />
+                            <label htmlFor="selectAllWardrobes" className="text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                                Chọn tất cả trên trang này
+                            </label>
+                        </div>
+                        {selectedIds.length > 0 && (
+                            <span className="text-xs font-semibold text-[#4a3728]">
+                                Đang chọn {selectedIds.length} món đồ
+                            </span>
+                        )}
+                    </div>
+
                     <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {items.map(item => {
                             const formattedDate = new Date(item.createdAt).toLocaleDateString("vi-VN", {
@@ -304,11 +361,29 @@ export function WardrobeManagement() {
                                 day: "2-digit"
                             });
 
+                            const isSelected = selectedIds.includes(item.id);
+
                             return (
                                 <Card key={item.id} className={`overflow-hidden border/60 shadow-sm hover:shadow-md transition-all duration-300 bg-white/80 group
-                                    ${!item.isActive ? "opacity-75 border-red-200 bg-rose-50/10" : ""}`}>
+                                    ${!item.isActive ? "opacity-75 border-red-200 bg-rose-50/10" : ""}
+                                    ${isSelected ? "ring-2 ring-[#4a3728] border-transparent bg-[#4a3728]/5" : ""}`}>
                                     {/* Image Container with background removal hover preview */}
                                     <div className="relative aspect-square bg-slate-100 flex items-center justify-center overflow-hidden border-b">
+                                        {/* Checkbox Overlay */}
+                                        <div className="absolute top-2 right-2 z-20">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedIds(prev => [...prev, item.id]);
+                                                    } else {
+                                                        setSelectedIds(prev => prev.filter(id => id !== item.id));
+                                                    }
+                                                }}
+                                                className="w-5 h-5 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728] bg-white/80"
+                                            />
+                                        </div>
                                         <img
                                             src={item.originalImageUrl}
                                             alt={item.name || "Original Wardrobe Item"}
@@ -557,6 +632,71 @@ export function WardrobeManagement() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* DIALOG: CONFIRM BULK DELETE */}
+            <Dialog open={bulkConfirmOpen} onOpenChange={open => !open && setBulkConfirmOpen(false)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-rose-700 font-bold">
+                            <Trash2 className="w-5 h-5 text-rose-600 animate-pulse" /> Xác nhận xóa hàng loạt?
+                        </DialogTitle>
+                        <DialogDescription>
+                            Bạn sắp xóa vĩnh viễn <strong className="text-rose-600">{selectedIds.length} món đồ</strong> khỏi hệ thống. Hành động này sẽ loại bỏ hoàn toàn các món đồ này khỏi tủ đồ của tất cả người dùng và cơ sở dữ liệu, không thể hoàn tác.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button type="button" variant="outline" onClick={() => setBulkConfirmOpen(false)} disabled={isBulkDeleting}>
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleBulkDeleteConfirm}
+                            disabled={isBulkDeleting}
+                            className="bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1.5"
+                        >
+                            {isBulkDeleting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Đồng ý Xóa vĩnh viễn
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Floating Bulk Actions Bar */}
+            {selectedIds.length > 0 && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-[#4a3728]/20 shadow-2xl px-6 py-4 rounded-2xl flex items-center gap-6 z-40 animate-in slide-in-from-bottom-8 duration-300">
+                    <span className="text-sm font-semibold text-slate-800">
+                        Đã chọn <strong className="text-[#4a3728]">{selectedIds.length}</strong> món đồ
+                    </span>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedIds([])}
+                            className="rounded-xl border-[#4a3728]/20 text-slate-700 h-9"
+                        >
+                            Hủy chọn
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={() => setBulkConfirmOpen(true)}
+                            className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl flex items-center gap-1.5 h-9"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Xóa hàng loạt
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Toast Container */}
             <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />

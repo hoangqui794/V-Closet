@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
     getAdminOutfits,
     deleteOutfitByAdmin,
+    bulkDeleteOutfitsByAdmin,
     AdminOutfitItem
 } from "@/lib/api";
 import {
@@ -79,6 +80,11 @@ export function OutfitManagement() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+    // Bulk delete states
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
     // Fetch outfits
     const fetchOutfits = async () => {
         setIsLoading(true);
@@ -94,6 +100,7 @@ export function OutfitManagement() {
             const res = await getAdminOutfits(params);
             setOutfits(res.items || []);
             setTotalCount(res.totalCount || 0);
+            setSelectedIds([]); // Clear selection when outfits reload
         } catch (err: any) {
             console.error(err);
             addToast("error", err.message || "Tải danh sách bộ phối đồ thất bại.");
@@ -141,6 +148,30 @@ export function OutfitManagement() {
             addToast("error", err.message || "Xóa bộ phối đồ thất bại.");
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    // Handle bulk delete outfits
+    const handleBulkDeleteConfirm = async () => {
+        if (selectedIds.length === 0) return;
+        setIsBulkDeleting(true);
+        try {
+            await bulkDeleteOutfitsByAdmin(selectedIds);
+            addToast("success", `Đã xóa thành công ${selectedIds.length} bộ phối đồ khỏi hệ thống!`);
+            setSelectedIds([]);
+            setBulkConfirmOpen(false);
+            
+            // Adjust page if necessary
+            if (outfits.length === selectedIds.length && page > 1) {
+                setPage(p => p - 1);
+            } else {
+                fetchOutfits();
+            }
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Xóa hàng loạt thất bại.");
+        } finally {
+            setIsBulkDeleting(false);
         }
     };
 
@@ -243,6 +274,32 @@ export function OutfitManagement() {
                 </div>
             ) : (
                 <div className="space-y-6">
+                    <div className="flex items-center justify-between bg-white/60 backdrop-blur-md p-3.5 border border-[#4a3728]/10 rounded-xl">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="selectAllOutfits"
+                                checked={outfits.length > 0 && selectedIds.length === outfits.length}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setSelectedIds(outfits.map(item => item.id));
+                                    } else {
+                                        setSelectedIds([]);
+                                    }
+                                }}
+                                className="w-4 h-4 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728]"
+                            />
+                            <label htmlFor="selectAllOutfits" className="text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                                Chọn tất cả trên trang này
+                            </label>
+                        </div>
+                        {selectedIds.length > 0 && (
+                            <span className="text-xs font-semibold text-[#4a3728]">
+                                Đang chọn {selectedIds.length} bộ phối đồ
+                            </span>
+                        )}
+                    </div>
+
                     <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {outfits.map(outfit => {
                             const formattedDate = new Date(outfit.createdAt).toLocaleDateString("vi-VN", {
@@ -251,10 +308,29 @@ export function OutfitManagement() {
                                 day: "2-digit"
                             });
 
+                            const isSelected = selectedIds.includes(outfit.id);
+
                             return (
-                                <Card key={outfit.id} className="overflow-hidden border/60 shadow-sm hover:shadow-md transition-all duration-300 bg-white/80 group">
+                                <Card key={outfit.id} className={`overflow-hidden border/60 shadow-sm hover:shadow-md transition-all duration-300 bg-white/80 group
+                                    ${isSelected ? "ring-2 ring-[#4a3728] border-transparent bg-[#4a3728]/5" : ""}`}>
                                     {/* Snapshot Image Container */}
                                     <div className="relative aspect-square bg-slate-100 flex items-center justify-center overflow-hidden border-b">
+                                        {/* Checkbox Overlay */}
+                                        <div className="absolute top-2.5 left-2 z-20">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedIds(prev => [...prev, outfit.id]);
+                                                    } else {
+                                                        setSelectedIds(prev => prev.filter(id => id !== outfit.id));
+                                                    }
+                                                }}
+                                                className="w-5 h-5 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728] bg-white/80"
+                                            />
+                                        </div>
+
                                         {outfit.canvasSnapshotUrl ? (
                                             <img
                                                 src={outfit.canvasSnapshotUrl}
@@ -269,7 +345,7 @@ export function OutfitManagement() {
                                         )}
 
                                         {/* Status badge */}
-                                        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                                        <div className="absolute top-2.5 left-9 flex flex-col gap-1 z-10">
                                             {outfit.isPublic ? (
                                                 <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
                                                     <Globe className="w-2.5 h-2.5" /> Công khai
@@ -431,6 +507,71 @@ export function OutfitManagement() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* DIALOG: CONFIRM BULK DELETE */}
+            <Dialog open={bulkConfirmOpen} onOpenChange={open => !open && setBulkConfirmOpen(false)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-rose-700 font-bold">
+                            <Trash2 className="w-5 h-5 text-rose-600 animate-pulse" /> Xác nhận xóa hàng loạt?
+                        </DialogTitle>
+                        <DialogDescription>
+                            Bạn sắp xóa vĩnh viễn <strong className="text-rose-600">{selectedIds.length} bộ phối đồ</strong> khỏi hệ thống. Hành động này sẽ loại bỏ hoàn toàn các bộ phối đồ này khỏi tài khoản của tất cả người dùng tương ứng và cơ sở dữ liệu, không thể hoàn tác.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button type="button" variant="outline" onClick={() => setBulkConfirmOpen(false)} disabled={isBulkDeleting}>
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleBulkDeleteConfirm}
+                            disabled={isBulkDeleting}
+                            className="bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1.5"
+                        >
+                            {isBulkDeleting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Đồng ý Xóa vĩnh viễn
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Floating Bulk Actions Bar */}
+            {selectedIds.length > 0 && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-[#4a3728]/20 shadow-2xl px-6 py-4 rounded-2xl flex items-center gap-6 z-40 animate-in slide-in-from-bottom-8 duration-300">
+                    <span className="text-sm font-semibold text-slate-800">
+                        Đã chọn <strong className="text-[#4a3728]">{selectedIds.length}</strong> bộ phối đồ
+                    </span>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedIds([])}
+                            className="rounded-xl border-[#4a3728]/20 text-slate-700 h-9"
+                        >
+                            Hủy chọn
+                        </Button>
+                        <Button
+                            size="sm"
+                            onClick={() => setBulkConfirmOpen(true)}
+                            className="bg-rose-600 hover:bg-rose-700 text-white rounded-xl flex items-center gap-1.5 h-9"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Xóa hàng loạt
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Toast Container */}
             <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />

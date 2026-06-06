@@ -208,6 +208,7 @@ async function request<T>(
 
 export interface AdminUser {
     userId: string;
+    internalId: number;
     email: string;
     displayName: string;
     avatarUrl: string | null;
@@ -1185,6 +1186,13 @@ export async function deleteNotificationByAdmin(id: string): Promise<void> {
     });
 }
 
+export async function bulkDeleteNotificationsByAdmin(ids: string[]): Promise<{ message: string }> {
+    return request<{ message: string }>("/api/notifications/admin/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify(ids),
+    });
+}
+
 // ─── Admin Wardrobes API ──────────────────────────────────────────────────────
 
 export interface AdminWardrobeItem {
@@ -1243,6 +1251,13 @@ export async function deleteWardrobeItemByAdmin(id: string): Promise<{ message: 
     });
 }
 
+export async function bulkDeleteWardrobeItemsByAdmin(ids: string[]): Promise<{ message: string }> {
+    return request<{ message: string }>("/api/admin/wardrobe/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify(ids),
+    });
+}
+
 // ─── Admin Outfits API ────────────────────────────────────────────────────────
 
 export interface AdminOutfitItem {
@@ -1287,6 +1302,13 @@ export async function getAdminOutfits(params: GetAdminOutfitsParams = {}): Promi
 export async function deleteOutfitByAdmin(id: string): Promise<{ message: string }> {
     return request<{ message: string }>(`/api/admin/outfits/${id}`, {
         method: "DELETE",
+    });
+}
+
+export async function bulkDeleteOutfitsByAdmin(ids: string[]): Promise<{ message: string }> {
+    return request<{ message: string }>("/api/admin/outfits/bulk-delete", {
+        method: "POST",
+        body: JSON.stringify(ids),
     });
 }
 
