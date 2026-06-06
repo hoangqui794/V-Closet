@@ -54,7 +54,9 @@ import {
     revokeAdminPremiumSubscription,
     PremiumSubscriptionListItem,
     BASE_URL,
-    getToken
+    getToken,
+    getAdminPaymentTransactions,
+    AdminPaymentTransaction
 } from "../../../lib/api";
 import { HubConnectionBuilder, HubConnection, HubConnectionState } from "@microsoft/signalr";
 
@@ -88,8 +90,46 @@ const initialCoupons = [
 ];
 
 export function SubscriptionManagement() {
-    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons" | "manual-payments">("limits");
+    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons" | "manual-payments" | "transactions">("limits");
     const [coupons, setCoupons] = useState(initialCoupons);
+
+    // States cho Lịch sử Giao dịch thanh toán trực tuyến (Momo/PayOS)
+    const [transactions, setTransactions] = useState<AdminPaymentTransaction[]>([]);
+    const [loadingTx, setLoadingTx] = useState(false);
+    const [txPage, setTxPage] = useState(1);
+    const [txPageSize] = useState(10);
+    const [txTotalCount, setTxTotalCount] = useState(0);
+    const [txGatewayFilter, setTxGatewayFilter] = useState("");
+    const [txStatusFilter, setTxStatusFilter] = useState("");
+    const [txUserIdFilter, setTxUserIdFilter] = useState<number | "">("");
+
+    const fetchTransactions = async () => {
+        setLoadingTx(true);
+        try {
+            const params: any = {
+                page: txPage,
+                pageSize: txPageSize
+            };
+            if (txGatewayFilter) params.gateway = txGatewayFilter;
+            if (txStatusFilter) params.status = txStatusFilter;
+            if (txUserIdFilter !== "") params.userInternalId = Number(txUserIdFilter);
+
+            const res = await getAdminPaymentTransactions(params);
+            setTransactions(res.items || []);
+            setTxTotalCount(res.totalCount || 0);
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Không thể tải danh sách giao dịch trực tuyến.");
+        } finally {
+            setLoadingTx(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === "transactions") {
+            fetchTransactions();
+        }
+    }, [activeTab, txPage, txGatewayFilter, txStatusFilter, txUserIdFilter]);
 
     // States cho Duyệt chuyển khoản thủ công
     const [pendingPayments, setPendingPayments] = useState<ManualPaymentListItem[]>([]);
@@ -512,6 +552,16 @@ export function SubscriptionManagement() {
                 >
                     Mã giảm giá (Coupons)
                 </button>
+                <button
+                    onClick={() => { setActiveTab("transactions"); setTxPage(1); }}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
+                        activeTab === "transactions"
+                            ? "border-[#4a3728] text-[#4a3728]"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                    }`}
+                >
+                    Đối soát Giao dịch Momo/PayOS
+                </button>
             </div>
 
             {/* TAB: DOANH THU & GIAO DỊCH */}
@@ -865,6 +915,181 @@ export function SubscriptionManagement() {
                             </TableBody>
                         </Table>
                     </div>
+                </div>
+            )}
+
+            {/* TAB: ĐỐI SOÁT GIAO DỊCH MOMO/PAYOS */}
+            {activeTab === "transactions" && (
+                <div className="space-y-6">
+                    <Card className="shadow-sm border-muted">
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
+                            <div>
+                                <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                                    <CreditCard className="w-5 h-5" /> Nhật ký giao dịch trực tuyến
+                                </CardTitle>
+                                <CardDescription>
+                                    Xem và đối soát toàn bộ dòng tiền thanh toán trực tuyến qua cổng Momo hoặc PayOS.
+                                </CardDescription>
+                            </div>
+                            
+                            {/* Filter bar */}
+                            <div className="flex flex-wrap items-center gap-3">
+                                {/* Filter by Gateway */}
+                                <select
+                                    value={txGatewayFilter}
+                                    onChange={e => { setTxGatewayFilter(e.target.value); setTxPage(1); }}
+                                    className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none"
+                                >
+                                    <option value="">Tất cả Cổng (Momo/PayOS)</option>
+                                    <option value="Momo">Ví điện tử Momo</option>
+                                    <option value="PayOS">Cổng PayOS</option>
+                                </select>
+
+                                {/* Filter by Status */}
+                                <select
+                                    value={txStatusFilter}
+                                    onChange={e => { setTxStatusFilter(e.target.value); setTxPage(1); }}
+                                    className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none"
+                                >
+                                    <option value="">Tất cả Trạng thái</option>
+                                    <option value="Paid">Đã thanh toán (Paid)</option>
+                                    <option value="Pending">Chờ thanh toán (Pending)</option>
+                                    <option value="Failed">Thất bại (Failed)</option>
+                                </select>
+
+                                {/* Filter by UserId */}
+                                <Input
+                                    type="number"
+                                    placeholder="Tìm theo ID User..."
+                                    value={txUserIdFilter}
+                                    onChange={e => { setTxUserIdFilter(e.target.value === "" ? "" : Number(e.target.value)); setTxPage(1); }}
+                                    className="h-9 w-36 text-xs bg-background"
+                                />
+                            </div>
+                        </CardHeader>
+                        
+                        <CardContent className="pt-6">
+                            {loadingTx ? (
+                                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                    <span className="text-sm">Đang tải lịch sử giao dịch trực tuyến...</span>
+                                </div>
+                            ) : transactions.length === 0 ? (
+                                <div className="text-center py-16 text-muted-foreground space-y-2">
+                                    <HelpCircle className="w-12 h-12 mx-auto text-muted-foreground/30" />
+                                    <p className="text-sm font-semibold">Chưa phát sinh giao dịch nào</p>
+                                    <p className="text-xs">
+                                        Không tìm thấy lịch sử thanh toán qua cổng tự động MOMO/PAYOS.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="overflow-x-auto rounded-xl border border-muted">
+                                        <Table>
+                                            <TableHeader className="bg-muted/50">
+                                                <TableRow>
+                                                    <TableHead className="w-12 text-center">STT</TableHead>
+                                                    <TableHead>Mã giao dịch cổng</TableHead>
+                                                    <TableHead>Khách hàng</TableHead>
+                                                    <TableHead>Gói Premium</TableHead>
+                                                    <TableHead>Số tiền</TableHead>
+                                                    <TableHead>Cổng kết nối</TableHead>
+                                                    <TableHead>Trạng thái</TableHead>
+                                                    <TableHead>Thời gian</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {transactions.map((tx, idx) => {
+                                                    const formattedDate = new Date(tx.createdAt).toLocaleString("vi-VN", {
+                                                        year: "numeric",
+                                                        month: "2-digit",
+                                                        day: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit"
+                                                    });
+
+                                                    const getTxStatusBadgeColor = (status: string) => {
+                                                        switch (status.toLowerCase()) {
+                                                            case "paid":
+                                                            case "success":
+                                                                return "bg-green-100 text-green-800 border-none";
+                                                            case "pending":
+                                                                return "bg-amber-100 text-amber-800 border-none animate-pulse";
+                                                            case "failed":
+                                                                return "bg-red-100 text-red-800 border-none";
+                                                            default:
+                                                                return "bg-gray-100 text-gray-800 border-none";
+                                                        }
+                                                    };
+
+                                                    return (
+                                                        <TableRow key={tx.id} className="hover:bg-muted/30 transition-colors">
+                                                            <TableCell className="text-center font-mono text-xs text-muted-foreground">
+                                                                {(txPage - 1) * txPageSize + idx + 1}
+                                                            </TableCell>
+                                                            <TableCell className="font-mono text-xs font-semibold text-[#4a3728]">
+                                                                {tx.gatewayTransactionId || "N/A"}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="text-xs font-semibold text-slate-800">{tx.userDisplayName}</div>
+                                                                <div className="text-[10px] text-muted-foreground font-mono">ID User: {tx.userInternalId}</div>
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-medium text-slate-700">
+                                                                {tx.subscriptionPlanName}
+                                                            </TableCell>
+                                                            <TableCell className="font-mono font-bold text-xs">
+                                                                {tx.amount.toLocaleString("vi-VN")} {tx.currency}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-semibold">
+                                                                <Badge variant="outline" className="border-muted bg-[#4a3728]/5 text-[#4a3728] text-[10px]">
+                                                                    {tx.paymentGateway}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge className={`font-semibold text-[10px] px-2 py-0.5 rounded ${getTxStatusBadgeColor(tx.status)}`}>
+                                                                    {tx.status}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-mono text-muted-foreground">
+                                                                {formattedDate}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                    
+                                    {/* Pagination */}
+                                    <div className="flex items-center justify-between pt-2">
+                                        <p className="text-xs text-muted-foreground font-semibold">
+                                            Tổng giao dịch: {txTotalCount} (Trang {txPage})
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setTxPage(p => Math.max(p - 1, 1))}
+                                                disabled={txPage === 1}
+                                                className="h-8 rounded-lg"
+                                            >
+                                                Trước
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setTxPage(p => p + 1)}
+                                                disabled={transactions.length < txPageSize}
+                                                className="h-8 rounded-lg"
+                                            >
+                                                Sau
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
             )}
 
