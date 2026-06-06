@@ -22,7 +22,11 @@ import {
     Loader2,
     AlertCircle,
     CheckCircle,
-    Eye
+    Eye,
+    TrendingUp,
+    BarChart2,
+    RefreshCw,
+    Search
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
@@ -56,7 +60,9 @@ import {
     BASE_URL,
     getToken,
     getAdminPaymentTransactions,
-    AdminPaymentTransaction
+    AdminPaymentTransaction,
+    getAdminRevenueStats,
+    RevenueStats
 } from "../../../lib/api";
 import { HubConnectionBuilder, HubConnection, HubConnectionState } from "@microsoft/signalr";
 
@@ -90,7 +96,7 @@ const initialCoupons = [
 ];
 
 export function SubscriptionManagement() {
-    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons" | "manual-payments" | "transactions">("limits");
+    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons" | "manual-payments" | "transactions" | "revenue">("limits");
     const [coupons, setCoupons] = useState(initialCoupons);
 
     // States cho Lịch sử Giao dịch thanh toán trực tuyến (Momo/PayOS)
@@ -101,7 +107,18 @@ export function SubscriptionManagement() {
     const [txTotalCount, setTxTotalCount] = useState(0);
     const [txGatewayFilter, setTxGatewayFilter] = useState("");
     const [txStatusFilter, setTxStatusFilter] = useState("");
-    const [txUserIdFilter, setTxUserIdFilter] = useState<number | "">("");
+    const [txUserIdFilter, setTxUserIdFilter] = useState<number | "">("")
+    const [txSearchTerm, setTxSearchTerm] = useState("");
+
+    // States cho Doanh thu
+    const [revenue, setRevenue] = useState<RevenueStats | null>(null);
+    const [loadingRevenue, setLoadingRevenue] = useState(false);
+    const [revenueGateway, setRevenueGateway] = useState("");
+    const [revenueFrom, setRevenueFrom] = useState(() => {
+        const d = new Date(); d.setDate(d.getDate() - 29);
+        return d.toISOString().split("T")[0];
+    });
+    const [revenueTo, setRevenueTo] = useState(() => new Date().toISOString().split("T")[0]);;
 
     const fetchTransactions = async () => {
         setLoadingTx(true);
@@ -113,6 +130,7 @@ export function SubscriptionManagement() {
             if (txGatewayFilter) params.gateway = txGatewayFilter;
             if (txStatusFilter) params.status = txStatusFilter;
             if (txUserIdFilter !== "") params.userInternalId = Number(txUserIdFilter);
+            if (txSearchTerm.trim()) params.searchTerm = txSearchTerm.trim();
 
             const res = await getAdminPaymentTransactions(params);
             setTransactions(res.items || []);
@@ -125,11 +143,34 @@ export function SubscriptionManagement() {
         }
     };
 
+    const fetchRevenue = useCallback(async () => {
+        setLoadingRevenue(true);
+        try {
+            const params: any = {};
+            if (revenueFrom) params.fromDate = revenueFrom;
+            if (revenueTo) params.toDate = revenueTo;
+            if (revenueGateway) params.gateway = revenueGateway;
+            const res = await getAdminRevenueStats(params);
+            setRevenue(res);
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Không thể tải thống kê doanh thu.");
+        } finally {
+            setLoadingRevenue(false);
+        }
+    }, [revenueFrom, revenueTo, revenueGateway]);
+
     useEffect(() => {
         if (activeTab === "transactions") {
             fetchTransactions();
         }
-    }, [activeTab, txPage, txGatewayFilter, txStatusFilter, txUserIdFilter]);
+    }, [activeTab, txPage, txGatewayFilter, txStatusFilter, txUserIdFilter, txSearchTerm]);
+
+    useEffect(() => {
+        if (activeTab === "revenue") {
+            fetchRevenue();
+        }
+    }, [activeTab, fetchRevenue]);
 
     // States cho Duyệt chuyển khoản thủ công
     const [pendingPayments, setPendingPayments] = useState<ManualPaymentListItem[]>([]);
@@ -562,6 +603,17 @@ export function SubscriptionManagement() {
                 >
                     Đối soát Giao dịch Momo/PayOS
                 </button>
+                <button
+                    onClick={() => { setActiveTab("revenue"); }}
+                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
+                        activeTab === "revenue"
+                            ? "border-[#4a3728] text-[#4a3728]"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                    }`}
+                >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    Thống kê Doanh thu
+                </button>
             </div>
 
             {/* TAB: DOANH THU & GIAO DỊCH */}
@@ -934,14 +986,26 @@ export function SubscriptionManagement() {
                             
                             {/* Filter bar */}
                             <div className="flex flex-wrap items-center gap-3">
+                                {/* Search by name/email */}
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        type="text"
+                                        placeholder="Tìm theo tên hoặc email..."
+                                        value={txSearchTerm}
+                                        onChange={e => { setTxSearchTerm(e.target.value); setTxPage(1); }}
+                                        className="h-9 pl-8 w-52 text-xs bg-background"
+                                    />
+                                </div>
+
                                 {/* Filter by Gateway */}
                                 <select
                                     value={txGatewayFilter}
                                     onChange={e => { setTxGatewayFilter(e.target.value); setTxPage(1); }}
                                     className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none"
                                 >
-                                    <option value="">Tất cả Cổng (Momo/PayOS)</option>
-                                    <option value="Momo">Ví điện tử Momo</option>
+                                    <option value="">Tất cả Cổng</option>
+                                    <option value="Momo">Ví Momo</option>
                                     <option value="PayOS">Cổng PayOS</option>
                                 </select>
 
@@ -951,20 +1015,11 @@ export function SubscriptionManagement() {
                                     onChange={e => { setTxStatusFilter(e.target.value); setTxPage(1); }}
                                     className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none"
                                 >
-                                    <option value="">Tất cả Trạng thái</option>
-                                    <option value="Paid">Đã thanh toán (Paid)</option>
-                                    <option value="Pending">Chờ thanh toán (Pending)</option>
-                                    <option value="Failed">Thất bại (Failed)</option>
+                                    <option value="">Tất cả TT</option>
+                                    <option value="Paid">Đã thanh toán</option>
+                                    <option value="Pending">Chờ thanh toán</option>
+                                    <option value="Failed">Thất bại</option>
                                 </select>
-
-                                {/* Filter by UserId */}
-                                <Input
-                                    type="number"
-                                    placeholder="Tìm theo ID User..."
-                                    value={txUserIdFilter}
-                                    onChange={e => { setTxUserIdFilter(e.target.value === "" ? "" : Number(e.target.value)); setTxPage(1); }}
-                                    className="h-9 w-36 text-xs bg-background"
-                                />
                             </div>
                         </CardHeader>
                         
@@ -1097,6 +1152,167 @@ export function SubscriptionManagement() {
                                             </Button>
                                         </div>
                                     </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {/* TAB: THỐNG KÊ DOANH THU */}
+            {activeTab === "revenue" && (
+                <div className="space-y-6">
+                    {/* Bộ lọc */}
+                    <Card className="shadow-sm border-muted">
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
+                            <div>
+                                <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                                    <BarChart2 className="w-5 h-5" /> Thống kê Doanh thu
+                                </CardTitle>
+                                <CardDescription>Tổng hợp doanh thu từ các giao dịch thanh toán trực tuyến thành công.</CardDescription>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <span>Từ</span>
+                                    <input type="date" value={revenueFrom} onChange={e => setRevenueFrom(e.target.value)}
+                                        className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none" />
+                                    <span>đến</span>
+                                    <input type="date" value={revenueTo} onChange={e => setRevenueTo(e.target.value)}
+                                        className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none" />
+                                </div>
+                                <select value={revenueGateway} onChange={e => setRevenueGateway(e.target.value)}
+                                    className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none">
+                                    <option value="">Tất cả cổng</option>
+                                    <option value="Momo">Momo</option>
+                                    <option value="PayOS">PayOS</option>
+                                </select>
+                                <Button size="sm" className="h-9 bg-[#4a3728] hover:bg-[#3d2d21] text-white gap-1.5" onClick={fetchRevenue} disabled={loadingRevenue}>
+                                    {loadingRevenue ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                                    Làm mới
+                                </Button>
+                            </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-6">
+                            {loadingRevenue ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                    <span className="text-sm">Đang tải dữ liệu doanh thu...</span>
+                                </div>
+                            ) : !revenue ? (
+                                <div className="text-center py-16 text-muted-foreground space-y-2">
+                                    <BarChart2 className="w-12 h-12 mx-auto text-muted-foreground/30" />
+                                    <p className="text-sm font-semibold">Chưa có dữ liệu</p>
+                                    <p className="text-xs">Nhấn "Làm mới" để tải thống kê doanh thu.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {/* Stat Cards */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-emerald-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Tổng doanh thu</span>
+                                            <span className="text-2xl font-bold text-emerald-700">{revenue.totalRevenue.toLocaleString("vi-VN")}đ</span>
+                                            <span className="text-[11px] text-muted-foreground">Đơn vị: {revenue.currency || "VND"}</span>
+                                        </div>
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-blue-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Tổng giao dịch</span>
+                                            <span className="text-2xl font-bold text-blue-700">{revenue.totalTransactions}</span>
+                                            <span className="text-[11px] text-muted-foreground">Tất cả trạng thái</span>
+                                        </div>
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-green-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Đã thanh toán</span>
+                                            <span className="text-2xl font-bold text-green-700">{revenue.paidCount}</span>
+                                            <span className="text-[11px] text-muted-foreground">Giao dịch Paid/Success</span>
+                                        </div>
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-amber-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Chờ / Thất bại</span>
+                                            <span className="text-2xl font-bold text-amber-700">{revenue.pendingCount + revenue.failedCount}</span>
+                                            <span className="text-[11px] text-muted-foreground">{revenue.pendingCount} chờ · {revenue.failedCount} thất bại</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Breakdown by Gateway */}
+                                    {revenue.byGateway && revenue.byGateway.length > 0 && (
+                                        <div className="rounded-xl border border-muted p-5 shadow-sm">
+                                            <h3 className="text-sm font-semibold text-[#4a3728] mb-4 flex items-center gap-2">
+                                                <CreditCard className="w-4 h-4" /> Phân tích theo cổng thanh toán
+                                            </h3>
+                                            <div className="grid sm:grid-cols-2 gap-4">
+                                                {revenue.byGateway.map(g => {
+                                                    const pct = revenue.totalRevenue > 0 ? Math.round((g.totalAmount / revenue.totalRevenue) * 100) : 0;
+                                                    return (
+                                                        <div key={g.gateway} className="flex flex-col gap-2 p-4 rounded-lg bg-muted/30 border border-muted">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-sm font-bold text-[#4a3728]">{g.gateway}</span>
+                                                                <Badge variant="outline" className="text-[11px] border-[#4a3728]/20 bg-[#4a3728]/5 text-[#4a3728]">{g.count} giao dịch</Badge>
+                                                            </div>
+                                                            <span className="text-xl font-bold text-slate-800">{g.totalAmount.toLocaleString("vi-VN")}đ</span>
+                                                            <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                                                                <div className="h-full rounded-full bg-gradient-to-r from-[#4a3728] to-amber-600 transition-all duration-500" style={{ width: `${pct}%` }} />
+                                                            </div>
+                                                            <span className="text-xs text-muted-foreground">{pct}% tổng doanh thu</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Biểu đồ doanh thu theo ngày (SVG bar chart) */}
+                                    {revenue.dailyRevenue && revenue.dailyRevenue.length > 0 && (() => {
+                                        const data = revenue.dailyRevenue.slice(-30);
+                                        const maxAmt = Math.max(...data.map(d => d.totalAmount), 1);
+                                        const W = 100 / data.length;
+                                        return (
+                                            <div className="rounded-xl border border-muted p-5 shadow-sm">
+                                                <h3 className="text-sm font-semibold text-[#4a3728] mb-4 flex items-center gap-2">
+                                                    <TrendingUp className="w-4 h-4" /> Doanh thu theo ngày (30 ngày gần nhất)
+                                                </h3>
+                                                <div className="relative w-full overflow-x-auto">
+                                                    <svg viewBox={`0 0 ${Math.max(data.length * 24, 300)} 140`} className="w-full min-w-[300px]" preserveAspectRatio="none">
+                                                        {/* Grid lines */}
+                                                        {[0, 25, 50, 75, 100].map(pct => (
+                                                            <line key={pct}
+                                                                x1="0" y1={120 - pct * 1.1}
+                                                                x2={Math.max(data.length * 24, 300)} y2={120 - pct * 1.1}
+                                                                stroke="#e5e7eb" strokeWidth="0.5" strokeDasharray="3,3" />
+                                                        ))}
+                                                        {/* Bars */}
+                                                        {data.map((d, i) => {
+                                                            const bw = Math.max(data.length * 24, 300) / data.length;
+                                                            const h = (d.totalAmount / maxAmt) * 110;
+                                                            const x = i * bw + bw * 0.15;
+                                                            const bwFill = bw * 0.7;
+                                                            return (
+                                                                <g key={d.date}>
+                                                                    <rect x={x} y={120 - h} width={bwFill} height={h}
+                                                                        rx="3" fill="url(#barGrad)" opacity="0.9" />
+                                                                    {data.length <= 15 && (
+                                                                        <text x={x + bwFill / 2} y="135" textAnchor="middle" fontSize="7" fill="#9ca3af">
+                                                                            {d.date.slice(5)}
+                                                                        </text>
+                                                                    )}
+                                                                </g>
+                                                            );
+                                                        })}
+                                                        <defs>
+                                                            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="0%" stopColor="#92400e" />
+                                                                <stop offset="100%" stopColor="#d97706" />
+                                                            </linearGradient>
+                                                        </defs>
+                                                    </svg>
+                                                </div>
+                                                <div className="mt-2 flex flex-wrap gap-3">
+                                                    {data.slice(-7).map(d => (
+                                                        <div key={d.date} className="text-[10px] text-muted-foreground">
+                                                            <span className="font-semibold text-slate-700">{d.date.slice(5)}</span>: {d.totalAmount.toLocaleString("vi-VN")}đ
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             )}
                         </CardContent>

@@ -1343,6 +1343,7 @@ export interface GetAdminPaymentTransactionsParams {
     gateway?: string;
     status?: string;
     userInternalId?: number;
+    searchTerm?: string;
 }
 
 export async function getAdminPaymentTransactions(params: GetAdminPaymentTransactionsParams = {}): Promise<PagedPaymentTransactionResponse> {
@@ -1352,8 +1353,49 @@ export async function getAdminPaymentTransactions(params: GetAdminPaymentTransac
     if (params.gateway) query.set("gateway", params.gateway);
     if (params.status) query.set("status", params.status);
     if (params.userInternalId !== undefined) query.set("userInternalId", String(params.userInternalId));
+    if (params.searchTerm) query.set("searchTerm", params.searchTerm);
 
     return request<PagedPaymentTransactionResponse>(`/api/admin/payments/transactions?${query.toString()}`);
+}
+
+// ─── Revenue Stats (computed from transactions) ──────────────────────────────
+
+export interface RevenueByGateway {
+    gateway: string;
+    totalAmount: number;
+    count: number;
+}
+
+export interface RevenueDailyPoint {
+    date: string; // YYYY-MM-DD
+    totalAmount: number;
+    count: number;
+}
+
+export interface RevenueStats {
+    totalRevenue: number;
+    totalTransactions: number;
+    paidCount: number;
+    pendingCount: number;
+    failedCount: number;
+    byGateway: RevenueByGateway[];
+    dailyRevenue: RevenueDailyPoint[];
+    currency: string;
+}
+
+export interface GetRevenueStatsParams {
+    fromDate?: string; // ISO date
+    toDate?: string;
+    gateway?: string;
+}
+
+export async function getAdminRevenueStats(params: GetRevenueStatsParams = {}): Promise<RevenueStats> {
+    const query = new URLSearchParams();
+    if (params.fromDate) query.set("fromDate", params.fromDate);
+    if (params.toDate) query.set("toDate", params.toDate);
+    if (params.gateway) query.set("gateway", params.gateway);
+
+    return request<RevenueStats>(`/api/admin/payments/revenue-stats?${query.toString()}`);
 }
 
 
