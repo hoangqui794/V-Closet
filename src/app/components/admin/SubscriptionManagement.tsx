@@ -373,7 +373,7 @@ export function SubscriptionManagement() {
             description: plan.description || "",
             price: plan.price,
             currency: plan.currency,
-            durationDays: plan.durationDays,
+            durationDays: plan.durationDays ?? 0,
             isActive: plan.isActive
         });
         setErrorPlans("");
@@ -388,8 +388,8 @@ export function SubscriptionManagement() {
             setErrorPlans("Giá tiền phải lớn hơn hoặc bằng 0");
             return;
         }
-        if (planForm.durationDays < 1) {
-            setErrorPlans("Số ngày hiệu lực phải lớn hơn 0");
+        if (planForm.durationDays < 0) {
+            setErrorPlans("Số ngày hiệu lực phải lớn hơn hoặc bằng 0");
             return;
         }
 
@@ -413,8 +413,8 @@ export function SubscriptionManagement() {
             setErrorPlans("Giá tiền phải lớn hơn hoặc bằng 0");
             return;
         }
-        if (planForm.durationDays < 1) {
-            setErrorPlans("Số ngày hiệu lực phải lớn hơn 0");
+        if (planForm.durationDays < 0) {
+            setErrorPlans("Số ngày hiệu lực phải lớn hơn hoặc bằng 0");
             return;
         }
 
@@ -1382,7 +1382,9 @@ export function SubscriptionManagement() {
                                                             {(plan.price ?? 0).toLocaleString("vi-VN")} {plan.currency || "VND"}
                                                         </TableCell>
                                                         <TableCell className="text-sm font-medium">
-                                                            {plan.durationDays ?? 0} ngày
+                                                            {plan.durationDays && plan.durationDays > 0 
+                                                                ? `${plan.durationDays} ngày` 
+                                                                : "Không giới hạn (Nạp lượt)"}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Badge
@@ -1604,10 +1606,11 @@ export function SubscriptionManagement() {
                                 <Label>Thời gian hiệu lực (ngày)</Label>
                                 <Input
                                     type="number"
-                                    min={1}
+                                    min={0}
                                     value={planForm.durationDays}
                                     onChange={(e) => setPlanForm({ ...planForm, durationDays: Number(e.target.value) })}
                                 />
+                                <span className="text-[10px] text-muted-foreground">Nhập 0 để thiết lập không giới hạn thời hạn (Gói nạp lượt)</span>
                             </div>
                             <div className="flex flex-col gap-1.5">
                                 <Label>Trạng thái kích hoạt</Label>
