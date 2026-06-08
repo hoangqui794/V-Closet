@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import {
     LayoutDashboard,
@@ -43,7 +43,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import imgLogoVcloset from "@/assets/logoVcloset.png";
-import { setToken as apiSetToken, getToken as apiGetToken, clearToken as apiClearToken, logoutAdmin, changePassword } from "@/lib/api";
+import { setToken as apiSetToken, getToken as apiGetToken, clearToken as apiClearToken, logoutAdmin, changePassword, getCurrentUserProfile, updateCurrentUserProfile, updateCurrentUserAvatar } from "@/lib/api";
+import { toast } from "sonner";
+import { AdminNotifications } from "./AdminNotifications";
 
 const menuItems = [
     {
@@ -114,8 +116,17 @@ export function AdminLayout() {
     const [changePasswordError, setChangePasswordError] = useState("");
     const [changePasswordSuccess, setChangePasswordSuccess] = useState("");
 
+    // States for Edit Profile Dialog
+    const [editProfileOpen, setEditProfileOpen] = useState(false);
+    const [profileDisplayName, setProfileDisplayName] = useState("");
+    const [profilePhoneNumber, setProfilePhoneNumber] = useState("");
+    const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
+    const [editProfileLoading, setEditProfileLoading] = useState(false);
+    const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     // Read saved admin profile information
-    const [adminUser] = useState(() => {
+    const [adminUser, setAdminUser] = useState(() => {
         try {
             const saved = localStorage.getItem("adminUser");
             return saved ? JSON.parse(saved) : null;
@@ -172,6 +183,68 @@ export function AdminLayout() {
             setChangePasswordError(err.message || "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu cũ.");
         } finally {
             setChangePasswordLoading(false);
+        }
+    };
+
+    const handleOpenProfile = async () => {
+        setEditProfileOpen(true);
+        setEditProfileLoading(true);
+        try {
+            const data = await getCurrentUserProfile();
+            setProfileDisplayName(data.displayName || "");
+            setProfilePhoneNumber(data.profile?.phoneNumber || "");
+            setProfileAvatarUrl(data.avatarUrl || null);
+        } catch (error: any) {
+            console.error("Lỗi tải thông tin:", error);
+            toast.error("Không thể tải thông tin hồ sơ");
+        } finally {
+            setEditProfileLoading(false);
+        }
+    };
+
+    const handleEditProfileSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setEditProfileLoading(true);
+        try {
+            await updateCurrentUserProfile({
+                displayName: profileDisplayName,
+                phoneNumber: profilePhoneNumber,
+            });
+            
+            // Cập nhật lại adminUser trong localStorage
+            const updatedUser = { ...adminUser, displayName: profileDisplayName, avatarUrl: profileAvatarUrl };
+            setAdminUser(updatedUser);
+            localStorage.setItem("adminUser", JSON.stringify(updatedUser));
+            
+            toast.success("Đã cập nhật hồ sơ thành công!");
+            setEditProfileOpen(false);
+        } catch (error: any) {
+            console.error("Lỗi lưu thông tin:", error);
+            toast.error("Lỗi khi cập nhật hồ sơ");
+        } finally {
+            setEditProfileLoading(false);
+        }
+    };
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsAvatarUploading(true);
+        try {
+            const res = await updateCurrentUserAvatar(file);
+            setProfileAvatarUrl(res.avatarUrl);
+            
+            // Cập nhật ngay avatar vào thanh topbar
+            const updatedUser = { ...adminUser, avatarUrl: res.avatarUrl };
+            setAdminUser(updatedUser);
+            localStorage.setItem("adminUser", JSON.stringify(updatedUser));
+            toast.success("Đã cập nhật ảnh đại diện!");
+        } catch (error: any) {
+            console.error("Lỗi tải ảnh:", error);
+            toast.error("Lỗi khi tải ảnh lên");
+        } finally {
+            setIsAvatarUploading(false);
         }
     };
 
@@ -276,6 +349,61 @@ export function AdminLayout() {
                 </DialogContent>
             </Dialog>
 
+            {/* Edit Profile Dialog */}
+            <Dialog open={editProfileOpen} onOpenChange={setEditProfileOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728]">
+                            <Users className="w-5 h-5" /> Hồ sơ cá nhân
+                        </DialogTitle>
+                        <DialogDescription>
+                            Cập nhật thông tin hồ sơ và ảnh đại diện của bạn.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleEditProfileSubmit} className="space-y-4">
+                        <div className="flex flex-col items-center gap-2">
+                            <Avatar className="w-20 h-20 cursor-pointer border-2 border-muted hover:opacity-80 transition-opacity" onClick={() => fileInputRef.current?.click()}>
+                                <AvatarImage src={profileAvatarUrl || ""} />
+                                <AvatarFallback className="bg-[#4a3728] text-white">
+                                    {isAvatarUploading ? "..." : (profileDisplayName || adminUser?.displayName || "AD").slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs text-muted-foreground">Nhấn vào ảnh để thay đổi</span>
+                            <input type="file" hidden accept="image/*" ref={fileInputRef} onChange={handleAvatarChange} />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                Tên hiển thị
+                            </label>
+                            <Input
+                                required
+                                placeholder="Nhập tên hiển thị"
+                                value={profileDisplayName}
+                                onChange={e => setProfileDisplayName(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                Số điện thoại
+                            </label>
+                            <Input
+                                placeholder="Nhập số điện thoại"
+                                value={profilePhoneNumber}
+                                onChange={e => setProfilePhoneNumber(e.target.value)}
+                            />
+                        </div>
+                        <DialogFooter className="pt-2">
+                            <Button type="button" variant="outline" onClick={() => setEditProfileOpen(false)}>
+                                Hủy
+                            </Button>
+                            <Button type="submit" disabled={editProfileLoading || isAvatarUploading} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                                {editProfileLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
             <SidebarProvider>
                 <div className="flex h-screen w-full bg-background overflow-hidden font-poppins">
                     <Sidebar variant="inset" collapsible="icon">
@@ -365,11 +493,8 @@ export function AdminLayout() {
                                 <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-[#4a3728]" title="Đổi mật khẩu" onClick={() => setChangePasswordOpen(true)}>
                                     <Lock className="h-5 w-5" />
                                 </Button>
-                                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-                                    <Bell className="h-5 w-5" />
-                                    <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full border-2 border-background" />
-                                </Button>
-                                <div className="flex items-center gap-3 pl-4 border-l">
+                                <AdminNotifications />
+                                <div className="flex items-center gap-3 pl-4 border-l cursor-pointer hover:opacity-80 transition-opacity" onClick={handleOpenProfile} title="Xem hồ sơ">
                                     <div className="text-right hidden sm:block">
                                         <p className="text-sm font-medium leading-none">
                                             {adminUser?.displayName || "Admin V-Closet"}
@@ -383,7 +508,7 @@ export function AdminLayout() {
                                         </p>
                                     </div>
                                     <Avatar>
-                                        <AvatarImage src={adminUser?.avatarUrl || "https://github.com/shadcn.png"} />
+                                        <AvatarImage src={adminUser?.avatarUrl || ""} />
                                         <AvatarFallback className="bg-[#4a3728] text-white">
                                             {(adminUser?.displayName || "AD").slice(0, 2).toUpperCase()}
                                         </AvatarFallback>

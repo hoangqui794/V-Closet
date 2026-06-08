@@ -220,14 +220,19 @@ export interface AdminUser {
     activeBanType: string | null;
     bannedUntil: string | null;
     permissions?: string[] | any[];
-    country?: string | null;
-    phoneNumber?: string | null;
-    address?: string | null;
-    gender?: string | null;
-    heightCm?: number | null;
-    weightKg?: number | null;
-    dateOfBirth?: string | null;
-    wardrobeItemCount?: number;
+    profile?: {
+        phoneNumber?: string | null;
+        address?: string | null;
+        gender?: string | null;
+        country?: string | null;
+        heightCm?: number | null;
+        weightKg?: number | null;
+        dateOfBirth?: string | null;
+        wardrobeItemCount?: number;
+        jobTitle?: string | null;
+        employeeCode?: string | null;
+        department?: string | null;
+    } | null;
     banHistory?: Array<{
         id: string;
         banType: string;
@@ -1398,6 +1403,125 @@ export async function getAdminRevenueStats(params: GetRevenueStatsParams = {}): 
     return request<RevenueStats>(`/api/admin/payments/revenue-stats?${query.toString()}`);
 }
 
+// ─── Current User Profile API ─────────────────────────────────────────────────
+
+export interface UserProfileResponse {
+    userId: string;
+    internalId: number;
+    email: string;
+    displayName: string;
+    avatarUrl: string | null;
+    role: string;
+    isActive: boolean;
+    isEmailVerified: boolean;
+    createdAt: string;
+    isBanned: boolean;
+    activeBanType: string | null;
+    bannedUntil: string | null;
+    profile: {
+        phoneNumber?: string | null;
+        address?: string | null;
+        gender?: string | null;
+        country?: string | null;
+        heightCm?: number | null;
+        weightKg?: number | null;
+        dateOfBirth?: string | null;
+        wardrobeItemCount?: number;
+    } | null;
+}
+
+export async function getCurrentUserProfile(): Promise<UserProfileResponse> {
+    return request<UserProfileResponse>("/api/users/me", {
+        method: "GET",
+    });
+}
+
+export interface UpdateUserProfilePayload {
+    heightCm?: number | null;
+    weightKg?: number | null;
+    dateOfBirth?: string | null;
+    phoneNumber?: string | null;
+    address?: string | null;
+    gender?: string | null;
+    country?: string | null;
+    displayName?: string | null;
+    lifestyle?: string | null;
+    eyeColor?: string | null;
+    hair?: string | null;
+}
+
+export async function updateCurrentUserProfile(payload: UpdateUserProfilePayload): Promise<{ message: string }> {
+    // Note: If the backend returns a plain string, we might need to handle it differently,
+    // but our request wrapper handles text responses as well.
+    return request<any>("/api/users/me", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function updateCurrentUserAvatar(file: File): Promise<{ avatarUrl: string; message: string }> {
+    const formData = new FormData();
+    formData.append("file", file); // The backend parameter is named 'file'
+    return request<{ avatarUrl: string; message: string }>("/api/users/me/avatar", {
+        method: "POST",
+        body: formData,
+    });
+}
+
+export async function updateAdminInternalInfo(userId: string, data: {
+    department?: string;
+    jobTitle?: string;
+    employeeCode?: string;
+    notes?: string;
+}) {
+    return request<any>(`/api/admin/users/${userId}/internal-info`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+}
+
+// ─── Notification API ─────────────────────────────────────────────────────────
+
+export interface AppNotification {
+    id: string;
+    type: string;
+    title: string;
+    body: string;
+    referenceType: string | null;
+    referenceId: string | null;
+    isRead: boolean;
+    createdAt: string;
+}
+
+export interface NotificationResponse {
+    items: AppNotification[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    unreadCount: number;
+}
+
+export const getNotifications = async (isRead?: boolean, page: number = 1, pageSize: number = 20): Promise<AppNotification[]> => {
+    let url = `/api/notifications?page=${page}&pageSize=${pageSize}`;
+    if (isRead !== undefined) url += `&isRead=${isRead}`;
+    const res = await request<AppNotification[]>(url);
+    return res;
+};
+
+export const getUnreadNotificationCount = async (): Promise<number> => {
+    const res = await request<{ count: number }>('/api/notifications/unread-count');
+    return res.count;
+};
+
+export const markNotificationAsRead = async (id: string): Promise<void> => {
+    await request(`/api/notifications/${id}/read`, { method: "PATCH" });
+};
+
+export const markAllNotificationsAsRead = async (): Promise<void> => {
+    await request(`/api/notifications/read-all`, { method: "POST" });
+};
 
 
 

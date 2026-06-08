@@ -203,7 +203,7 @@ export function ProfilePage() {
 
   const { t } = useLanguage();
   const menuActions: Record<string, () => void> = {
-    [t("editProfile")]: () => navigate("/app/settings/edit-profile"),
+    [t("editProfile")]: () => navigate("/edit-profile"),
     [t("subscription")]: () => navigate("/app/subscription"),
     [t("personalStats")]: () => setShowMeasurements(true),
     [t("wardrobeHistory")]: () => toast("📜 Mở lịch sử mua hàng..."),

@@ -27,9 +27,11 @@ import {
     deactivateAdminUser, banAdminUser, unbanAdminUser,
     updateUserRole, reactivateAdminUser,
     grantAdminUserPermissions, revokeAdminUserPermissions, resetAdminUserPermissions,
-    getAdminPermissionsAll, getAdminUserPermissions,
-    AdminUser, GetUsersParams, PermissionResponse
+    getAdminPermissionsAll, getAdminUserPermissions, updateAdminInternalInfo,
+    AdminUser, GetUsersParams, PermissionResponse,
+    BASE_URL, getToken
 } from "../../../lib/api";
+import { HubConnectionBuilder, HubConnection } from "@microsoft/signalr";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -152,8 +154,8 @@ function CreateUserModal({
 // ─── User Detail Modal ────────────────────────────────────────────────────────
 
 function UserDetailModal({
-    userId, open, onClose
-}: { userId: string | null; open: boolean; onClose: () => void }) {
+    userId, open, onClose, isSuperAdmin, onEditInternalInfo
+}: { userId: string | null; open: boolean; onClose: () => void; isSuperAdmin?: boolean; onEditInternalInfo?: () => void }) {
     const [user, setUser] = useState<AdminUser | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -218,59 +220,104 @@ function UserDetailModal({
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-muted-foreground flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-stone-400" /> Số điện thoại:</span>
-                                        <span className="font-semibold text-[#4a3728]">{user.phoneNumber ?? "—"}</span>
+                                        <span className="font-semibold text-[#4a3728]">{user.profile?.phoneNumber ?? "—"}</span>
                                     </div>
-                                    <div className="flex justify-between items-start gap-4">
-                                        <span className="text-muted-foreground flex items-center gap-1 shrink-0"><MapPin className="w-3.5 h-3.5 text-stone-400" /> Địa chỉ:</span>
-                                        <span className="font-semibold text-[#4a3728] text-right break-words max-w-[180px]">{user.address ?? "—"}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-stone-400" /> Ngày sinh:</span>
-                                        <span className="font-semibold text-[#4a3728]">{user.dateOfBirth ? formatDate(user.dateOfBirth) : "—"}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">Giới tính:</span>
-                                        <span className="font-semibold text-[#4a3728] bg-muted/50 px-2 py-0.5 rounded-full">{user.gender ?? "—"}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground flex items-center gap-1"><Globe className="w-3.5 h-3.5 text-stone-400" /> Quốc gia:</span>
-                                        <span className="font-semibold text-[#4a3728]">{user.country ?? "—"}</span>
-                                    </div>
+                                    {user.role === 'Customer' && (
+                                        <>
+                                            <div className="flex justify-between items-start gap-4">
+                                                <span className="text-muted-foreground flex items-center gap-1 shrink-0"><MapPin className="w-3.5 h-3.5 text-stone-400" /> Địa chỉ:</span>
+                                                <span className="font-semibold text-[#4a3728] text-right break-words max-w-[180px]">{user.profile?.address ?? "—"}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-muted-foreground flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-stone-400" /> Ngày sinh:</span>
+                                                <span className="font-semibold text-[#4a3728]">{user.profile?.dateOfBirth ? formatDate(user.profile?.dateOfBirth) : "—"}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-muted-foreground">Giới tính:</span>
+                                                <span className="font-semibold text-[#4a3728] bg-muted/50 px-2 py-0.5 rounded-full">{user.profile?.gender ?? "—"}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-muted-foreground flex items-center gap-1"><Globe className="w-3.5 h-3.5 text-stone-400" /> Quốc gia:</span>
+                                                <span className="font-semibold text-[#4a3728]">{user.profile?.country ?? "—"}</span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Body Profile & Wardrobe */}
-                            <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
-                                <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
-                                    <Activity className="w-4 h-4 text-purple-600" /> Chỉ số & Tủ đồ
-                                </h3>
-                                <div className="space-y-3 text-xs">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground flex items-center gap-1"><Ruler className="w-3.5 h-3.5 text-stone-400" /> Chiều cao:</span>
-                                        <span className="font-bold text-[#4a3728]">{user.heightCm ? `${user.heightCm} cm` : "—"}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">Cân nặng:</span>
-                                        <span className="font-bold text-[#4a3728]">{user.weightKg ? `${user.weightKg} kg` : "—"}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground flex items-center gap-1"><Shirt className="w-3.5 h-3.5 text-stone-400" /> Số đồ trong tủ:</span>
-                                        <span className="font-bold text-[#4a3728] bg-orange-50 text-orange-800 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
-                                            {user.wardrobeItemCount ?? 0} món đồ
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">Trạng thái HĐ:</span>
-                                        <span className={`font-semibold ${user.isActive ? "text-green-600" : "text-amber-600"}`}>
-                                            {user.isActive ? "🟢 Hoạt động" : "🟡 Inactive"}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">Ngày đăng ký:</span>
-                                        <span className="font-medium text-[#4a3728]">{formatDate(user.createdAt)}</span>
+                            {/* Body Profile & Wardrobe (for Customers) / Admin Info (for Admins) */}
+                            {(user.role === 'Admin' || user.role === 'Moderator' || user.role === 'SuperAdmin') ? (
+                                <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm relative">
+                                    <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center justify-between border-b border-[#f5efe6] pb-2">
+                                        <div className="flex items-center gap-1.5">
+                                            <Activity className="w-4 h-4 text-purple-600" /> Thông tin Nội bộ
+                                        </div>
+                                        {isSuperAdmin && (
+                                            <Button variant="ghost" size="sm" className="h-6 px-2 text-[#7f5539] hover:bg-[#f5efe6]" onClick={onEditInternalInfo}>
+                                                Sửa
+                                            </Button>
+                                        )}
+                                    </h3>
+                                    <div className="space-y-3 text-xs">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground flex items-center gap-1">Chức danh:</span>
+                                            <span className="font-bold text-[#4a3728]">{user.profile?.jobTitle ?? "—"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Phòng ban:</span>
+                                            <span className="font-bold text-[#4a3728]">{user.profile?.department ?? "—"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Mã NV:</span>
+                                            <span className="font-bold text-[#4a3728] bg-orange-50 text-orange-800 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
+                                                {user.profile?.employeeCode ?? "—"}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Trạng thái HĐ:</span>
+                                            <span className={`font-semibold ${user.isActive ? "text-green-600" : "text-amber-600"}`}>
+                                                {user.isActive ? "🟢 Hoạt động" : "🟡 Inactive"}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Ngày đăng ký:</span>
+                                            <span className="font-medium text-[#4a3728]">{formatDate(user.createdAt)}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
+                                    <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
+                                        <Activity className="w-4 h-4 text-purple-600" /> Chỉ số & Tủ đồ
+                                    </h3>
+                                    <div className="space-y-3 text-xs">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground flex items-center gap-1"><Ruler className="w-3.5 h-3.5 text-stone-400" /> Chiều cao:</span>
+                                            <span className="font-bold text-[#4a3728]">{user.profile?.heightCm ? `${user.profile?.heightCm} cm` : "—"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Cân nặng:</span>
+                                            <span className="font-bold text-[#4a3728]">{user.profile?.weightKg ? `${user.profile?.weightKg} kg` : "—"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground flex items-center gap-1"><Shirt className="w-3.5 h-3.5 text-stone-400" /> Số đồ trong tủ:</span>
+                                            <span className="font-bold text-[#4a3728] bg-orange-50 text-orange-800 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
+                                                {user.profile?.wardrobeItemCount ?? 0} món đồ
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Trạng thái HĐ:</span>
+                                            <span className={`font-semibold ${user.isActive ? "text-green-600" : "text-amber-600"}`}>
+                                                {user.isActive ? "🟢 Hoạt động" : "🟡 Inactive"}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground">Ngày đăng ký:</span>
+                                            <span className="font-medium text-[#4a3728]">{formatDate(user.createdAt)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Ban / Violation History List */}
@@ -754,7 +801,7 @@ function GrantPermissionModal({
 
 function UpdateRoleModal({
     user, open, onClose, onSuccess
-}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: () => void }) {
+}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: (newRole: string) => void }) {
     const [role, setRole] = useState("Customer");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -774,7 +821,7 @@ function UpdateRoleModal({
 
         try {
             await updateUserRole(user.userId, { newRole: rolePayload });
-            onSuccess();
+            onSuccess(role);
             onClose();
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : "Cập nhật vai trò thất bại");
@@ -829,9 +876,104 @@ function UpdateRoleModal({
     );
 }
 
+// ─── Edit Admin Internal Info Modal ─────────────────────────────────────────────
+
+function EditAdminInternalModal({
+    user, open, onClose, onSuccess
+}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: () => void }) {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [form, setForm] = useState({
+        department: "",
+        jobTitle: "",
+        employeeCode: "",
+        notes: ""
+    });
+
+    useEffect(() => {
+        if (open && user) {
+            setForm({
+                department: user.profile?.department || "",
+                jobTitle: user.profile?.jobTitle || "",
+                employeeCode: user.profile?.employeeCode || "",
+                notes: user.profile?.notes || ""
+            });
+            setError("");
+        }
+    }, [open, user]);
+
+    const handleSubmit = async () => {
+        if (!user) return;
+        setLoading(true);
+        setError("");
+        try {
+            await updateAdminInternalInfo(user.userId, form);
+            onSuccess();
+            onClose();
+        } catch (e: any) {
+            setError(e.message || "Cập nhật thông tin nội bộ thất bại.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={v => !v && onClose()}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-purple-700 font-semibold">
+                        <UserCog className="w-5 h-5 shrink-0" /> Sửa thông tin Nội bộ
+                    </DialogTitle>
+                    <DialogDescription className="text-sm text-muted-foreground mt-1">
+                        Cập nhật chức danh, phòng ban cho <strong>{user?.displayName}</strong>.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="flex flex-col gap-4 py-3">
+                    {error && (
+                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg animate-in fade-in duration-200">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    <div className="flex flex-col gap-1.5">
+                        <Label>Chức danh</Label>
+                        <Input value={form.jobTitle} onChange={e => setForm(f => ({...f, jobTitle: e.target.value}))} placeholder="Vd: System Administrator" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <Label>Phòng ban</Label>
+                        <Input value={form.department} onChange={e => setForm(f => ({...f, department: e.target.value}))} placeholder="Vd: IT" />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <Label>Mã NV</Label>
+                        <Input value={form.employeeCode} onChange={e => setForm(f => ({...f, employeeCode: e.target.value}))} placeholder="Vd: NV001" />
+                    </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
+                    <Button onClick={handleSubmit} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
+                        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        Lưu thông tin
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export function UserManagement() {
+    const [adminUser] = useState(() => {
+        try {
+            const saved = localStorage.getItem("adminUser");
+            return saved ? JSON.parse(saved) : null;
+        } catch { return null; }
+    });
+    const isSuperAdmin = adminUser?.role?.toLowerCase() === "superadmin";
+
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
@@ -853,6 +995,7 @@ export function UserManagement() {
     const [deactivateUser, setDeactivateUser] = useState<AdminUser | null>(null);
     const [permissionUser, setPermissionUser] = useState<AdminUser | null>(null);
     const [roleUser, setRoleUser] = useState<AdminUser | null>(null);
+    const [editInternalInfoUser, setEditInternalInfoUser] = useState<AdminUser | null>(null);
 
     // Toast
     const [toasts, setToasts] = useState<Toast[]>([]);
@@ -893,6 +1036,67 @@ export function UserManagement() {
 
     useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
+    // ─── SignalR Real-time Notifications ───────────────────────────────────────
+    useEffect(() => {
+        let connection: HubConnection | null = null;
+
+        const startSignalR = async () => {
+            const token = getToken();
+            if (!token) return;
+
+            let userId = 0;
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                userId = parseInt(payload.sub || payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || "0");
+            } catch (e) {
+                console.error("Failed to parse JWT token", e);
+            }
+
+            connection = new HubConnectionBuilder()
+                .withUrl(`${BASE_URL}/notificationHub?userId=${userId}`, {
+                    accessTokenFactory: () => token
+                })
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("ReceiveAdminUserUpdate", (data: { action: string, userId: string, displayName: string }) => {
+                console.log("[SignalR] Received AdminUserUpdate:", data);
+                if (data.action === "Deactivate" || data.action === "Reactivate") {
+                    setUsers(prevUsers => prevUsers.map(u => 
+                        u.userId === data.userId 
+                            ? { ...u, isActive: data.action === "Reactivate" } 
+                            : u
+                    ));
+                    addToast("success", `Tài khoản ${data.displayName} vừa bị đổi trạng thái bởi Admin khác.`);
+                } else if (data.action === "Create") {
+                    // Cập nhật nhẹ hoặc fetch lại tuỳ ý (vì Create có thể thiếu nhiều trường)
+                    // Tốt nhất là thêm toast và gọi fetchUsers nhẹ ngầm
+                    addToast("success", `Admin khác vừa tạo mới người dùng: ${data.displayName}`);
+                    // fetchUsers(); // Tuỳ chọn
+                } else if (data.action === "Delete") {
+                    setUsers(prevUsers => prevUsers.filter(u => u.userId !== data.userId));
+                    addToast("success", `Admin khác vừa xóa người dùng: ${data.displayName}`);
+                }
+            });
+
+            try {
+                await connection.start();
+                console.log("[SignalR Admin User Update] Connected successfully.");
+                await connection.invoke("JoinAdminGroup");
+            } catch (err) {
+                console.error("[SignalR Admin User Update] Connection Error:", err);
+            }
+        };
+
+        startSignalR();
+
+        return () => {
+            if (connection) {
+                connection.stop();
+            }
+        };
+    }, []); // Empty dependency array as it registers events once
+
     const handleSearch = () => {
         setSearch(searchInput);
         setPage(1);
@@ -906,7 +1110,7 @@ export function UserManagement() {
         try {
             await unbanAdminUser(user.userId);
             addToast("success", `Đã gỡ khóa ${user.displayName}`);
-            fetchUsers();
+            setUsers(prev => prev.map(u => u.userId === user.userId ? { ...u, isBanned: false } : u));
         } catch (e: unknown) {
             addToast("error", e instanceof Error ? e.message : "Gỡ khóa thất bại");
         }
@@ -916,7 +1120,7 @@ export function UserManagement() {
         try {
             await reactivateAdminUser(user.userId);
             addToast("success", `Đã kích hoạt lại tài khoản ${user.displayName}`);
-            fetchUsers();
+            setUsers(prev => prev.map(u => u.userId === user.userId ? { ...u, isActive: true } : u));
         } catch (e: unknown) {
             addToast("error", e instanceof Error ? e.message : "Kích hoạt lại thất bại");
         }
@@ -1196,30 +1400,53 @@ export function UserManagement() {
                 userId={detailUserId}
                 open={!!detailUserId}
                 onClose={() => setDetailUserId(null)}
+                isSuperAdmin={isSuperAdmin}
+                onEditInternalInfo={() => {
+                    const targetUser = users.find(u => u.userId === detailUserId);
+                    if (targetUser) {
+                        setDetailUserId(null); // close detail modal
+                        setEditInternalInfoUser(targetUser); // open edit internal info modal
+                    }
+                }}
+            />
+            <EditAdminInternalModal
+                user={editInternalInfoUser}
+                open={!!editInternalInfoUser}
+                onClose={() => setEditInternalInfoUser(null)}
+                onSuccess={() => { addToast("success", "Cập nhật thông tin nội bộ thành công"); }}
             />
             <BanUserModal
                 user={banUser}
                 open={!!banUser}
                 onClose={() => setBanUser(null)}
-                onSuccess={() => { addToast("success", `Đã khóa ${banUser?.displayName}`); fetchUsers(); }}
+                onSuccess={() => { 
+                    addToast("success", `Đã khóa ${banUser?.displayName}`);
+                    setUsers(prev => prev.map(u => u.userId === banUser?.userId ? { ...u, isBanned: true } : u));
+                }}
             />
             <ConfirmDeactivateModal
                 user={deactivateUser}
                 open={!!deactivateUser}
                 onClose={() => setDeactivateUser(null)}
-                onSuccess={() => { addToast("success", `Đã vô hiệu hóa ${deactivateUser?.displayName}`); fetchUsers(); }}
+                onSuccess={() => { 
+                    addToast("success", `Đã vô hiệu hóa ${deactivateUser?.displayName}`);
+                    setUsers(prev => prev.map(u => u.userId === deactivateUser?.userId ? { ...u, isActive: false } : u));
+                }}
             />
             <GrantPermissionModal
                 user={permissionUser}
                 open={!!permissionUser}
                 onClose={() => setPermissionUser(null)}
-                onSuccess={(msg: string) => { addToast("success", msg); fetchUsers(); }}
+                onSuccess={(msg: string) => { addToast("success", msg); }} // Permissions don't show in table, no need to refetch
             />
             <UpdateRoleModal
                 user={roleUser}
                 open={!!roleUser}
                 onClose={() => setRoleUser(null)}
-                onSuccess={() => { addToast("success", `Cập nhật vai trò cho ${roleUser?.displayName} thành công!`); fetchUsers(); }}
+                onSuccess={(newRole) => {
+                    addToast("success", `Cập nhật vai trò cho ${roleUser?.displayName} thành công!`);
+                    setUsers(prev => prev.map(u => u.userId === roleUser?.userId ? { ...u, role: newRole } : u));
+                }}
             />
         </div>
     );
