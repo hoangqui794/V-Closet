@@ -901,6 +901,8 @@ export interface SubscriptionPlanResponse {
     price: number;
     currency: string;
     durationDays: number;
+    grantedBgCredits: number;
+    grantedTryOnCredits: number;
     isActive: boolean;
 }
 
@@ -910,6 +912,8 @@ export interface CreateOrUpdatePlanPayload {
     price: number;
     currency: string;
     durationDays: number;
+    grantedBgCredits: number;
+    grantedTryOnCredits: number;
     isActive: boolean;
 }
 

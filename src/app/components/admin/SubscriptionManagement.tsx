@@ -234,6 +234,8 @@ export function SubscriptionManagement() {
         price: 0,
         currency: "VND",
         durationDays: 30,
+        grantedBgCredits: 0,
+        grantedTryOnCredits: 0,
         isActive: true
     });
 
@@ -360,6 +362,8 @@ export function SubscriptionManagement() {
             price: 0,
             currency: "VND",
             durationDays: 30,
+            grantedBgCredits: 0,
+            grantedTryOnCredits: 0,
             isActive: true
         });
         setErrorPlans("");
@@ -374,6 +378,8 @@ export function SubscriptionManagement() {
             price: plan.price,
             currency: plan.currency,
             durationDays: plan.durationDays ?? 0,
+            grantedBgCredits: plan.grantedBgCredits ?? 0,
+            grantedTryOnCredits: plan.grantedTryOnCredits ?? 0,
             isActive: plan.isActive
         });
         setErrorPlans("");
@@ -1626,6 +1632,27 @@ export function SubscriptionManagement() {
                                         <SelectItem value="false">Inactive (Tạm ẩn)</SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <Label>Số lượt xóa nền tặng kèm</Label>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={planForm.grantedBgCredits}
+                                    onChange={(e) => setPlanForm({ ...planForm, grantedBgCredits: Number(e.target.value) })}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label>Số lượt thử AI tặng kèm</Label>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={planForm.grantedTryOnCredits}
+                                    onChange={(e) => setPlanForm({ ...planForm, grantedTryOnCredits: Number(e.target.value) })}
+                                />
                             </div>
                         </div>
                     </div>
