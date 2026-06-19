@@ -7,7 +7,14 @@ import {
     bulkDeleteNotificationsByAdmin,
     getAdminUsers,
     AdminNotificationItem,
-    AdminUser
+    AdminUser,
+    AdminSurveyItem,
+    SurveyResponseItem,
+    getAdminSurveys,
+    createAdminSurvey,
+    toggleSurveyStatus,
+    deleteAdminSurvey,
+    getAdminSurveyResponses
 } from "@/lib/api";
 import {
     Bell,
@@ -25,7 +32,11 @@ import {
     Calendar,
     ChevronLeft,
     ChevronRight,
-    Loader2
+    Loader2,
+    Star,
+    MessageSquare,
+    BarChart2,
+    ArrowUpRight
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -115,6 +126,178 @@ export function NotificationManagement() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
     const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+    // Surveys & Reviews states
+    const [surveys, setSurveys] = useState<AdminSurveyItem[]>([]);
+    const [isLoadingSurveys, setIsLoadingSurveys] = useState(false);
+    const [surveyTitle, setSurveyTitle] = useState("");
+    const [surveyQuestion, setSurveyQuestion] = useState("");
+    const [surveyType, setSurveyType] = useState("stars_and_comment");
+    const [quizOptions, setQuizOptions] = useState<string[]>(["", ""]);
+    const [surveyUrl, setSurveyUrl] = useState("");
+    const [surveysPage, setSurveysPage] = useState(1);
+    const [surveysPageSize] = useState(5);
+    const [surveyTargetType, setSurveyTargetType] = useState<"broadcast" | "targeted">("broadcast");
+    const [surveyUserSearch, setSurveyUserSearch] = useState("");
+    const [surveySelectedUser, setSurveySelectedUser] = useState<AdminUser | null>(null);
+    const [surveySearchedUsers, setSurveySearchedUsers] = useState<AdminUser[]>([]);
+    const [isSearchingSurveyUsers, setIsSearchingSurveyUsers] = useState(false);
+    const [isCreatingSurvey, setIsCreatingSurvey] = useState(false);
+
+    // Survey details modal states
+    const [selectedSurveyForDetails, setSelectedSurveyForDetails] = useState<AdminSurveyItem | null>(null);
+    const [surveyResponses, setSurveyResponses] = useState<SurveyResponseItem[]>([]);
+    const [isLoadingResponses, setIsLoadingResponses] = useState(false);
+    const [ratingFilter, setRatingFilter] = useState<number>(0);
+    const [deleteSurveyId, setDeleteSurveyId] = useState<string | null>(null);
+    const [isDeletingSurvey, setIsDeletingSurvey] = useState(false);
+
+    const fetchSurveysList = async () => {
+        setIsLoadingSurveys(true);
+        try {
+            const data = await getAdminSurveys();
+            setSurveys(data);
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Không thể tải danh sách khảo sát.");
+        } finally {
+            setIsLoadingSurveys(false);
+        }
+    };
+
+    const fetchSurveyResponsesList = async (surveyId: string, rating = 0) => {
+        setIsLoadingResponses(true);
+        try {
+            const data = await getAdminSurveyResponses(surveyId, rating);
+            setSurveyResponses(data);
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Không thể tải danh sách phản hồi.");
+        } finally {
+            setIsLoadingResponses(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === "surveys") {
+            fetchSurveysList();
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        if (selectedSurveyForDetails) {
+            fetchSurveyResponsesList(selectedSurveyForDetails.id, ratingFilter);
+        }
+    }, [selectedSurveyForDetails, ratingFilter]);
+
+    useEffect(() => {
+        if (!surveyUserSearch || surveyTargetType === "broadcast") {
+            setSurveySearchedUsers([]);
+            return;
+        }
+
+        const delayDebounce = setTimeout(async () => {
+            setIsSearchingSurveyUsers(true);
+            try {
+                const res = await getAdminUsers({ search: surveyUserSearch, pageSize: 8 });
+                setSurveySearchedUsers(res.items || []);
+            } catch (err: any) {
+                console.error("Lỗi khi tìm kiếm người dùng khảo sát:", err);
+            } finally {
+                setIsSearchingSurveyUsers(false);
+            }
+        }, 400);
+
+        return () => clearTimeout(delayDebounce);
+    }, [surveyUserSearch, surveyTargetType]);
+
+    const handleCreateSurveySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!surveyTitle.trim()) {
+            addToast("error", "Tiêu đề khảo sát không được trống.");
+            return;
+        }
+        if (!surveyQuestion.trim()) {
+            addToast("error", "Câu hỏi khảo sát không được trống.");
+            return;
+        }
+        if (surveyTargetType === "targeted" && !surveySelectedUser) {
+            addToast("error", "Vui lòng chọn người nhận khảo sát.");
+            return;
+        }
+
+        let options: string[] | undefined = undefined;
+        let urlVal: string | undefined = undefined;
+        if (surveyType === "quiz") {
+            const filledOptions = quizOptions.map(o => o.trim()).filter(o => o !== "");
+            if (filledOptions.length < 2) {
+                addToast("error", "Vui lòng nhập ít nhất 2 đáp án trắc nghiệm.");
+                return;
+            }
+            options = filledOptions;
+        } else if (surveyType === "survey_link") {
+            if (!surveyUrl.trim()) {
+                addToast("error", "Vui lòng nhập liên kết khảo sát.");
+                return;
+            }
+            urlVal = surveyUrl.trim();
+        }
+
+        setIsCreatingSurvey(true);
+        try {
+            await createAdminSurvey({
+                title: surveyTitle.trim(),
+                question: surveyQuestion.trim(),
+                type: surveyType,
+                quizOptions: options,
+                surveyUrl: urlVal
+            });
+            addToast("success", "Đã tạo và phát hành khảo sát ý kiến thành công!");
+            setSurveyTitle("");
+            setSurveyQuestion("");
+            setSurveySelectedUser(null);
+            setSurveyUserSearch("");
+            setQuizOptions(["", ""]);
+            setSurveyUrl("");
+            setSurveysPage(1);
+            fetchSurveysList();
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Tạo khảo sát thất bại.");
+        } finally {
+            setIsCreatingSurvey(false);
+        }
+    };
+
+    const handleToggleSurveyStatus = async (id: string) => {
+        try {
+            await toggleSurveyStatus(id);
+            addToast("success", "Đã thay đổi trạng thái khảo sát thành công!");
+            fetchSurveysList();
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Không thể thay đổi trạng thái.");
+        }
+    };
+
+    const handleDeleteSurvey = async () => {
+        if (!deleteSurveyId) return;
+        setIsDeletingSurvey(true);
+        try {
+            await deleteAdminSurvey(deleteSurveyId);
+            addToast("success", "Đã xóa khảo sát khỏi hệ thống thành công!");
+            setDeleteSurveyId(null);
+            fetchSurveysList();
+            if (selectedSurveyForDetails?.id === deleteSurveyId) {
+                setSelectedSurveyForDetails(null);
+            }
+        } catch (err: any) {
+            console.error(err);
+            addToast("error", err.message || "Xóa khảo sát thất bại.");
+        } finally {
+            setIsDeletingSurvey(false);
+        }
+    };
 
     // User search debounce effect
     useEffect(() => {
@@ -311,6 +494,10 @@ export function NotificationManagement() {
                     <TabsTrigger value="logs" className="data-[state=active]:bg-[#4a3728] data-[state=active]:text-white rounded-lg flex items-center gap-2">
                         <History className="w-4 h-4" />
                         Nhật ký thông báo
+                    </TabsTrigger>
+                    <TabsTrigger value="surveys" className="data-[state=active]:bg-[#4a3728] data-[state=active]:text-white rounded-lg flex items-center gap-2">
+                        <Star className="w-4 h-4" />
+                        Đánh giá & Khảo sát
                     </TabsTrigger>
                 </TabsList>
 
@@ -801,6 +988,509 @@ export function NotificationManagement() {
                         </CardContent>
                     </Card>
                 </TabsContent>
+
+                {/* TAB 3: APP REVIEWS & SURVEYS */}
+                <TabsContent value="surveys" className="space-y-6 animate-in fade-in duration-300">
+                    <div className="grid gap-6 md:grid-cols-12 items-start">
+                        {/* LEFT: Create Survey Form */}
+                        <div className="md:col-span-7 space-y-6">
+                            <Card className="border-[#4a3728]/10 shadow-sm overflow-hidden bg-card/60 backdrop-blur-md">
+                                <CardHeader className="bg-gradient-to-r from-[#4a3728]/5 to-[#4a3728]/0 border-b border-[#4a3728]/10">
+                                    <CardTitle className="text-[#4a3728] flex items-center gap-2">
+                                        <Star className="w-5 h-5 text-amber-500 fill-amber-500" /> Tạo đợt khảo sát mới
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Soạn khảo sát gửi đến người dùng để thu thập đánh giá mức độ hài lòng về ứng dụng.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="pt-6 space-y-4">
+                                    <form onSubmit={handleCreateSurveySubmit} className="space-y-4">
+                                        {/* Survey Target Selection */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                                Đối tượng khảo sát
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSurveyTargetType("broadcast")}
+                                                    className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all duration-300
+                                                        ${surveyTargetType === "broadcast"
+                                                            ? "bg-[#4a3728] text-white border-transparent shadow-sm"
+                                                            : "bg-white hover:bg-muted border-border/80 text-muted-foreground"}`}
+                                                >
+                                                    <Users className="w-3.5 h-3.5" />
+                                                    Tất cả người dùng
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSurveyTargetType("targeted")}
+                                                    className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all duration-300
+                                                        ${surveyTargetType === "targeted"
+                                                            ? "bg-[#4a3728] text-white border-transparent shadow-sm"
+                                                            : "bg-white hover:bg-muted border-border/80 text-muted-foreground"}`}
+                                                >
+                                                    <User className="w-3.5 h-3.5" />
+                                                    User cụ thể
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Targeted User Search */}
+                                        {surveyTargetType === "targeted" && (
+                                            <div className="space-y-2 p-3 bg-[#4a3728]/5 border border-[#4a3728]/10 rounded-xl relative">
+                                                <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide flex items-center gap-1.5">
+                                                    Tìm kiếm người nhận <span className="text-destructive">*</span>
+                                                </label>
+                                                {surveySelectedUser ? (
+                                                    <div className="flex items-center justify-between bg-white p-2 rounded-lg border border-green-200 text-xs">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-7 h-7 rounded-full bg-[#4a3728] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                                                {surveySelectedUser.displayName.slice(0, 2).toUpperCase()}
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-semibold text-[#4a3728]">{surveySelectedUser.displayName}</p>
+                                                                <p className="text-[10px] text-muted-foreground">{surveySelectedUser.email}</p>
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => setSurveySelectedUser(null)}
+                                                            className="h-6 w-6 text-muted-foreground hover:text-red-500"
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="relative">
+                                                        <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-muted-foreground" />
+                                                        <Input
+                                                            type="text"
+                                                            placeholder="Nhập tên hoặc email..."
+                                                            value={surveyUserSearch}
+                                                            onChange={e => setSurveyUserSearch(e.target.value)}
+                                                            className="pl-8 h-9 text-xs bg-white"
+                                                        />
+                                                        {isSearchingSurveyUsers && (
+                                                            <Loader2 className="absolute right-2.5 top-2.5 w-3.5 h-3.5 animate-spin text-[#4a3728]" />
+                                                        )}
+                                                        {surveySearchedUsers.length > 0 && (
+                                                            <div className="absolute left-0 right-0 mt-1.5 bg-white border rounded-xl shadow-xl z-20 max-h-40 overflow-y-auto divide-y divide-border/60">
+                                                                {surveySearchedUsers.map(u => (
+                                                                    <button
+                                                                        key={u.userId}
+                                                                        type="button"
+                                                                        onClick={() => setSurveySelectedUser(u)}
+                                                                        className="w-full flex items-center gap-2 p-2.5 text-left hover:bg-[#4a3728]/5 text-xs transition-colors duration-200"
+                                                                    >
+                                                                        <div className="w-6 h-6 rounded-full bg-[#4a3728]/10 text-[#4a3728] flex items-center justify-center font-bold text-[10px] shrink-0">
+                                                                            {u.displayName.slice(0, 2).toUpperCase()}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="font-semibold text-[#4a3728]">{u.displayName}</p>
+                                                                            <p className="text-[9px] text-muted-foreground">{u.email}</p>
+                                                                        </div>
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Survey Title */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                                Tiêu đề khảo sát <span className="text-destructive">*</span>
+                                            </label>
+                                            <Input
+                                                type="text"
+                                                placeholder="Ví dụ: Đánh giá tính năng phối đồ AI..."
+                                                value={surveyTitle}
+                                                onChange={e => setSurveyTitle(e.target.value)}
+                                                required
+                                                className="bg-white border-border"
+                                            />
+                                        </div>
+
+                                        {/* Survey Question */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                                Câu hỏi thu thập ý kiến <span className="text-destructive">*</span>
+                                            </label>
+                                            <Textarea
+                                                placeholder="Ví dụ: Trải nghiệm tách nền và thử đồ bằng AI của bạn thế nào? Hãy chia sẻ phản hồi của bạn nhé!"
+                                                value={surveyQuestion}
+                                                onChange={e => setSurveyQuestion(e.target.value)}
+                                                required
+                                                className="bg-white border-border min-h-[90px]"
+                                            />
+                                        </div>
+
+                                        {/* Survey Type */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                                Phương thức đánh giá
+                                            </label>
+                                            <select
+                                                value={surveyType}
+                                                onChange={e => {
+                                                    setSurveyType(e.target.value);
+                                                    if (e.target.value === "quiz" && quizOptions.length < 2) {
+                                                        setQuizOptions(["", ""]);
+                                                    }
+                                                }}
+                                                className="w-full flex h-10 rounded-xl border border-input bg-white px-3 py-2 text-sm focus-visible:outline-none"
+                                            >
+                                                <option value="stars_only">Theo số sao (Star Rating)</option>
+                                                <option value="quiz">Theo trắc nghiệm (Multiple Choice)</option>
+                                                <option value="comment_only">Viết bình luận (Comment Only)</option>
+                                                <option value="stars_and_comment">Theo số sao & bình luận (Stars and Comments)</option>
+                                                <option value="survey_link">Đường link khảo sát (Google Forms, Typeform...)</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Survey Link URL Input */}
+                                        {surveyType === "survey_link" && (
+                                            <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-300">
+                                                <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                                    Đường dẫn liên kết khảo sát (URL) <span className="text-destructive">*</span>
+                                                </label>
+                                                <Input
+                                                    type="url"
+                                                    placeholder="Nhập link khảo sát ngoài (ví dụ: https://forms.gle/...)"
+                                                    value={surveyUrl}
+                                                    onChange={e => setSurveyUrl(e.target.value)}
+                                                    required
+                                                    className="bg-white border-border"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Dynamic Quiz Answers Builder */}
+                                        {surveyType === "quiz" && (
+                                            <div className="space-y-2.5 p-3.5 bg-[#4a3728]/5 border border-[#4a3728]/10 rounded-xl animate-in slide-in-from-top-2 duration-300">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-xs font-bold text-[#4a3728]/85 uppercase tracking-wide">
+                                                        Danh sách đáp án trắc nghiệm
+                                                    </label>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setQuizOptions(prev => [...prev, ""])}
+                                                        className="h-7 text-[10px] px-2.5 rounded-lg border-[#4a3728]/20 text-[#4a3728] hover:bg-[#4a3728]/5"
+                                                    >
+                                                        + Thêm đáp án
+                                                    </Button>
+                                                </div>
+                                                <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                                                    {quizOptions.map((option, index) => (
+                                                        <div key={index} className="flex items-center gap-2">
+                                                            <span className="w-6 h-6 rounded-full bg-[#4a3728]/15 text-[#4a3728] font-bold text-xs flex items-center justify-center shrink-0">
+                                                                {String.fromCharCode(65 + index)}
+                                                            </span>
+                                                            <Input
+                                                                type="text"
+                                                                placeholder={`Nhập đáp án ${index + 1}...`}
+                                                                value={option}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    setQuizOptions(prev => {
+                                                                        const next = [...prev];
+                                                                        next[index] = val;
+                                                                        return next;
+                                                                    });
+                                                                }}
+                                                                required
+                                                                className="h-9 text-xs bg-white"
+                                                            />
+                                                            {quizOptions.length > 2 && (
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => setQuizOptions(prev => prev.filter((_, i) => i !== index))}
+                                                                    className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg shrink-0"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground italic">Nhập tối thiểu 2 đáp án để người dùng chọn trên App.</p>
+                                            </div>
+                                        )}
+
+                                        {/* Submit Button */}
+                                        <Button
+                                            type="submit"
+                                            disabled={isCreatingSurvey}
+                                            className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white flex items-center justify-center gap-2 h-10 rounded-xl font-semibold"
+                                        >
+                                            {isCreatingSurvey ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    Đang tạo và phát hành...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Send className="w-4 h-4" />
+                                                    Phát hành khảo sát ngay
+                                                </>
+                                            )}
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* RIGHT: Live Preview on Smartphone Mockup */}
+                        <div className="md:col-span-5 flex justify-center">
+                            <div className="w-[300px] h-[580px] bg-slate-900 border-[8px] border-slate-800 rounded-[3rem] shadow-2xl relative overflow-hidden flex flex-col items-center">
+                                {/* Speaker and Notch */}
+                                <div className="absolute top-2.5 w-24 h-5 bg-black rounded-2xl z-30 flex justify-center items-center">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-800 ml-auto mr-3" />
+                                </div>
+                                <div className="absolute top-2 right-8 w-1.5 h-1.5 rounded-full bg-slate-800 z-30" />
+
+                                {/* Screen Background Image (Warm Glassmorphic Nature Look to match TAB 1) */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-[#6b5847] via-[#9c8470] to-[#bca693] z-0 flex flex-col justify-start items-center pt-14 px-4">
+                                    {/* Status Bar Mock */}
+                                    <div className="w-full flex justify-between items-center text-white/95 text-[9px] font-medium px-2.5 mb-8 z-10 select-none">
+                                        <span>12:30</span>
+                                        <div className="flex items-center gap-1">
+                                            <span className="w-3 h-2 border border-white/80 rounded-sm relative flex items-center p-0.5"><span className="h-full bg-white w-2/3 rounded-xs" /></span>
+                                        </div>
+                                    </div>
+
+                                    {/* App Interface Area */}
+                                    <div className="w-full bg-[#f9f6f0] border border-white/20 rounded-2xl shadow-2xl flex-1 flex flex-col p-4 mb-14 relative z-10 select-none overflow-hidden max-h-[440px]">
+                                        {/* App Header Mock */}
+                                        <div className="w-full flex items-center justify-between text-[10px] font-bold text-[#4a3728] border-b pb-2 mb-3 opacity-75">
+                                            <span>V-CLOSET TRY-ON</span>
+                                            <X className="w-3 h-3 cursor-pointer text-[#4a3728]" />
+                                        </div>
+
+                                        {/* Survey Popup Modal content */}
+                                        <div className="flex-1 flex flex-col justify-center items-center py-1.5 space-y-3.5">
+                                            <div className="text-center space-y-1">
+                                                <div className="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center mx-auto shadow-sm">
+                                                    <Star className="w-4.5 h-4.5 text-amber-500 fill-amber-500" />
+                                                </div>
+                                                <h5 className="text-[10px] font-bold text-[#4a3728] leading-tight break-words max-h-[30px] overflow-hidden px-0.5">
+                                                    {surveyTitle.trim() || "Tiêu đề khảo sát mẫu"}
+                                                </h5>
+                                                <p className="text-[9px] text-stone-600 font-medium break-words max-h-[45px] overflow-y-auto px-0.5 leading-normal">
+                                                    {surveyQuestion.trim() || "Nội dung câu hỏi khảo sát ý kiến người dùng..."}
+                                                </p>
+                                            </div>
+
+                                            {/* Rating Stars Mock */}
+                                            {(surveyType === "stars_only" || surveyType === "stars_and_comment") && (
+                                                <div className="flex justify-center gap-1.5 py-1.5 w-full border-y border-dashed border-stone-200">
+                                                    {Array.from({ length: 5 }).map((_, i) => (
+                                                        <Star key={i} className="w-5.5 h-5.5 text-amber-400 fill-amber-400 cursor-pointer hover:scale-110 transition-transform" />
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Multiple Choice (Trắc nghiệm) Mock */}
+                                            {surveyType === "quiz" && (
+                                                <div className="w-full border-y border-dashed border-stone-200 py-1.5 max-h-[130px] overflow-y-auto space-y-1.5">
+                                                    {quizOptions.map((opt, i) => (
+                                                        <div key={i} className="flex items-center gap-2 p-1.5 rounded-lg border border-stone-200 bg-white hover:border-[#4a3728] cursor-pointer transition-all text-[8px] text-[#4a3728] font-bold">
+                                                            <span className="w-3.5 h-3.5 rounded-full bg-[#4a3728]/10 text-[#4a3728] flex items-center justify-center text-[7px] font-bold">
+                                                                {String.fromCharCode(65 + i)}
+                                                            </span>
+                                                            <span className="truncate flex-1 text-left">{opt || `Đáp án ${i + 1}`}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Survey Link Mock */}
+                                            {surveyType === "survey_link" && (
+                                                <div className="w-full border-y border-dashed border-stone-200 py-3 flex flex-col items-center gap-2">
+                                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#4a3728]/5 text-[#4a3728] shadow-inner shrink-0">
+                                                        <Info className="w-4 h-4" />
+                                                    </div>
+                                                    <p className="text-[8px] text-stone-500 font-semibold text-center max-w-[180px] break-all leading-normal px-1">
+                                                        Khảo sát ngoài: <span className="underline font-bold text-blue-600">{surveyUrl.trim() || "https://forms.gle/vcloset-survey"}</span>
+                                                    </p>
+                                                    <div className="w-full mt-1.5 flex items-center justify-center gap-1.5 p-2 rounded-xl border border-[#4a3728]/10 bg-white hover:bg-[#4a3728]/5 text-[8px] text-[#4a3728] font-bold select-none cursor-pointer transition-all">
+                                                        <span>Mở liên kết khảo sát</span>
+                                                        <ArrowUpRight className="w-3 h-3 shrink-0" />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Comment box */}
+                                            {(surveyType === "comment_only" || surveyType === "stars_and_comment") && (
+                                                <div className="w-full bg-white border border-stone-200 rounded-lg p-2 text-[8px] text-stone-400 text-left min-h-[50px] leading-relaxed shadow-inner">
+                                                    Nhập ý kiến đóng góp của bạn...
+                                                </div>
+                                            )}
+
+                                            <div className="w-full flex gap-2 pt-1.5 mt-auto">
+                                                <button type="button" className="flex-1 text-[8px] py-1.5 bg-[#4a3728] hover:bg-[#3d2d21] text-white rounded-lg text-center font-bold shadow-sm transition-all">Gửi phản hồi</button>
+                                                <button type="button" className="px-3 text-[8px] py-1.5 bg-stone-200 hover:bg-stone-300 text-stone-600 rounded-lg text-center font-semibold transition-all">Đóng</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Phone Home indicator */}
+                                    <div className="absolute bottom-10 text-white/70 text-[9px] font-medium text-center z-10 select-none">
+                                        Bản xem trước giao diện khảo sát trên App
+                                    </div>
+                                </div>
+
+                                {/* Home Bar */}
+                                <div className="absolute bottom-2 w-32 h-1 bg-white/60 rounded-full z-30" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Lower Area: Surveys List & History */}
+                    <Card className="border-[#4a3728]/10 shadow-sm bg-card/60 backdrop-blur-md mt-6">
+                        <CardHeader className="pb-3 border-b border-[#4a3728]/10 flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle className="text-[#4a3728] text-base flex items-center gap-2">
+                                    <History className="w-4 h-4" /> Các đợt khảo sát đã phát hành
+                                </CardTitle>
+                                <CardDescription className="text-xs">Danh sách toàn bộ các chiến dịch lấy đánh giá người dùng.</CardDescription>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            {isLoadingSurveys ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-stone-500">
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] mb-2" />
+                                    <p className="text-xs">Đang tải lịch sử khảo sát...</p>
+                                </div>
+                            ) : surveys.length === 0 ? (
+                                <div className="text-center py-12 text-stone-400">
+                                    <History className="w-10 h-10 mx-auto opacity-30 mb-2" />
+                                    <p className="text-xs font-semibold">Chưa phát hành cuộc khảo sát nào</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="overflow-x-auto border border-border/80 rounded-xl bg-white/70">
+                                        <table className="w-full text-left border-collapse text-xs">
+                                            <thead>
+                                                <tr className="bg-[#4a3728]/5 border-b border-border/80 text-muted-foreground font-semibold uppercase tracking-wider">
+                                                    <th className="p-3">Khảo sát</th>
+                                                    <th className="p-3 w-32">Loại yêu cầu</th>
+                                                    <th className="p-3 w-28 text-center">Trạng thái</th>
+                                                    <th className="p-3 w-32 text-center">Phản hồi đã nhận</th>
+                                                    <th className="p-3 w-36">Thời gian phát hành</th>
+                                                    <th className="p-3 w-36 text-center">Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-border/60">
+                                                {surveys.slice((surveysPage - 1) * surveysPageSize, surveysPage * surveysPageSize).map(s => {
+                                                    const formattedDate = new Date(s.createdAt).toLocaleDateString("vi-VN", {
+                                                        year: "numeric",
+                                                        month: "2-digit",
+                                                        day: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit"
+                                                    });
+                                                    return (
+                                                        <tr key={s.id} className="hover:bg-[#4a3728]/5 transition-colors duration-200">
+                                                            <td className="p-3">
+                                                                <p className="font-bold text-[#4a3728]">{s.title}</p>
+                                                                <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{s.question}</p>
+                                                            </td>
+                                                            <td className="p-3">
+                                                                <Badge variant="outline" className="text-[9px] py-0.5 capitalize border-[#4a3728]/10 text-[#4a3728] bg-[#4a3728]/5">
+                                                                    {s.type === "stars_only" ? "Chỉ chấm sao" : s.type === "quiz" ? "Trắc nghiệm" : s.type === "comment_only" ? "Bình luận" : s.type === "survey_link" ? "Link khảo sát" : "Sao + Ý kiến"}
+                                                                </Badge>
+                                                            </td>
+                                                            <td className="p-3 text-center">
+                                                                <Badge className={s.status === "active" ? "bg-green-600 hover:bg-green-700 text-white" : "bg-stone-500 hover:bg-stone-600 text-white"}>
+                                                                    {s.status === "active" ? "Đang mở" : "Đã đóng"}
+                                                                </Badge>
+                                                            </td>
+                                                            <td className="p-3 text-center font-bold font-mono text-[#4a3728]">
+                                                                {s.responseCount} lượt
+                                                            </td>
+                                                            <td className="p-3 text-muted-foreground font-mono">
+                                                                {formattedDate}
+                                                            </td>
+                                                            <td className="p-3">
+                                                                <div className="flex items-center justify-center gap-1.5">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={() => setSelectedSurveyForDetails(s)}
+                                                                        className="h-7 text-[10px] px-2.5 rounded-lg border-[#4a3728]/20 text-[#4a3728] hover:bg-[#4a3728]/5 flex items-center gap-1"
+                                                                        title="Xem chi tiết các lượt đánh giá"
+                                                                    >
+                                                                        <MessageSquare className="w-3.5 h-3.5" />
+                                                                        Xem ý kiến
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={() => handleToggleSurveyStatus(s.id)}
+                                                                        className="h-7 text-[10px] px-2.5 rounded-lg flex items-center gap-1"
+                                                                    >
+                                                                        {s.status === "active" ? "Đóng" : "Mở"}
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        onClick={() => setDeleteSurveyId(s.id)}
+                                                                        className="h-7 w-7 p-0 rounded-lg text-red-600 hover:bg-red-50"
+                                                                    >
+                                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                                    </Button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Pagination Controls */}
+                                    {surveys.length > 0 && (
+                                        <div className="flex items-center justify-between pt-4 border-t mt-4">
+                                            <p className="text-xs text-muted-foreground font-medium">
+                                                Hiển thị danh sách khảo sát (Trang {surveysPage} / {Math.ceil(surveys.length / surveysPageSize) || 1})
+                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setSurveysPage(prev => Math.max(prev - 1, 1))}
+                                                    disabled={surveysPage === 1}
+                                                    className="h-8 rounded-lg flex items-center gap-1"
+                                                >
+                                                    <ChevronLeft className="w-3.5 h-3.5" /> Trước
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setSurveysPage(prev => Math.min(prev + 1, Math.ceil(surveys.length / surveysPageSize)))}
+                                                    disabled={surveysPage >= Math.ceil(surveys.length / surveysPageSize)}
+                                                    className="h-8 rounded-lg flex items-center gap-1"
+                                                >
+                                                    Sau <ChevronRight className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
             </Tabs>
 
             {/* DIALOG: CONFIRM SEND */}
@@ -978,6 +1668,162 @@ export function NotificationManagement() {
                     </div>
                 </div>
             )}
+
+            {/* DIALOG: SURVEY RESPONSES DETAILS */}
+            <Dialog open={selectedSurveyForDetails !== null} onOpenChange={open => !open && setSelectedSurveyForDetails(null)}>
+                <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] font-bold">
+                            <MessageSquare className="w-5 h-5 text-[#4a3728]" /> Chi tiết đánh giá từ người dùng
+                        </DialogTitle>
+                        <DialogDescription className="text-xs font-semibold text-stone-600">
+                            Khảo sát: <strong className="text-[#4a3728]">{selectedSurveyForDetails?.title}</strong>
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Rating filter inside details */}
+                    <div className="flex items-center justify-between border-b pb-3.5 mt-2">
+                        <span className="text-xs font-bold text-stone-500 uppercase tracking-wide">Danh sách câu trả lời</span>
+                        {selectedSurveyForDetails?.type !== "quiz" && (
+                            <div className="flex items-center gap-1.5 text-xs">
+                                <span className="font-semibold text-stone-500">Lọc sao:</span>
+                                <select
+                                    value={ratingFilter}
+                                    onChange={e => setRatingFilter(Number(e.target.value))}
+                                    className="h-8 rounded-lg border border-input bg-white px-2 py-0.5"
+                                >
+                                    <option value={0}>Tất cả sao</option>
+                                    <option value={5}>5 Sao (★★★★★)</option>
+                                    <option value={4}>4 Sao (★★★★☆)</option>
+                                    <option value={3}>3 Sao (★★★☆☆)</option>
+                                    <option value={2}>2 Sao (★★☆☆☆)</option>
+                                    <option value={1}>1 Sao (★☆☆☆☆)</option>
+                                </select>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Table of responses */}
+                    <div className="space-y-4 pt-2">
+                        {isLoadingResponses ? (
+                            <div className="flex flex-col items-center justify-center py-10 text-stone-400">
+                                <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                            </div>
+                        ) : surveyResponses.length === 0 ? (
+                            <p className="text-center py-10 text-xs text-stone-400 italic">Chưa nhận được phản hồi nào phù hợp với bộ lọc.</p>
+                        ) : (
+                            <div className="max-h-[350px] overflow-y-auto border border-border/60 rounded-xl bg-slate-50/50">
+                                <table className="w-full text-left border-collapse text-xs">
+                                    {selectedSurveyForDetails?.type === "quiz" ? (
+                                        <thead>
+                                            <tr className="bg-stone-100 border-b border-border/80 text-muted-foreground font-semibold uppercase">
+                                                <th className="p-3 w-40">Thành viên</th>
+                                                <th className="p-3">Đáp án trắc nghiệm đã chọn</th>
+                                                <th className="p-3 w-36">Thời gian gửi</th>
+                                            </tr>
+                                        </thead>
+                                    ) : (
+                                        <thead>
+                                            <tr className="bg-stone-100 border-b border-border/80 text-muted-foreground font-semibold uppercase">
+                                                <th className="p-3 w-40">Thành viên</th>
+                                                <th className="p-3 w-28 text-center">Đánh giá</th>
+                                                <th className="p-3">Ý kiến góp ý</th>
+                                                <th className="p-3 w-36">Thời gian gửi</th>
+                                            </tr>
+                                        </thead>
+                                    )}
+                                    <tbody className="divide-y divide-border/60 bg-white">
+                                        {surveyResponses.map(r => {
+                                            const rDate = new Date(r.createdAt).toLocaleString("vi-VN", {
+                                                year: "numeric",
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                hour: "2-digit",
+                                                minute: "2-digit"
+                                            });
+                                            return (
+                                                <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="p-3 font-semibold text-slate-800">
+                                                        <p>{r.userDisplayName}</p>
+                                                        <span className="text-[10px] text-muted-foreground font-normal">{r.userEmail}</span>
+                                                    </td>
+                                                    {selectedSurveyForDetails?.type === "quiz" ? (
+                                                        <td className="p-3 text-stone-700 font-medium">
+                                                            <Badge variant="outline" className="bg-[#4a3728]/5 border-[#4a3728]/20 text-[#4a3728] text-xs font-semibold py-1 px-2.5">
+                                                                {r.quizAnswer || "Không rõ"}
+                                                            </Badge>
+                                                        </td>
+                                                    ) : (
+                                                        <>
+                                                            <td className="p-3 text-center text-amber-500 font-medium">
+                                                                {r.rating && r.rating > 0 ? (
+                                                                    Array.from({ length: 5 }).map((_, i) => (
+                                                                        <span key={i} className={i < r.rating ? "text-amber-500" : "text-stone-300"}>★</span>
+                                                                    ))
+                                                                ) : (
+                                                                    <span className="text-stone-400 italic">Không chấm sao</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="p-3 text-stone-700 break-words whitespace-pre-wrap max-w-[280px]">
+                                                                {r.comment || <span className="text-stone-400 italic font-normal">Không có bình luận</span>}
+                                                            </td>
+                                                        </>
+                                                    )}
+                                                    <td className="p-3 text-muted-foreground font-mono">
+                                                        {rDate}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter className="mt-4">
+                        <Button onClick={() => setSelectedSurveyForDetails(null)} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                            Đóng cửa sổ
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* DIALOG: CONFIRM DELETE SURVEY */}
+            <Dialog open={deleteSurveyId !== null} onOpenChange={open => !open && setDeleteSurveyId(null)}>
+                <DialogContent className="sm:max-w-md font-poppins">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-rose-700 font-bold">
+                            <Trash2 className="w-5 h-5 text-rose-600 animate-pulse" /> Xác nhận xóa khảo sát?
+                        </DialogTitle>
+                        <DialogDescription>
+                            Chiến dịch khảo sát này và tất cả các phản hồi/đánh giá thu thập được của người dùng liên quan sẽ bị xóa vĩnh viễn khỏi hệ thống.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                        <Button type="button" variant="outline" onClick={() => setDeleteSurveyId(null)} disabled={isDeletingSurvey}>
+                            Hủy bỏ
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleDeleteSurvey}
+                            disabled={isDeletingSurvey}
+                            className="bg-rose-600 hover:bg-rose-700 text-white flex items-center gap-1.5"
+                        >
+                            {isDeletingSurvey ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Đồng ý Xóa vĩnh viễn
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Toast Container */}
             <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />

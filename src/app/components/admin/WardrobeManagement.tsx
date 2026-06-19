@@ -58,7 +58,7 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
     );
 }
 
-export function WardrobeManagement() {
+export function WardrobeManagement({ showHeader = true }: { showHeader?: boolean }) {
     // Toasts state
     const [toasts, setToasts] = useState<Toast[]>([]);
     const addToast = (type: Toast["type"], message: string) => {
@@ -227,19 +227,27 @@ export function WardrobeManagement() {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins text-foreground">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] flex items-center gap-2">
-                        <Shirt className="w-8 h-8" /> Quản lý Tủ đồ thành viên
-                    </h2>
-                    <p className="text-muted-foreground mt-1">
-                        Quản lý toàn bộ hình ảnh quần áo người dùng tải lên tủ đồ cá nhân.
-                    </p>
+            {showHeader ? (
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] flex items-center gap-2">
+                            <Shirt className="w-8 h-8" /> Quản lý Tủ đồ thành viên
+                        </h2>
+                        <p className="text-muted-foreground mt-1">
+                            Quản lý toàn bộ hình ảnh quần áo người dùng tải lên tủ đồ cá nhân.
+                        </p>
+                    </div>
+                    <Badge className="bg-[#4a3728]/10 text-[#4a3728] hover:bg-[#4a3728]/15 border-[#4a3728]/20 px-3 py-1 text-sm font-semibold">
+                        Tổng cộng: {totalCount} món đồ
+                    </Badge>
                 </div>
-                <Badge className="bg-[#4a3728]/10 text-[#4a3728] hover:bg-[#4a3728]/15 border-[#4a3728]/20 px-3 py-1 text-sm font-semibold">
-                    Tổng cộng: {totalCount} món đồ
-                </Badge>
-            </div>
+            ) : (
+                <div className="flex justify-end mb-2">
+                    <Badge className="bg-[#4a3728]/10 text-[#4a3728] hover:bg-[#4a3728]/15 border-[#4a3728]/20 px-3 py-1 text-sm font-semibold">
+                        Tổng cộng: {totalCount} món đồ
+                    </Badge>
+                </div>
+            )}
 
             {/* Filter Section */}
             <Card className="border-[#4a3728]/10 shadow-sm bg-card/60 backdrop-blur-md">

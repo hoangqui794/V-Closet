@@ -59,14 +59,9 @@ const menuItems = [
         icon: Users,
     },
     {
-        title: "Tủ đồ thành viên",
-        url: "/admin/wardrobes",
+        title: "Tủ đồ & Phối đồ",
+        url: "/admin/closet",
         icon: Shirt,
-    },
-    {
-        title: "Bộ phối đồ",
-        url: "/admin/outfits",
-        icon: Palette,
     },
     {
         title: "Báo cáo vi phạm",

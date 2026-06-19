@@ -11,6 +11,7 @@ import { AdminLoginPage } from "./components/admin/AdminLoginPage";
 import { NotificationManagement } from "./components/admin/NotificationManagement";
 import { WardrobeManagement } from "./components/admin/WardrobeManagement";
 import { OutfitManagement } from "./components/admin/OutfitManagement";
+import { ClosetManagement } from "./components/admin/ClosetManagement";
 
 export const router = createBrowserRouter([
   {
@@ -24,8 +25,9 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: "dashboard", Component: Dashboard },
       { path: "users", Component: UserManagement },
-      { path: "wardrobes", Component: WardrobeManagement },
-      { path: "outfits", Component: OutfitManagement },
+      { path: "closet", Component: ClosetManagement },
+      { path: "wardrobes", element: <Navigate to="/admin/closet?tab=wardrobes" replace /> },
+      { path: "outfits", element: <Navigate to="/admin/closet?tab=outfits" replace /> },
       { path: "reports", Component: ReportManagement },
       { path: "campaigns", Component: CampaignManagement },
       { path: "notifications", Component: NotificationManagement },

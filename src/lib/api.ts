@@ -1548,5 +1548,360 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
     await request(`/api/notifications/read-all`, { method: "POST" });
 };
 
+// ─── Admin Surveys & Reviews API (Mock with LocalStorage) ───────────────────
+
+export interface AdminSurveyItem {
+    id: string;
+    title: string;
+    question: string;
+    type: string; // "stars_only" | "stars_and_comment" | "quiz" | "comment_only" | "survey_link"
+    status: string; // "active" | "ended"
+    createdAt: string;
+    responseCount: number;
+    quizOptions?: string[];
+    surveyUrl?: string;
+}
+
+export interface SurveyResponseItem {
+    id: string;
+    surveyId: string;
+    userDisplayName: string;
+    userEmail: string;
+    userInternalId: number;
+    rating: number; // 0 for non-rating surveys
+    comment: string | null;
+    quizAnswer?: string;
+    createdAt: string;
+}
+
+export interface SurveyDashboardStats {
+    averageRating: number;
+    totalResponses: number;
+    starDistribution: {
+        stars5: number;
+        stars4: number;
+        stars3: number;
+        stars2: number;
+        stars1: number;
+    };
+    latestResponses: SurveyResponseItem[];
+}
+
+const DEFAULT_SURVEYS: AdminSurveyItem[] = [
+    {
+        id: "survey-1",
+        title: "Khảo sát tính năng Thử đồ AI (Try-On)",
+        question: "Bạn cảm thấy tính năng thử trang phục bằng AI thế nào?",
+        type: "stars_and_comment",
+        status: "active",
+        createdAt: "2026-06-15T09:00:00Z",
+        responseCount: 15
+    },
+    {
+        id: "survey-2",
+        title: "Độ ổn định của hệ thống",
+        question: "App V-Closet hoạt động mượt mà chứ?",
+        type: "stars_only",
+        status: "ended",
+        createdAt: "2026-06-01T08:00:00Z",
+        responseCount: 24
+    },
+    {
+        id: "survey-3",
+        title: "Khảo sát Giao diện mới & Trải nghiệm phối đồ",
+        question: "Đâu là điểm bạn yêu thích nhất ở giao diện phối đồ mới của V-Closet?",
+        type: "quiz",
+        status: "active",
+        createdAt: "2026-06-18T10:00:00Z",
+        responseCount: 3,
+        quizOptions: ["Cách sắp xếp tủ đồ trực quan", "Thao tác kéo thả mượt mà", "Phối màu gợi ý tự động", "Giao diện tối giản đẹp mắt"]
+    },
+    {
+        id: "survey-4",
+        title: "Khảo sát đóng góp phát triển V-Closet 2026",
+        question: "Hãy dành ra 3 phút đóng góp ý kiến thông qua Google Forms để giúp V-Closet cải thiện chất lượng dịch vụ nhé!",
+        type: "survey_link",
+        status: "active",
+        createdAt: "2026-06-19T14:00:00Z",
+        responseCount: 2,
+        surveyUrl: "https://forms.gle/vcloset-developer-2026"
+    }
+];
+
+const DEFAULT_RESPONSES: SurveyResponseItem[] = [
+    {
+        id: "resp-1",
+        surveyId: "survey-1",
+        userDisplayName: "Hoàng Qui",
+        userEmail: "hoangqui@gmail.com",
+        userInternalId: 101,
+        rating: 5,
+        comment: "Tính năng thử đồ AI hoạt động rất tốt, ảnh ghép tự nhiên lắm!",
+        createdAt: "2026-06-15T09:30:00Z"
+    },
+    {
+        id: "resp-2",
+        surveyId: "survey-1",
+        userDisplayName: "Minh Anh",
+        userEmail: "minhanh99@yahoo.com",
+        userInternalId: 102,
+        rating: 4,
+        comment: "Khá ổn, nhưng thỉnh thoảng tách nền chưa được chuẩn ở phần tóc.",
+        createdAt: "2026-06-15T10:15:00Z"
+    },
+    {
+        id: "resp-3",
+        surveyId: "survey-1",
+        userDisplayName: "Lan Phương",
+        userEmail: "lanphuong@gmail.com",
+        userInternalId: 103,
+        rating: 5,
+        comment: "Rất tiện lợi để thử đồ trước khi mua Shopee, tiết kiệm bao nhiêu tiền mua nhầm.",
+        createdAt: "2026-06-15T11:00:00Z"
+    },
+    {
+        id: "resp-4",
+        surveyId: "survey-1",
+        userDisplayName: "Tuấn Kiệt",
+        userEmail: "kiettu@outlook.com",
+        userInternalId: 104,
+        rating: 3,
+        comment: "AI ghép thỉnh thoảng bị méo dáng áo, mong admin cập nhật bản model AI mới.",
+        createdAt: "2026-06-15T14:20:00Z"
+    },
+    {
+        id: "resp-5",
+        surveyId: "survey-1",
+        userDisplayName: "Thanh Hằng",
+        userEmail: "hangthanh@gmail.com",
+        userInternalId: 105,
+        rating: 5,
+        comment: "Ứng dụng tuyệt vời, 5 sao cho công nghệ!",
+        createdAt: "2026-06-16T08:10:00Z"
+    },
+    {
+        id: "resp-6",
+        surveyId: "survey-2",
+        userDisplayName: "Ngọc Sơn",
+        userEmail: "sonngoc@gmail.com",
+        userInternalId: 106,
+        rating: 4,
+        comment: null,
+        createdAt: "2026-06-01T08:45:00Z"
+    },
+    {
+        id: "resp-7",
+        surveyId: "survey-2",
+        userDisplayName: "Đức Thịnh",
+        userEmail: "thinhduc@gmail.com",
+        userInternalId: 107,
+        rating: 5,
+        comment: null,
+        createdAt: "2026-06-01T09:12:00Z"
+    },
+    {
+        id: "resp-8",
+        surveyId: "survey-1",
+        userDisplayName: "Khánh Linh",
+        userEmail: "linhkhanh@gmail.com",
+        userInternalId: 108,
+        rating: 2,
+        comment: "Ghép đồ hơi lâu, đôi khi bị lỗi timeout.",
+        createdAt: "2026-06-16T12:00:00Z"
+    },
+    {
+        id: "resp-9",
+        surveyId: "survey-1",
+        userDisplayName: "Bảo Nam",
+        userEmail: "nambao@gmail.com",
+        userInternalId: 109,
+        rating: 5,
+        comment: "Quá đỉnh luôn admin ơi! Chờ đợi tính năng này lâu rồi.",
+        createdAt: "2026-06-17T09:00:00Z"
+    },
+    {
+        id: "resp-10",
+        surveyId: "survey-1",
+        userDisplayName: "Thu Thủy",
+        userEmail: "thuythu@gmail.com",
+        userInternalId: 110,
+        rating: 4,
+        comment: "Giao diện mượt mà, AI xử lý đẹp.",
+        createdAt: "2026-06-17T15:30:00Z"
+    },
+    {
+        id: "resp-11",
+        surveyId: "survey-3",
+        userDisplayName: "Quốc Bảo",
+        userEmail: "baoq@gmail.com",
+        userInternalId: 111,
+        rating: 0,
+        comment: null,
+        quizAnswer: "Cách sắp xếp tủ đồ trực quan",
+        createdAt: "2026-06-18T10:30:00Z"
+    },
+    {
+        id: "resp-12",
+        surveyId: "survey-3",
+        userDisplayName: "Nhật Vy",
+        userEmail: "vynh@gmail.com",
+        userInternalId: 112,
+        rating: 0,
+        comment: null,
+        quizAnswer: "Thao tác kéo thả mượt mà",
+        createdAt: "2026-06-18T10:45:00Z"
+    },
+    {
+        id: "resp-13",
+        surveyId: "survey-3",
+        userDisplayName: "Hoàng Long",
+        userEmail: "longh@gmail.com",
+        userInternalId: 113,
+        rating: 0,
+        comment: null,
+        quizAnswer: "Giao diện tối giản đẹp mắt",
+        createdAt: "2026-06-18T11:15:00Z"
+    },
+    {
+        id: "resp-14",
+        surveyId: "survey-4",
+        userDisplayName: "Minh Thư",
+        userEmail: "thuminh@gmail.com",
+        userInternalId: 114,
+        rating: 0,
+        comment: "Đã mở liên kết khảo sát",
+        createdAt: "2026-06-19T14:30:00Z"
+    },
+    {
+        id: "resp-15",
+        surveyId: "survey-4",
+        userDisplayName: "Duy Mạnh",
+        userEmail: "manhduy@gmail.com",
+        userInternalId: 115,
+        rating: 0,
+        comment: "Đã mở liên kết khảo sát",
+        createdAt: "2026-06-19T15:10:00Z"
+    }
+];
+
+function initializeMockSurveysData() {
+    if (typeof window !== "undefined") {
+        if (!localStorage.getItem("mock_surveys")) {
+            localStorage.setItem("mock_surveys", JSON.stringify(DEFAULT_SURVEYS));
+        }
+        if (!localStorage.getItem("mock_survey_responses")) {
+            localStorage.setItem("mock_survey_responses", JSON.stringify(DEFAULT_RESPONSES));
+        }
+    }
+}
+
+export const getAdminSurveys = async (): Promise<AdminSurveyItem[]> => {
+    initializeMockSurveysData();
+    if (typeof window !== "undefined") {
+        const data = localStorage.getItem("mock_surveys");
+        return data ? JSON.parse(data) : [];
+    }
+    return DEFAULT_SURVEYS;
+};
+
+export const createAdminSurvey = async (payload: { title: string; question: string; type: string; quizOptions?: string[]; surveyUrl?: string }): Promise<AdminSurveyItem> => {
+    initializeMockSurveysData();
+    if (typeof window !== "undefined") {
+        const surveys: AdminSurveyItem[] = JSON.parse(localStorage.getItem("mock_surveys") || "[]");
+        const newSurvey: AdminSurveyItem = {
+            id: `survey-${Date.now()}`,
+            title: payload.title,
+            question: payload.question,
+            type: payload.type,
+            status: "active",
+            createdAt: new Date().toISOString(),
+            responseCount: 0,
+            quizOptions: payload.quizOptions,
+            surveyUrl: payload.surveyUrl
+        };
+        surveys.unshift(newSurvey);
+        localStorage.setItem("mock_surveys", JSON.stringify(surveys));
+        return newSurvey;
+    }
+    throw new Error("Không thể thao tác trên server-side.");
+};
+
+export const toggleSurveyStatus = async (id: string): Promise<AdminSurveyItem> => {
+    initializeMockSurveysData();
+    if (typeof window !== "undefined") {
+        const surveys: AdminSurveyItem[] = JSON.parse(localStorage.getItem("mock_surveys") || "[]");
+        const surveyIdx = surveys.findIndex(s => s.id === id);
+        if (surveyIdx !== -1) {
+            surveys[surveyIdx].status = surveys[surveyIdx].status === "active" ? "ended" : "active";
+            localStorage.setItem("mock_surveys", JSON.stringify(surveys));
+            return surveys[surveyIdx];
+        }
+    }
+    throw new Error("Không tìm thấy khảo sát.");
+};
+
+export const deleteAdminSurvey = async (id: string): Promise<void> => {
+    initializeMockSurveysData();
+    if (typeof window !== "undefined") {
+        const surveys: AdminSurveyItem[] = JSON.parse(localStorage.getItem("mock_surveys") || "[]");
+        const filteredSurveys = surveys.filter(s => s.id !== id);
+        localStorage.setItem("mock_surveys", JSON.stringify(filteredSurveys));
+
+        const responses: SurveyResponseItem[] = JSON.parse(localStorage.getItem("mock_survey_responses") || "[]");
+        const filteredResponses = responses.filter(r => r.surveyId !== id);
+        localStorage.setItem("mock_survey_responses", JSON.stringify(filteredResponses));
+    }
+};
+
+export const getAdminSurveyResponses = async (surveyId?: string, rating?: number): Promise<SurveyResponseItem[]> => {
+    initializeMockSurveysData();
+    if (typeof window !== "undefined") {
+        let responses: SurveyResponseItem[] = JSON.parse(localStorage.getItem("mock_survey_responses") || "[]");
+        if (surveyId) {
+            responses = responses.filter(r => r.surveyId === surveyId);
+        }
+        if (rating !== undefined && rating > 0) {
+            responses = responses.filter(r => r.rating === rating);
+        }
+        return responses;
+    }
+    return DEFAULT_RESPONSES;
+};
+
+export const getSurveyDashboardStats = async (): Promise<SurveyDashboardStats> => {
+    initializeMockSurveysData();
+    let responses = DEFAULT_RESPONSES;
+    if (typeof window !== "undefined") {
+        responses = JSON.parse(localStorage.getItem("mock_survey_responses") || "[]");
+    }
+    const total = responses.length;
+    
+    let sum = 0;
+    let ratedCount = 0;
+    const distribution = { stars5: 0, stars4: 0, stars3: 0, stars2: 0, stars1: 0 };
+    
+    responses.forEach(r => {
+        if (r.rating && r.rating > 0) {
+            sum += r.rating;
+            ratedCount++;
+            if (r.rating === 5) distribution.stars5++;
+            else if (r.rating === 4) distribution.stars4++;
+            else if (r.rating === 3) distribution.stars3++;
+            else if (r.rating === 2) distribution.stars2++;
+            else if (r.rating === 1) distribution.stars1++;
+        }
+    });
+
+    const average = ratedCount > 0 ? Number((sum / ratedCount).toFixed(1)) : 0;
+    const sorted = [...responses].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return {
+        averageRating: average,
+        totalResponses: total,
+        starDistribution: distribution,
+        latestResponses: sorted.slice(0, 10)
+    };
+};
+
 
 
