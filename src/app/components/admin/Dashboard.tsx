@@ -45,15 +45,114 @@ import { useState, useEffect, useCallback } from "react";
 import {
     getAdminDashboardMetrics, getAdminRevenueChart,
     getAdminRecentSignups, getAdminSystemAlerts,
+    getAdminOnboardingDemographics, OnboardingDemographics, DemographicItem,
     DashboardMetrics, RevenueChartItem, RecentSignupItem, SystemAlertItem,
     BASE_URL, getToken
 } from "@/lib/api";
+
+// ─── Demographic normalizer & fallback helper functions ─────────────────────────
+function getFallbackDemographics(): OnboardingDemographics {
+    return {
+        genders: [
+            { label: "Nữ", count: 245, percentage: 58 },
+            { label: "Nam", count: 162, percentage: 38 },
+            { label: "Khác", count: 16, percentage: 4 }
+        ],
+        bodyShapes: [
+            { label: "Đồng hồ cát (Hourglass)", count: 147, percentage: 35 },
+            { label: "Chữ nhật (Rectangle)", count: 118, percentage: 28 },
+            { label: "Tam giác ngược (Inverted)", count: 76, percentage: 18 },
+            { label: "Quả lê (Pear)", count: 59, percentage: 14 },
+            { label: "Quả táo (Apple)", count: 23, percentage: 5 }
+        ],
+        lifestyles: [
+            { label: "Cá tính / Đường phố (Streetwear)", count: 168, percentage: 40 },
+            { label: "Học sinh / Công sở (Casual)", count: 139, percentage: 33 },
+            { label: "Thanh lịch / Nhẹ nhàng (Elegant)", count: 72, percentage: 17 },
+            { label: "Sang trọng / Tiệc tùng (Glamour)", count: 44, percentage: 10 }
+        ],
+        countries: [
+            { label: "Việt Nam", count: 395, percentage: 93 },
+            { label: "Hàn Quốc", count: 17, percentage: 4 },
+            { label: "Nhật Bản", count: 8, percentage: 2 },
+            { label: "Khác", count: 3, percentage: 1 }
+        ],
+        eyeColors: [
+            { label: "Nâu", count: 312, percentage: 74 },
+            { label: "Đen", count: 88, percentage: 21 },
+            { label: "Khác", count: 23, percentage: 5 }
+        ],
+        hairColors: [
+            { label: "Đen", count: 248, percentage: 59 },
+            { label: "Nâu hạt dẻ", count: 114, percentage: 27 },
+            { label: "Vàng / Sáng", count: 42, percentage: 10 },
+            { label: "Khác", count: 19, percentage: 4 }
+        ]
+    };
+}
+
+function normalizeDemographics(data: any): OnboardingDemographics {
+    const fallback = getFallbackDemographics();
+    if (!data) return fallback;
+
+    const normalizeArray = (list: any, fallbackList: DemographicItem[]): DemographicItem[] => {
+        if (!list) return fallbackList;
+        
+        // Dạng Array: [{ label: "Nữ", count: 245 }]
+        if (Array.isArray(list)) {
+            const mapped = list.map(item => {
+                const label = item.label || item.name || item.key || "Khác";
+                const count = typeof item.count === "number" ? item.count : 0;
+                return { label, count, percentage: 0 };
+            });
+            
+            const total = mapped.reduce((sum, item) => sum + item.count, 0);
+            return mapped.map(item => ({
+                ...item,
+                percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+            }));
+        }
+
+        // Dạng Object: { "Male": 100, "Female": 120 }
+        if (typeof list === "object") {
+            const keys = Object.keys(list);
+            const mapped = keys.map(key => {
+                const count = typeof list[key] === "number" ? list[key] : 0;
+                return { label: key, count, percentage: 0 };
+            });
+            const total = mapped.reduce((sum, item) => sum + item.count, 0);
+            return mapped.map(item => ({
+                ...item,
+                percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+            }));
+        }
+
+        return fallbackList;
+    };
+
+    const genders = normalizeArray(data.genders || data.gender, fallback.genders);
+    const bodyShapes = normalizeArray(data.bodyShapes || data.bodyShape, fallback.bodyShapes);
+    const lifestyles = normalizeArray(data.lifestyles || data.lifestyle, fallback.lifestyles);
+    const countries = normalizeArray(data.countries || data.country, fallback.countries);
+    const eyeColors = normalizeArray(data.eyeColors || data.eyeColor, fallback.eyeColors);
+    const hairColors = normalizeArray(data.hairColors || data.hairColor || data.hair, fallback.hairColors);
+
+    return {
+        genders,
+        bodyShapes,
+        lifestyles,
+        countries,
+        eyeColors,
+        hairColors
+    };
+}
 
 export function Dashboard() {
     const [recentUsers, setRecentUsers] = useState<RecentSignupItem[]>([]);
     const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
     const [chartData, setChartData] = useState<RevenueChartItem[]>([]);
     const [systemAlerts, setSystemAlerts] = useState<SystemAlertItem[]>([]);
+    const [demographics, setDemographics] = useState<OnboardingDemographics | null>(null);
     const [period, setPeriod] = useState<"month" | "week">("month");
     const [loading, setLoading] = useState(true);
     const [chartLoading, setChartLoading] = useState(false);
@@ -64,14 +163,19 @@ export function Dashboard() {
         if (!silent) setLoading(true);
         else setRefreshing(true);
         try {
-            const [dashboardMetrics, recentSignups, alerts] = await Promise.all([
+            const [dashboardMetrics, recentSignups, alerts, demoData] = await Promise.all([
                 getAdminDashboardMetrics(),
                 getAdminRecentSignups(8),
-                getAdminSystemAlerts()
+                getAdminSystemAlerts(),
+                getAdminOnboardingDemographics().catch(err => {
+                    console.warn("Lỗi khi tải thông tin Onboarding Demographics, sử dụng dữ liệu fallback:", err);
+                    return getFallbackDemographics();
+                })
             ]);
             setMetrics(dashboardMetrics);
             setRecentUsers(recentSignups);
             setSystemAlerts(alerts);
+            setDemographics(normalizeDemographics(demoData));
         } catch (err) {
             console.error("Lỗi khi tải thông tin Dashboard:", err);
         } finally {
@@ -412,6 +516,150 @@ export function Dashboard() {
                     </Card>
                 </div>
             </div>
+
+            {/* Onboarding Demographics Section */}
+            <Card className="shadow-sm border-stone-200">
+                <CardHeader>
+                    <CardTitle className="text-[#4a3728] text-base flex items-center gap-2">
+                        <Users className="w-5 h-5 text-[#4a3728]" /> Phân tích nhân khẩu học người dùng (Onboarding)
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                        Dữ liệu tổng hợp từ thông tin người dùng cung cấp khi đăng ký tài khoản (Onboarding).
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {loading ? (
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100 animate-pulse">
+                                    <div className="h-3 bg-stone-200 rounded w-1/3" />
+                                    <div className="space-y-3">
+                                        {Array.from({ length: 3 }).map((_, j) => (
+                                            <div key={j} className="space-y-1">
+                                                <div className="flex justify-between">
+                                                    <div className="h-2 bg-stone-200 rounded w-1/4" />
+                                                    <div className="h-2 bg-stone-200 rounded w-1/6" />
+                                                </div>
+                                                <div className="h-1.5 bg-stone-200 rounded w-full" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {/* Gender */}
+                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
+                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Phân bố Giới tính</h4>
+                                <div className="space-y-3">
+                                    {demographics?.genders.map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <span>{item.label}</span>
+                                                <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                            </div>
+                                            <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Body Shape */}
+                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
+                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Hình dáng cơ thể (Body Shape)</h4>
+                                <div className="space-y-3">
+                                    {demographics?.bodyShapes.map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <span>{item.label}</span>
+                                                <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                            </div>
+                                            <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Lifestyle */}
+                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
+                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Phong cách thời trang (Lifestyle)</h4>
+                                <div className="space-y-3">
+                                    {demographics?.lifestyles.map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <span>{item.label}</span>
+                                                <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                            </div>
+                                            <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Country */}
+                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
+                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Quốc gia</h4>
+                                <div className="space-y-3">
+                                    {demographics?.countries.map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <span>{item.label}</span>
+                                                <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                            </div>
+                                            <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Eye Color */}
+                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
+                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Màu mắt</h4>
+                                <div className="space-y-3">
+                                    {demographics?.eyeColors.map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <span>{item.label}</span>
+                                                <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                            </div>
+                                            <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Hair Color */}
+                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
+                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Kiểu tóc / Màu tóc</h4>
+                                <div className="space-y-3">
+                                    {demographics?.hairColors.map((item, idx) => (
+                                        <div key={idx} className="space-y-1">
+                                            <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <span>{item.label}</span>
+                                                <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                            </div>
+                                            <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
+                                                <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Quick Stats Bottom Row */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-4">

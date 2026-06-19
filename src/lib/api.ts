@@ -996,6 +996,27 @@ export async function getAdminSystemAlerts(): Promise<SystemAlertItem[]> {
     return request<SystemAlertItem[]>("/api/admin/dashboard/system-alerts");
 }
 
+// ─── Onboarding Demographics API ────────────────────────────────────────────────
+export interface DemographicItem {
+    label: string;
+    count: number;
+    percentage: number;
+}
+
+export interface OnboardingDemographics {
+    genders: DemographicItem[];
+    bodyShapes: DemographicItem[];
+    lifestyles: DemographicItem[];
+    countries: DemographicItem[];
+    eyeColors: DemographicItem[];
+    hairColors: DemographicItem[];
+}
+
+export async function getAdminOnboardingDemographics(): Promise<OnboardingDemographics> {
+    return request<OnboardingDemographics>("/api/admin/dashboard/onboarding-demographics");
+}
+
+
 // ─── Admin Manual Payments & Premium Subscriptions APIs ─────────────────────────────────
 
 export interface ManualPaymentListItem {
