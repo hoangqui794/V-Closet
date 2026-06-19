@@ -58,12 +58,12 @@ function getFallbackDemographics(): OnboardingDemographics {
             { label: "Nam", count: 162, percentage: 38 },
             { label: "Khác", count: 16, percentage: 4 }
         ],
-        bodyShapes: [
-            { label: "Đồng hồ cát (Hourglass)", count: 147, percentage: 35 },
-            { label: "Chữ nhật (Rectangle)", count: 118, percentage: 28 },
-            { label: "Tam giác ngược (Inverted)", count: 76, percentage: 18 },
-            { label: "Quả lê (Pear)", count: 59, percentage: 14 },
-            { label: "Quả táo (Apple)", count: 23, percentage: 5 }
+        ageGroups: [
+            { label: "25 - 34 tuổi", count: 242, percentage: 57 },
+            { label: "18 - 24 tuổi", count: 128, percentage: 30 },
+            { label: "Dưới 18 tuổi", count: 32, percentage: 8 },
+            { label: "35 - 44 tuổi", count: 15, percentage: 4 },
+            { label: "Trên 45 tuổi", count: 5, percentage: 1 }
         ],
         lifestyles: [
             { label: "Cá tính / Đường phố (Streetwear)", count: 168, percentage: 40 },
@@ -129,19 +129,19 @@ function normalizeDemographics(data: any): OnboardingDemographics {
             if (clean === "other" || clean === "khác" || clean === "khac") return "Khác";
             return label;
         }
-        if (category === "bodyShape") {
-            if (clean === "hourglass" || clean === "đồng hồ cát" || clean === "dong ho cat") return "Đồng hồ cát";
-            if (clean === "rectangle" || clean === "chữ nhật" || clean === "chu nhat") return "Chữ nhật";
-            if (clean === "inverted" || clean === "tam giác ngược" || clean === "tam giac nguoc") return "Tam giác ngược";
-            if (clean === "pear" || clean === "quả lê" || clean === "qua le") return "Quả lê";
-            if (clean === "apple" || clean === "quả táo" || clean === "qua tao") return "Quả táo";
+        if (category === "ageGroup") {
+            if (clean.includes("< 18") || clean.includes("<18")) return "Dưới 18 tuổi";
+            if (clean.includes("45+") || clean.includes("above 45")) return "Trên 45 tuổi";
+            if (clean.includes("18 - 24") || clean.includes("18-24")) return "18 - 24 tuổi";
+            if (clean.includes("25 - 34") || clean.includes("25-34")) return "25 - 34 tuổi";
+            if (clean.includes("35 - 44") || clean.includes("35-44")) return "35 - 44 tuổi";
             return label;
         }
         return label;
     };
 
     const normalizeArray = (list: any, fallbackList: DemographicItem[], category: string): DemographicItem[] => {
-        if (!list) return [];
+        if (!list || (Array.isArray(list) && list.length === 0) || (typeof list === "object" && Object.keys(list).length === 0)) return fallbackList;
         
         let rawItems: { label: string; count: number }[] = [];
 
@@ -184,7 +184,7 @@ function normalizeDemographics(data: any): OnboardingDemographics {
     };
 
     const genders = normalizeArray(data.genders || data.gender, fallback.genders, "gender");
-    const bodyShapes = normalizeArray(data.bodyShapes || data.bodyShape, fallback.bodyShapes, "bodyShape");
+    const ageGroups = normalizeArray(data.ageGroups || data.ageGroup, fallback.ageGroups, "ageGroup");
     const lifestyles = normalizeArray(data.lifestyles || data.lifestyle, fallback.lifestyles, "lifestyle");
     const countries = normalizeArray(data.countries || data.country, fallback.countries, "country");
     const eyeColors = normalizeArray(data.eyeColors || data.eyeColor, fallback.eyeColors, "eyeColor");
@@ -192,7 +192,7 @@ function normalizeDemographics(data: any): OnboardingDemographics {
 
     return {
         genders: genders.length > 0 ? genders : [],
-        bodyShapes: bodyShapes.length > 0 ? bodyShapes : [],
+        ageGroups: ageGroups.length > 0 ? ageGroups : [],
         lifestyles: lifestyles.length > 0 ? lifestyles : [],
         countries: countries.length > 0 ? countries : [],
         eyeColors: eyeColors.length > 0 ? eyeColors : [],
@@ -626,12 +626,12 @@ export function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Body Shape */}
+                            {/* Age Groups */}
                             <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
-                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Hình dáng cơ thể (Body Shape)</h4>
+                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Phân bố Nhóm tuổi</h4>
                                 <div className="space-y-3">
-                                    {demographics?.bodyShapes && demographics.bodyShapes.length > 0 ? (
-                                        demographics.bodyShapes.map((item, idx) => (
+                                    {demographics?.ageGroups && demographics.ageGroups.length > 0 ? (
+                                        demographics.ageGroups.map((item, idx) => (
                                             <div key={idx} className="space-y-1">
                                                 <div className="flex justify-between text-xs font-semibold text-stone-600">
                                                     <span>{item.label}</span>

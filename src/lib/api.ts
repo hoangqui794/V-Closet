@@ -1005,7 +1005,7 @@ export interface DemographicItem {
 
 export interface OnboardingDemographics {
     genders: DemographicItem[];
-    bodyShapes: DemographicItem[];
+    ageGroups: DemographicItem[];
     lifestyles: DemographicItem[];
     countries: DemographicItem[];
     eyeColors: DemographicItem[];
