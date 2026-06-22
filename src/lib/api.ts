@@ -996,6 +996,33 @@ export async function getAdminSystemAlerts(): Promise<SystemAlertItem[]> {
     return request<SystemAlertItem[]>("/api/admin/dashboard/system-alerts");
 }
 
+// ─── App Reviews API ─────────────────────────────────────────────────────────
+export interface AppReviewItem {
+    reviewId: string;
+    authorName: string;
+    starRating: number;
+    text: string;
+    lastModified: string;
+    device: string;
+}
+
+export interface AppReviewsDashboardStats {
+    averageRating: number;
+    totalReviews: number;
+    ratingDistribution: {
+        star5: number;
+        star4: number;
+        star3: number;
+        star2: number;
+        star1: number;
+    };
+    recentReviews: AppReviewItem[];
+}
+
+export async function getAdminAppReviews(): Promise<AppReviewsDashboardStats> {
+    return request<AppReviewsDashboardStats>("/api/admin/dashboard/app-reviews");
+}
+
 // ─── Onboarding Demographics API ────────────────────────────────────────────────
 export interface DemographicItem {
     label: string;

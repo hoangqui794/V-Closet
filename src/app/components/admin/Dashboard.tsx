@@ -51,7 +51,8 @@ import {
     getAdminRecentSignups, getAdminSystemAlerts,
     getAdminOnboardingDemographics, OnboardingDemographics, DemographicItem,
     DashboardMetrics, RevenueChartItem, RecentSignupItem, SystemAlertItem,
-    BASE_URL, getToken, getSurveyDashboardStats, SurveyDashboardStats
+    BASE_URL, getToken, getSurveyDashboardStats, SurveyDashboardStats,
+    getAdminAppReviews, AppReviewsDashboardStats
 } from "@/lib/api";
 
 // ─── Demographic normalizer & fallback helper functions ─────────────────────────
@@ -212,6 +213,7 @@ export function Dashboard() {
     const [systemAlerts, setSystemAlerts] = useState<SystemAlertItem[]>([]);
     const [demographics, setDemographics] = useState<OnboardingDemographics | null>(null);
     const [surveyStats, setSurveyStats] = useState<SurveyDashboardStats | null>(null);
+    const [appReviews, setAppReviews] = useState<AppReviewsDashboardStats | null>(null);
     const [period, setPeriod] = useState<"month" | "week">("month");
     const [loading, setLoading] = useState(true);
     const [chartLoading, setChartLoading] = useState(false);
@@ -222,7 +224,7 @@ export function Dashboard() {
         if (!silent) setLoading(true);
         else setRefreshing(true);
         try {
-            const [dashboardMetrics, recentSignups, alerts, demoData, surveyData] = await Promise.all([
+            const [dashboardMetrics, recentSignups, alerts, demoData, surveyData, reviewsData] = await Promise.all([
                 getAdminDashboardMetrics(),
                 getAdminRecentSignups(8),
                 getAdminSystemAlerts(),
@@ -233,6 +235,10 @@ export function Dashboard() {
                 getSurveyDashboardStats().catch(err => {
                     console.warn("Lỗi khi tải thông tin khảo sát, sử dụng dữ liệu fallback:", err);
                     return null;
+                }),
+                getAdminAppReviews().catch(err => {
+                    console.warn("Lỗi khi tải đánh giá CH Play:", err);
+                    return null;
                 })
             ]);
             setMetrics(dashboardMetrics);
@@ -240,6 +246,7 @@ export function Dashboard() {
             setSystemAlerts(alerts);
             setDemographics(normalizeDemographics(demoData));
             setSurveyStats(surveyData);
+            setAppReviews(reviewsData);
         } catch (err) {
             console.error("Lỗi khi tải thông tin Dashboard:", err);
         } finally {
@@ -771,49 +778,51 @@ export function Dashboard() {
                 </CardContent>
             </Card>
 
-            {/* App Review & Survey Stats Section */}
+
+
+            {/* CH Play Reviews Stats Section */}
             <Card className="border-stone-200">
                 <CardHeader>
                     <CardTitle className="text-[#4a3728] text-base flex items-center gap-2">
-                        <Star className="w-5 h-5 text-amber-500 fill-amber-500" /> Thống kê Khảo sát & Đánh giá ứng dụng
+                        <Star className="w-5 h-5 text-green-600 fill-green-600" /> Đánh giá ứng dụng từ Google Play
                     </CardTitle>
                     <CardDescription className="text-xs">
-                        Dữ liệu tổng hợp từ các đợt khảo sát ý kiến phản hồi thu thập từ người dùng App.
+                        Dữ liệu được đồng bộ trực tiếp từ cửa hàng ứng dụng CH Play.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid gap-6 md:grid-cols-12">
                         {/* KPI Average Star Rating */}
-                        <div className="md:col-span-3 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-amber-50/50 to-white border border-amber-100 shadow-sm min-h-[200px]">
+                        <div className="md:col-span-3 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-green-50/50 to-white border border-green-100 shadow-sm min-h-[200px]">
                             <div>
-                                <span className="text-[10px] font-bold text-amber-850 uppercase tracking-wider">Đánh giá trung bình</span>
+                                <span className="text-[10px] font-bold text-green-800 uppercase tracking-wider">Đánh giá trung bình</span>
                                 <div className="flex items-baseline gap-1 mt-3">
-                                    <span className="text-4xl font-extrabold text-[#4a3728] font-mono">{surveyStats?.averageRating ?? 0}</span>
+                                    <span className="text-4xl font-extrabold text-[#4a3728] font-mono">{appReviews?.averageRating ?? 0}</span>
                                     <span className="text-xs font-semibold text-stone-500">/ 5 ★</span>
                                 </div>
-                                <div className="flex gap-1 mt-2 text-amber-500 text-base">
+                                <div className="flex gap-1 mt-2 text-green-600 text-base">
                                     {Array.from({ length: 5 }).map((_, i) => (
-                                        <span key={i} className={i < Math.round(surveyStats?.averageRating ?? 0) ? "fill-amber-500 text-amber-500" : "text-stone-300"}>★</span>
+                                        <span key={i} className={i < Math.round(appReviews?.averageRating ?? 0) ? "fill-green-600 text-green-600" : "text-stone-300"}>★</span>
                                     ))}
                                 </div>
                             </div>
-                            <div className="pt-3 border-t border-amber-100 text-[11px] font-medium text-stone-500 mt-4">
-                                Tổng số lượt đánh giá: <strong className="text-stone-700">{surveyStats?.totalResponses ?? 0}</strong> lượt
+                            <div className="pt-3 border-t border-green-100 text-[11px] font-medium text-stone-500 mt-4">
+                                Tổng số lượt đánh giá: <strong className="text-stone-700">{appReviews?.totalReviews ?? 0}</strong> lượt
                             </div>
                         </div>
 
                         {/* Chart Star Distribution */}
                         <div className="md:col-span-5 p-4 rounded-xl border bg-stone-50/30">
-                            <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider mb-3">Phân bố số sao đánh giá</h4>
+                            <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider mb-3">Phân bố số sao</h4>
                             <div className="h-[140px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart
                                         data={[
-                                            { name: "5 sao", count: surveyStats?.starDistribution.stars5 ?? 0, fill: "#eab308" },
-                                            { name: "4 sao", count: surveyStats?.starDistribution.stars4 ?? 0, fill: "#facc15" },
-                                            { name: "3 sao", count: surveyStats?.starDistribution.stars3 ?? 0, fill: "#fef08a" },
-                                            { name: "2 sao", count: surveyStats?.starDistribution.stars2 ?? 0, fill: "#fed7aa" },
-                                            { name: "1 sao", count: surveyStats?.starDistribution.stars1 ?? 0, fill: "#fca5a5" },
+                                            { name: "5 sao", count: appReviews?.ratingDistribution.star5 ?? 0, fill: "#eab308" },
+                                            { name: "4 sao", count: appReviews?.ratingDistribution.star4 ?? 0, fill: "#facc15" },
+                                            { name: "3 sao", count: appReviews?.ratingDistribution.star3 ?? 0, fill: "#fef08a" },
+                                            { name: "2 sao", count: appReviews?.ratingDistribution.star2 ?? 0, fill: "#fed7aa" },
+                                            { name: "1 sao", count: appReviews?.ratingDistribution.star1 ?? 0, fill: "#fca5a5" },
                                         ]}
                                         layout="vertical"
                                         margin={{ top: 0, right: 10, left: -25, bottom: 0 }}
@@ -831,31 +840,27 @@ export function Dashboard() {
                         <div className="md:col-span-4 p-4 rounded-xl border bg-card flex flex-col">
                             <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Nhận xét mới nhất</h4>
                             <div className="flex-1 max-h-[140px] overflow-y-auto space-y-2 pr-1.5 scrollbar-thin">
-                                {!surveyStats || surveyStats.latestResponses.length === 0 ? (
+                                {!appReviews || appReviews.recentReviews.length === 0 ? (
                                     <p className="text-center py-6 text-xs text-stone-400 italic">Chưa có bình luận nào</p>
                                 ) : (
-                                    surveyStats.latestResponses.map(r => (
-                                        <div key={r.id} className="p-2 rounded-lg bg-stone-50 border text-[11px] space-y-0.5">
+                                    appReviews.recentReviews.map(r => (
+                                        <div key={r.reviewId} className="p-2 rounded-lg bg-stone-50 border text-[11px] space-y-0.5">
                                             <div className="flex items-center justify-between">
-                                                <span className="font-bold text-[#4a3728] truncate max-w-[120px]">{r.userDisplayName}</span>
-                                                {r.rating && r.rating > 0 ? (
-                                                    <span className="text-[10px] text-amber-500 font-medium">{"★".repeat(r.rating)}</span>
-                                                ) : r.quizAnswer ? (
-                                                    <Badge variant="outline" className="text-[8px] h-4 py-0 px-1 border-[#4a3728]/10 text-[#4a3728] font-normal uppercase bg-[#4a3728]/5 shrink-0">
-                                                        Trắc nghiệm
+                                                <span className="font-bold text-[#4a3728] truncate max-w-[120px]">{r.authorName}</span>
+                                                <div className="flex items-center gap-1 shrink-0">
+                                                    {r.starRating && r.starRating > 0 && (
+                                                        <span className="text-[10px] text-amber-500 font-medium">{"★".repeat(r.starRating)}</span>
+                                                    )}
+                                                    <Badge variant="outline" className="text-[8px] h-4 py-0 px-1 border-stone-200 text-stone-500 font-normal shrink-0">
+                                                        {r.device}
                                                     </Badge>
-                                                ) : (
-                                                    <Badge variant="outline" className="text-[8px] h-4 py-0 px-1 border-stone-200 text-stone-500 font-normal uppercase shrink-0">
-                                                        Bình luận
-                                                    </Badge>
-                                                )}
+                                                </div>
                                             </div>
-                                            <p className="text-stone-700 break-words line-clamp-2">
-                                                {r.quizAnswer ? (
-                                                    <span className="font-semibold text-[#4a3728]">Chọn: {r.quizAnswer}</span>
-                                                ) : (
-                                                    r.comment || <span className="text-stone-400 italic font-normal">Chỉ đánh giá {r.rating} sao</span>
-                                                )}
+                                            <p className="text-stone-700 break-words line-clamp-2 mt-1">
+                                                {r.text || <span className="text-stone-400 italic font-normal">Chỉ đánh giá {r.starRating} sao</span>}
+                                            </p>
+                                            <p className="text-[9px] text-stone-400 mt-0.5">
+                                                {new Date(r.lastModified).toLocaleDateString("vi-VN")}
                                             </p>
                                         </div>
                                     ))
