@@ -3,10 +3,12 @@ import { Toaster } from "sonner";
 import { router } from "./routes";
 import { UserProfileProvider } from "./components/UserProfileContext";
 import { LanguageProvider } from "./components/LanguageContext";
+import { ThemeProvider } from "./components/theme-provider";
 
 export default function App() {
   return (
-    <LanguageProvider>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme" attribute="class">
+      <LanguageProvider>
       <UserProfileProvider>
         <RouterProvider router={router} />
         <Toaster
@@ -22,6 +24,7 @@ export default function App() {
           }}
         />
       </UserProfileProvider>
-    </LanguageProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

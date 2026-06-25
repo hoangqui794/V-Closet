@@ -188,7 +188,7 @@ export function CouponManagement() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-[#4a3728] flex items-center gap-2">
+                    <h2 className="text-2xl font-bold tracking-tight text-[#4a3728] dark:text-foreground flex items-center gap-2">
                         <Ticket className="w-6 h-6" /> Quản lý Mã giảm giá
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -206,7 +206,7 @@ export function CouponManagement() {
                     </Button>
                     <Button 
                         onClick={openCreateDialog}
-                        className="gap-2 text-xs bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                        className="gap-2 text-xs bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground"
                     >
                         <Plus className="w-4 h-4" />
                         Tạo mã mới
@@ -214,7 +214,7 @@ export function CouponManagement() {
                 </div>
             </div>
 
-            <Card className="shadow-sm border-stone-200">
+            <Card className="shadow-sm border-stone-200 dark:border-border">
                 <CardHeader className="pb-3 border-b">
                     <div className="flex flex-col sm:flex-row justify-between gap-4">
                         <div className="relative max-w-sm w-full">
@@ -231,7 +231,7 @@ export function CouponManagement() {
                 <CardContent className="p-0">
                     <div className="overflow-x-auto">
                         <Table>
-                            <TableHeader className="bg-stone-50/50">
+                            <TableHeader className=" dark:bg-muted/50/50 dark:bg-muted/50">
                                 <TableRow>
                                     <TableHead className="w-[150px]">Mã giảm giá</TableHead>
                                     <TableHead>Chiết khấu</TableHead>
@@ -261,17 +261,17 @@ export function CouponManagement() {
                                     </TableRow>
                                 ) : (
                                     filteredCoupons.map((coupon) => (
-                                        <TableRow key={coupon.id} className="hover:bg-stone-50/50">
-                                            <TableCell className="font-medium text-stone-800">
-                                                <Badge variant="outline" className="font-mono bg-white uppercase">
+                                        <TableRow key={coupon.id} className="hover: dark:bg-muted/50/50 dark:bg-muted/50">
+                                            <TableCell className="font-medium text-stone-800 dark:text-stone-200">
+                                                <Badge variant="outline" className="font-mono bg-card uppercase">
                                                     {coupon.code}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
                                                 {coupon.discountType === "percentage" ? (
-                                                    <span className="font-bold text-green-600">{coupon.discountValue}%</span>
+                                                    <span className="font-bold  dark:text-green-400">{coupon.discountValue}%</span>
                                                 ) : (
-                                                    <span className="font-bold text-amber-600">{coupon.discountValue.toLocaleString()}đ</span>
+                                                    <span className="font-bold  dark:text-amber-500">{coupon.discountValue.toLocaleString()}đ</span>
                                                 )}
                                             </TableCell>
                                             <TableCell>
@@ -301,7 +301,7 @@ export function CouponManagement() {
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => openEditDialog(coupon)}
-                                                    className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 mr-1"
+                                                    className="text-blue-500 hover: dark:text-blue-400 hover: dark:bg-blue-500/10 mr-1"
                                                     title="Chỉnh sửa mã"
                                                 >
                                                     <Edit className="w-4 h-4" />
@@ -310,7 +310,7 @@ export function CouponManagement() {
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => openDeleteModal(coupon.id)}
-                                                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                    className="text-red-500 hover: dark:text-red-400 hover: dark:bg-red-500/10"
                                                     title="Xoá mã"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -329,7 +329,7 @@ export function CouponManagement() {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-[#4a3728]">
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] dark:text-foreground">
                             <Ticket className="w-5 h-5" /> {editingId ? "Cập Nhật Mã Giảm Giá" : "Tạo Mã Giảm Giá"}
                         </DialogTitle>
                         <DialogDescription>
@@ -339,7 +339,7 @@ export function CouponManagement() {
                     
                     <form onSubmit={handleDialogSubmit} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase">Mã Code *</label>
+                            <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase">Mã Code *</label>
                             <Input 
                                 required
                                 placeholder="VD: WELCOME20"
@@ -351,7 +351,7 @@ export function CouponManagement() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-[#4a3728]/80 uppercase">Loại giảm *</label>
+                                <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase">Loại giảm *</label>
                                 <Select value={newDiscountType} onValueChange={setNewDiscountType}>
                                     <SelectTrigger>
                                         <SelectValue />
@@ -364,7 +364,7 @@ export function CouponManagement() {
                             </div>
                             
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-[#4a3728]/80 uppercase">Giá trị *</label>
+                                <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase">Giá trị *</label>
                                 <Input 
                                     required
                                     type="number"
@@ -378,7 +378,7 @@ export function CouponManagement() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-[#4a3728]/80 uppercase">Giới hạn lượt dùng</label>
+                                <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase">Giới hạn lượt dùng</label>
                                 <Input 
                                     type="number"
                                     min="1"
@@ -389,7 +389,7 @@ export function CouponManagement() {
                             </div>
                             
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-[#4a3728]/80 uppercase">Hạn sử dụng</label>
+                                <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase">Hạn sử dụng</label>
                                 <Input 
                                     type="datetime-local"
                                     value={newExpiresAt}
@@ -402,7 +402,7 @@ export function CouponManagement() {
                             <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                                 Hủy
                             </Button>
-                            <Button type="submit" disabled={dialogLoading} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                            <Button type="submit" disabled={dialogLoading} className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                                 {dialogLoading ? "Đang xử lý..." : (editingId ? "Lưu thay đổi" : "Tạo Mã")}
                             </Button>
                         </DialogFooter>
@@ -414,7 +414,7 @@ export function CouponManagement() {
             <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                 <DialogContent className="sm:max-w-sm">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                        <DialogTitle className="flex items-center gap-2  dark:text-red-400">
                             <AlertCircle className="w-5 h-5" /> Xoá Mã Giảm Giá
                         </DialogTitle>
                         <DialogDescription>

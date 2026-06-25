@@ -176,13 +176,13 @@ export function AIConfig() {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728]">Cấu hình AI & Hệ thống API</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] dark:text-foreground">Cấu hình AI & Hệ thống API</h2>
                     <p className="text-muted-foreground mt-1">
                         Quản lý chi phí gọi API, cấu hình hạn ngạch tính năng thông minh của tài khoản người dùng.
                     </p>
                 </div>
                 {successMessage && (
-                    <Badge className="bg-green-500 hover:bg-green-600 text-white border-none py-1.5 px-3 flex items-center gap-1.5 animate-bounce">
+                    <Badge className=" dark:bg-green-500/100 hover:bg-green-600 text-white border-none py-1.5 px-3 flex items-center gap-1.5 animate-bounce">
                         <CheckCircle2 className="w-3.5 h-3.5" /> {successMessage}
                     </Badge>
                 )}
@@ -197,8 +197,8 @@ export function AIConfig() {
                         <Cpu className="w-4 h-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold font-mono text-blue-600">8,240 <span className="text-sm text-muted-foreground font-normal">lượt</span></div>
-                        <div className="flex items-center mt-2 text-xs text-green-600 font-medium">
+                        <div className="text-3xl font-bold font-mono  dark:text-blue-400">8,240 <span className="text-sm text-muted-foreground font-normal">lượt</span></div>
+                        <div className="flex items-center mt-2 text-xs  dark:text-green-400 font-medium">
                             <CheckCircle2 className="w-3 h-3 mr-1" />
                             Đủ dùng cho ~45 ngày tiếp theo
                         </div>
@@ -231,19 +231,19 @@ export function AIConfig() {
                 </Card>
 
                 {/* AI Cost Summary Card */}
-                <Card className="shadow-sm border-muted bg-[#4a3728]/5 border-none">
+                <Card className="shadow-sm border-muted bg-[#4a3728]/5 dark:bg-primary/5 border-none">
                     <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-semibold text-[#4a3728]">Tạm tính chi phí AI tháng này</CardTitle>
-                        <Coins className="w-4 h-4 text-[#4a3728]" />
+                        <CardTitle className="text-sm font-semibold text-[#4a3728] dark:text-foreground">Tạm tính chi phí AI tháng này</CardTitle>
+                        <Coins className="w-4 h-4 text-[#4a3728] dark:text-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold font-mono text-[#4a3728]">$312.80</div>
-                        <div className="flex items-center mt-2 text-xs text-[#4a3728]/70">
+                        <div className="text-3xl font-bold font-mono text-[#4a3728] dark:text-foreground">$312.80</div>
+                        <div className="flex items-center mt-2 text-xs text-[#4a3728]/70 dark:text-foreground">
                             <TrendingUp className="w-3 h-3 mr-1" />
                             Tăng 14.5% so với tháng trước
                         </div>
-                        <Separator className="my-3 border-[#4a3728]/10" />
-                        <div className="flex justify-between text-xs text-[#4a3728]/80">
+                        <Separator className="my-3 border-[#4a3728]/10 dark:border-primary/10" />
+                        <div className="flex justify-between text-xs text-[#4a3728]/80 dark:text-foreground">
                             <span>Tách nền: $92.40</span>
                             <span>Phối đồ AI: $220.40</span>
                         </div>
@@ -256,7 +256,7 @@ export function AIConfig() {
                 {/* Cột 1 & 2: Biểu đồ gọi API trong tuần */}
                 <Card className="md:col-span-2 shadow-sm border-muted">
                     <CardHeader>
-                        <CardTitle className="text-[#4a3728] text-lg">Biểu đồ lượt gọi API trong tuần</CardTitle>
+                        <CardTitle className="text-[#4a3728] dark:text-foreground text-lg">Biểu đồ lượt gọi API trong tuần</CardTitle>
                         <CardDescription>
                             So sánh tần suất hoạt động của API Photoroom (Tách nền tủ đồ) vs FASHN AI (Thử đồ trực quan).
                         </CardDescription>
@@ -265,9 +265,9 @@ export function AIConfig() {
                         <div className="h-[280px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={apiCallData}>
-                                    <XAxis dataKey="name" fontSize={11} stroke="hsl(var(--muted-foreground))" axisLine={false} tickLine={false} />
-                                    <YAxis fontSize={11} stroke="hsl(var(--muted-foreground))" axisLine={false} tickLine={false} />
-                                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", borderRadius: "8px", fontSize: "11px" }} />
+                                    <XAxis dataKey="name" fontSize={11} stroke="var(--)" axisLine={false} tickLine={false} />
+                                    <YAxis fontSize={11} stroke="var(--)" axisLine={false} tickLine={false} />
+                                    <Tooltip contentStyle={{ backgroundColor: "var(--)", borderRadius: "8px", fontSize: "11px" }} />
                                     <Legend wrapperStyle={{ fontSize: "11px" }} />
                                     <Bar dataKey="photoroom" name="Photoroom (Tách nền)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                                     <Bar dataKey="fashn" name="FASHN AI (Phối đồ)" fill="#a855f7" radius={[4, 4, 0, 0]} />
@@ -280,7 +280,7 @@ export function AIConfig() {
                 {/* Cột 3: Quản lý Quotas (Hạn ngạch người dùng) */}
                 <Card className="shadow-sm border-muted">
                     <CardHeader>
-                        <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                        <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
                             <UserCheck className="w-5 h-5" /> Hạn ngạch Thành viên
                         </CardTitle>
                         <CardDescription>
@@ -291,7 +291,7 @@ export function AIConfig() {
                         {/* Free Tier */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-1.5">
-                                <Badge variant="secondary" className="bg-[#4a3728]/10 text-[#4a3728] border-none font-medium">Free Tier</Badge>
+                                <Badge variant="secondary" className="bg-[#4a3728]/10 dark:bg-primary/10 text-[#4a3728] dark:text-foreground border-none font-medium">Free Tier</Badge>
                                 <span className="text-xs text-muted-foreground">Giới hạn tài khoản miễn phí</span>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -341,7 +341,7 @@ export function AIConfig() {
                         {/* Premium Tier */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-1.5">
-                                <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-white border-none font-medium">Premium Tier</Badge>
+                                <Badge variant="default" className=" dark:bg-amber-500/100 hover:bg-orange-600 text-white border-none font-medium">Premium Tier</Badge>
                                 <span className="text-xs text-muted-foreground">Giới hạn tài khoản Premium</span>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -390,7 +390,7 @@ export function AIConfig() {
                         <Button
                             onClick={handleSaveQuotas}
                             disabled={isSavingQuotas}
-                            className="bg-[#4a3728] hover:bg-[#3d2d21] text-white w-full sm:w-auto h-9 text-xs"
+                            className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground w-full sm:w-auto h-9 text-xs"
                         >
                             <Save className="w-3.5 h-3.5 mr-1.5" />
                             {isSavingQuotas ? "Đang lưu..." : "Lưu hạn ngạch"}
@@ -402,7 +402,7 @@ export function AIConfig() {
             {/* Hàng 3: Cấu hình khóa API Keys */}
             <Card className="shadow-sm border-muted">
                 <CardHeader>
-                    <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                    <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
                         <Key className="w-5 h-5" /> Cấu hình API Keys liên kết dịch vụ
                     </CardTitle>
                     <CardDescription>
@@ -464,12 +464,12 @@ export function AIConfig() {
                 </CardContent>
                 <CardFooter className="border-t border-muted bg-muted/10 p-4 flex justify-between items-center">
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Lock className="w-3.5 h-3.5 text-green-600" /> Kết nối mã hóa SSL bảo mật an toàn.
+                        <Lock className="w-3.5 h-3.5  dark:text-green-400" /> Kết nối mã hóa SSL bảo mật an toàn.
                     </span>
                     <Button
                         onClick={handleSaveKeys}
                         disabled={isSavingKeys}
-                        className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                        className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground"
                     >
                         <Save className="w-4 h-4 mr-2" />
                         {isSavingKeys ? "Đang lưu..." : "Cập nhật API Keys"}
@@ -480,7 +480,7 @@ export function AIConfig() {
             {/* Cấu hình liên kết khảo sát hệ thống (survey_url) */}
             <Card className="shadow-sm border-muted">
                 <CardHeader>
-                    <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                    <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
                         <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500/10" /> Cấu hình liên kết khảo sát hệ thống (survey_url)
                     </CardTitle>
                     <CardDescription>
@@ -511,7 +511,7 @@ export function AIConfig() {
                     <Button
                         onClick={handleSaveSurveyUrl}
                         disabled={isSavingSurveyUrl}
-                        className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                        className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground"
                     >
                         <Save className="w-4 h-4 mr-2" />
                         {isSavingSurveyUrl ? "Đang lưu..." : "Cập nhật link khảo sát"}

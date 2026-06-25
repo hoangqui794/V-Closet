@@ -148,32 +148,32 @@ export function AdminNotifications() {
             >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-background shadow-sm">
+                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full  dark:bg-red-500/100 text-[10px] font-bold text-white border-2 border-background shadow-sm">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
             </Button>
             
             {open && (
-                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-[#f5efe6] z-50 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-[#f5efe6] bg-[#fdfaf7]">
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card rounded-xl shadow-xl border border-[#f5efe6] dark:border-border z-50 overflow-hidden flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-[#f5efe6] dark:border-border bg-[#fdfaf7] dark:bg-card">
                         <div className="flex items-center gap-2">
-                            <BellRing className="w-4 h-4 text-amber-600" />
-                            <h4 className="font-semibold text-[#4a3728]">Thông báo</h4>
+                            <BellRing className="w-4 h-4  dark:text-amber-500" />
+                            <h4 className="font-semibold text-[#4a3728] dark:text-foreground">Thông báo</h4>
                             {unreadCount > 0 && (
-                                <Badge variant="secondary" className="bg-amber-100 text-amber-800 text-[10px] font-bold">
+                                <Badge variant="secondary" className=" dark:bg-amber-500/10  dark:text-amber-400 text-[10px] font-bold">
                                     {unreadCount} mới
                                 </Badge>
                             )}
                         </div>
                         {unreadCount > 0 && (
-                            <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-blue-600 hover:bg-transparent hover:text-blue-800" onClick={handleMarkAllAsRead}>
+                            <Button variant="ghost" size="sm" className="h-auto p-0 text-xs  dark:text-blue-400 hover:bg-transparent hover: dark:text-blue-400" onClick={handleMarkAllAsRead}>
                                 Đánh dấu tất cả đã đọc
                             </Button>
                         )}
                     </div>
 
-                    <ScrollArea className="h-[350px] bg-white">
+                    <ScrollArea className="h-[350px] bg-card">
                         {loading && notifications.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
                                 <Loader2 className="w-6 h-6 animate-spin mb-2" />
@@ -189,15 +189,15 @@ export function AdminNotifications() {
                                 {notifications.map(notification => (
                                     <div 
                                         key={notification.id} 
-                                        className={`px-4 py-3 flex gap-3 transition-colors hover:bg-[#fcfaf8] ${!notification.isRead ? 'bg-[#fdfaf7]' : 'bg-white opacity-80'}`}
+                                        className={`px-4 py-3 flex gap-3 transition-colors hover:bg-[#fcfaf8] dark:bg-card ${!notification.isRead ? 'bg-[#fdfaf7] dark:bg-card' : 'bg-card opacity-80'}`}
                                     >
                                         <div className="flex-1 space-y-1">
                                             <div className="flex items-start justify-between gap-2">
-                                                <p className={`text-sm ${!notification.isRead ? 'font-semibold text-[#4a3728]' : 'font-medium text-[#7f5539]'}`}>
+                                                <p className={`text-sm ${!notification.isRead ? 'font-semibold text-[#4a3728] dark:text-foreground' : 'font-medium  dark:text-muted-foreground'}`}>
                                                     {notification.title}
                                                 </p>
                                                 {!notification.isRead && (
-                                                    <span className="w-2 h-2 shrink-0 rounded-full bg-blue-500 mt-1 shadow-sm" />
+                                                    <span className="w-2 h-2 shrink-0 rounded-full  dark:bg-blue-500/100 mt-1 shadow-sm" />
                                                 )}
                                             </div>
                                             <p className="text-xs text-muted-foreground line-clamp-2">
@@ -212,7 +212,7 @@ export function AdminNotifications() {
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
-                                                    className="w-6 h-6 text-muted-foreground hover:text-green-600 rounded-full"
+                                                    className="w-6 h-6 text-muted-foreground hover: dark:text-green-400 rounded-full"
                                                     title="Đánh dấu đã đọc"
                                                     onClick={() => handleMarkAsRead(notification.id)}
                                                 >
@@ -226,8 +226,8 @@ export function AdminNotifications() {
                         )}
                     </ScrollArea>
                     
-                    <div className="p-2 border-t border-[#f5efe6] bg-[#fdfaf7]">
-                        <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground hover:text-[#4a3728]">
+                    <div className="p-2 border-t border-[#f5efe6] dark:border-border bg-[#fdfaf7] dark:bg-card">
+                        <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground hover:text-[#4a3728] dark:text-foreground">
                             Xem tất cả thông báo
                         </Button>
                     </div>

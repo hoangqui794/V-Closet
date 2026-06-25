@@ -44,12 +44,12 @@ function formatDate(iso: string) {
 function getRoleBadge(role: string) {
     const map: Record<string, string> = {
         Admin: "bg-purple-100 text-purple-700 border-purple-200",
-        SuperAdmin: "bg-red-100 text-red-700 border-red-200",
-        Moderator: "bg-blue-100 text-blue-700 border-blue-200",
-        Customer: "bg-stone-100 text-stone-600 border-stone-200",
-        BrandPartner: "bg-amber-100 text-amber-700 border-amber-200",
+        SuperAdmin: " dark:bg-red-500/10  dark:text-red-400  dark:border-red-500/20",
+        Moderator: " dark:bg-blue-500/10  dark:text-blue-400  dark:border-blue-500/20",
+        Customer: "bg-muted text-stone-600 dark:text-stone-400 border-stone-200 dark:border-border",
+        BrandPartner: " dark:bg-amber-500/10  dark:text-amber-400  dark:border-amber-500/20",
     };
-    return map[role] ?? "bg-gray-100 text-gray-600 border-gray-200";
+    return map[role] ?? " dark:bg-muted  dark:text-muted-foreground border-gray-200";
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
@@ -103,14 +103,14 @@ function CreateUserModal({
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-[#4a3728]">Tạo tài khoản mới</DialogTitle>
+                    <DialogTitle className="text-[#4a3728] dark:text-foreground">Tạo tài khoản mới</DialogTitle>
                     <DialogDescription>
                         Điền thông tin để tạo tài khoản. Mật khẩu sẽ được hệ thống <strong>tự sinh ngẫu nhiên và gửi về email</strong> của người dùng.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col gap-4 py-2">
                     {error && (
-                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                        <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg">
                             <AlertCircle className="w-4 h-4 shrink-0" />{error}
                         </div>
                     )}
@@ -141,7 +141,7 @@ function CreateUserModal({
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>Hủy</Button>
                     <Button onClick={handleSubmit} disabled={loading}
-                        className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                        className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                         {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                         Tạo tài khoản
                     </Button>
@@ -172,35 +172,35 @@ function UserDetailModal({
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto pr-2 font-poppins">
                 <DialogHeader>
-                    <DialogTitle className="text-[#4a3728] font-bold text-xl flex items-center gap-2">
-                        <Info className="w-5.5 h-5.5 text-amber-600" /> Chi tiết người dùng
+                    <DialogTitle className="text-[#4a3728] dark:text-foreground font-bold text-xl flex items-center gap-2">
+                        <Info className="w-5.5 h-5.5  dark:text-amber-500" /> Chi tiết người dùng
                     </DialogTitle>
                 </DialogHeader>
                 {loading ? (
-                    <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" /></div>
+                    <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" /></div>
                 ) : user ? (
                     <div className="flex flex-col gap-6 py-2">
                         {/* Header Profile Info */}
-                        <div className="flex flex-col sm:flex-row items-center gap-4 bg-muted/20 p-4 rounded-2xl border border-stone-200/60">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 bg-muted/20 p-4 rounded-2xl border border-stone-200 dark:border-border/60">
                             <Avatar className="h-20 w-20 border-2 border-[#dccbb5]">
                                 <AvatarImage src={user.avatarUrl ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} />
-                                <AvatarFallback className="text-2xl bg-[#f5efe6] text-[#4a3728]">
+                                <AvatarFallback className="text-2xl bg-[#f5efe6] dark:bg-muted text-[#4a3728] dark:text-foreground">
                                     {user.displayName?.charAt(0) ?? "?"}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="text-center sm:text-left flex-1 space-y-1">
-                                <h3 className="font-bold text-xl text-[#4a3728] leading-tight">{user.displayName}</h3>
+                                <h3 className="font-bold text-xl text-[#4a3728] dark:text-foreground leading-tight">{user.displayName}</h3>
                                 <p className="text-sm text-muted-foreground flex items-center justify-center sm:justify-start gap-1.5 font-mono">
                                     <Mail className="w-3.5 h-3.5 text-stone-400" /> {user.email}
                                 </p>
                                 <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
                                     <Badge className={`text-xs border ${getRoleBadge(user.role)}`}>{user.role}</Badge>
                                     {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
-                                    {!user.isActive && <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-300">Inactive</Badge>}
+                                    {!user.isActive && <Badge variant="outline" className="text-xs  dark:text-amber-500  dark:border-amber-500/20">Inactive</Badge>}
                                     {user.isEmailVerified ? (
-                                        <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 border text-xs">Email Verified</Badge>
+                                        <Badge className=" dark:bg-green-500/10  dark:text-green-400  dark:border-green-500/20 border text-xs">Email Verified</Badge>
                                     ) : (
-                                        <Badge className="bg-rose-50 text-rose-800 border-rose-200 border text-xs">Unverified Email</Badge>
+                                        <Badge className=" dark:bg-red-500/10  dark:text-red-400  dark:border-red-500/20 border text-xs">Unverified Email</Badge>
                                     )}
                                 </div>
                             </div>
@@ -209,9 +209,9 @@ function UserDetailModal({
                         {/* Detail sections in grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Personal & Contact Details */}
-                            <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
-                                <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
-                                    <User className="w-4 h-4 text-[#4a3728]" /> Thông tin liên hệ
+                            <div className="border border-[#f5efe6] dark:border-border bg-[#fdfaf7] dark:bg-card rounded-2xl p-4 space-y-3.5 shadow-sm">
+                                <h3 className="text-xs font-bold  dark:text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] dark:border-border pb-2">
+                                    <User className="w-4 h-4 text-[#4a3728] dark:text-foreground" /> Thông tin liên hệ
                                 </h3>
                                 <div className="space-y-3 text-xs">
                                     <div className="flex justify-between items-center">
@@ -220,25 +220,25 @@ function UserDetailModal({
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-muted-foreground flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-stone-400" /> Số điện thoại:</span>
-                                        <span className="font-semibold text-[#4a3728]">{user.profile?.phoneNumber ?? "—"}</span>
+                                        <span className="font-semibold text-[#4a3728] dark:text-foreground">{user.profile?.phoneNumber ?? "—"}</span>
                                     </div>
                                     {user.role === 'Customer' && (
                                         <>
                                             <div className="flex justify-between items-start gap-4">
                                                 <span className="text-muted-foreground flex items-center gap-1 shrink-0"><MapPin className="w-3.5 h-3.5 text-stone-400" /> Địa chỉ:</span>
-                                                <span className="font-semibold text-[#4a3728] text-right break-words max-w-[180px]">{user.profile?.address ?? "—"}</span>
+                                                <span className="font-semibold text-[#4a3728] dark:text-foreground text-right break-words max-w-[180px]">{user.profile?.address ?? "—"}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-muted-foreground flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-stone-400" /> Ngày sinh:</span>
-                                                <span className="font-semibold text-[#4a3728]">{user.profile?.dateOfBirth ? formatDate(user.profile?.dateOfBirth) : "—"}</span>
+                                                <span className="font-semibold text-[#4a3728] dark:text-foreground">{user.profile?.dateOfBirth ? formatDate(user.profile?.dateOfBirth) : "—"}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-muted-foreground">Giới tính:</span>
-                                                <span className="font-semibold text-[#4a3728] bg-muted/50 px-2 py-0.5 rounded-full">{user.profile?.gender ?? "—"}</span>
+                                                <span className="font-semibold text-[#4a3728] dark:text-foreground bg-muted/50 px-2 py-0.5 rounded-full">{user.profile?.gender ?? "—"}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-muted-foreground flex items-center gap-1"><Globe className="w-3.5 h-3.5 text-stone-400" /> Quốc gia:</span>
-                                                <span className="font-semibold text-[#4a3728]">{user.profile?.country ?? "—"}</span>
+                                                <span className="font-semibold text-[#4a3728] dark:text-foreground">{user.profile?.country ?? "—"}</span>
                                             </div>
                                         </>
                                     )}
@@ -247,13 +247,13 @@ function UserDetailModal({
 
                             {/* Body Profile & Wardrobe (for Customers) / Admin Info (for Admins) */}
                             {(user.role === 'Admin' || user.role === 'Moderator' || user.role === 'SuperAdmin') ? (
-                                <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm relative">
-                                    <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center justify-between border-b border-[#f5efe6] pb-2">
+                                <div className="border border-[#f5efe6] dark:border-border bg-[#fdfaf7] dark:bg-card rounded-2xl p-4 space-y-3.5 shadow-sm relative">
+                                    <h3 className="text-xs font-bold  dark:text-muted-foreground uppercase tracking-wider flex items-center justify-between border-b border-[#f5efe6] dark:border-border pb-2">
                                         <div className="flex items-center gap-1.5">
                                             <Activity className="w-4 h-4 text-purple-600" /> Thông tin Nội bộ
                                         </div>
                                         {isSuperAdmin && (
-                                            <Button variant="ghost" size="sm" className="h-6 px-2 text-[#7f5539] hover:bg-[#f5efe6]" onClick={onEditInternalInfo}>
+                                            <Button variant="ghost" size="sm" className="h-6 px-2  dark:text-muted-foreground hover:bg-[#f5efe6] dark:bg-muted" onClick={onEditInternalInfo}>
                                                 Sửa
                                             </Button>
                                         )}
@@ -261,59 +261,59 @@ function UserDetailModal({
                                     <div className="space-y-3 text-xs">
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground flex items-center gap-1">Chức danh:</span>
-                                            <span className="font-bold text-[#4a3728]">{user.profile?.jobTitle ?? "—"}</span>
+                                            <span className="font-bold text-[#4a3728] dark:text-foreground">{user.profile?.jobTitle ?? "—"}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground">Phòng ban:</span>
-                                            <span className="font-bold text-[#4a3728]">{user.profile?.department ?? "—"}</span>
+                                            <span className="font-bold text-[#4a3728] dark:text-foreground">{user.profile?.department ?? "—"}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground">Mã NV:</span>
-                                            <span className="font-bold text-[#4a3728] bg-orange-50 text-orange-800 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
+                                            <span className="font-bold text-[#4a3728] dark:text-foreground  dark:bg-amber-500/10  dark:text-amber-400 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
                                                 {user.profile?.employeeCode ?? "—"}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground">Trạng thái HĐ:</span>
-                                            <span className={`font-semibold ${user.isActive ? "text-green-600" : "text-amber-600"}`}>
+                                            <span className={`font-semibold ${user.isActive ? " dark:text-green-400" : " dark:text-amber-500"}`}>
                                                 {user.isActive ? "🟢 Hoạt động" : "🟡 Inactive"}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground">Ngày đăng ký:</span>
-                                            <span className="font-medium text-[#4a3728]">{formatDate(user.createdAt)}</span>
+                                            <span className="font-medium text-[#4a3728] dark:text-foreground">{formatDate(user.createdAt)}</span>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
-                                    <h3 className="text-xs font-bold text-[#7f5539] uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
+                                <div className="border border-[#f5efe6] dark:border-border bg-[#fdfaf7] dark:bg-card rounded-2xl p-4 space-y-3.5 shadow-sm">
+                                    <h3 className="text-xs font-bold  dark:text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] dark:border-border pb-2">
                                         <Activity className="w-4 h-4 text-purple-600" /> Chỉ số & Tủ đồ
                                     </h3>
                                     <div className="space-y-3 text-xs">
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground flex items-center gap-1"><Ruler className="w-3.5 h-3.5 text-stone-400" /> Chiều cao:</span>
-                                            <span className="font-bold text-[#4a3728]">{user.profile?.heightCm ? `${user.profile?.heightCm} cm` : "—"}</span>
+                                            <span className="font-bold text-[#4a3728] dark:text-foreground">{user.profile?.heightCm ? `${user.profile?.heightCm} cm` : "—"}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground">Cân nặng:</span>
-                                            <span className="font-bold text-[#4a3728]">{user.profile?.weightKg ? `${user.profile?.weightKg} kg` : "—"}</span>
+                                            <span className="font-bold text-[#4a3728] dark:text-foreground">{user.profile?.weightKg ? `${user.profile?.weightKg} kg` : "—"}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground flex items-center gap-1"><Shirt className="w-3.5 h-3.5 text-stone-400" /> Số đồ trong tủ:</span>
-                                            <span className="font-bold text-[#4a3728] bg-orange-50 text-orange-800 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
+                                            <span className="font-bold text-[#4a3728] dark:text-foreground  dark:bg-amber-500/10  dark:text-amber-400 px-2 py-0.5 rounded-full border border-orange-100 font-mono">
                                                 {user.profile?.wardrobeItemCount ?? 0} món đồ
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground">Trạng thái HĐ:</span>
-                                            <span className={`font-semibold ${user.isActive ? "text-green-600" : "text-amber-600"}`}>
+                                            <span className={`font-semibold ${user.isActive ? " dark:text-green-400" : " dark:text-amber-500"}`}>
                                                 {user.isActive ? "🟢 Hoạt động" : "🟡 Inactive"}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground">Ngày đăng ký:</span>
-                                            <span className="font-medium text-[#4a3728]">{formatDate(user.createdAt)}</span>
+                                            <span className="font-medium text-[#4a3728] dark:text-foreground">{formatDate(user.createdAt)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -321,8 +321,8 @@ function UserDetailModal({
                         </div>
 
                         {/* Ban / Violation History List */}
-                        <div className="border border-[#f5efe6] bg-[#fdfaf7] rounded-2xl p-4 space-y-3.5 shadow-sm">
-                            <h3 className="text-xs font-bold text-red-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] pb-2">
+                        <div className="border border-[#f5efe6] dark:border-border bg-[#fdfaf7] dark:bg-card rounded-2xl p-4 space-y-3.5 shadow-sm">
+                            <h3 className="text-xs font-bold  dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-[#f5efe6] dark:border-border pb-2">
                                 <Ban className="w-4 h-4 text-red-500" /> Lịch sử cấm quyền ({user.banHistory?.length ?? 0})
                             </h3>
                             <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
@@ -330,11 +330,11 @@ function UserDetailModal({
                                     <p className="text-center text-xs text-muted-foreground py-6">Thành viên này có lý lịch sạch, chưa từng bị cấm.</p>
                                 ) : (
                                     user.banHistory.map((ban, index) => (
-                                        <div key={ban.id || index} className="p-3 bg-white border border-stone-200 rounded-xl space-y-2.5 text-xs shadow-2xs">
+                                        <div key={ban.id || index} className="p-3 bg-card border border-stone-200 dark:border-border rounded-xl space-y-2.5 text-xs shadow-2xs">
                                             <div className="flex items-center justify-between">
                                                 <span className="flex items-center gap-2">
                                                     <span className="text-[10px] text-muted-foreground font-mono">#{index + 1}</span>
-                                                    <Badge className="bg-red-50 text-red-700 border-red-200 border text-[10px] font-normal uppercase">
+                                                    <Badge className=" dark:bg-red-500/10  dark:text-red-400  dark:border-red-500/20 border text-[10px] font-normal uppercase">
                                                         Ban: {ban.banType}
                                                     </Badge>
                                                 </span>
@@ -342,7 +342,7 @@ function UserDetailModal({
                                                     Tạo lúc: {ban.createdAt ? formatDate(ban.createdAt) : "—"}
                                                 </span>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-2.5 text-[11px] bg-stone-50/50 p-2.5 rounded-lg border border-stone-100">
+                                            <div className="grid grid-cols-2 gap-2.5 text-[11px]  dark:bg-muted/50/50 dark:bg-muted/50 p-2.5 rounded-lg border border-stone-100 dark:border-border">
                                                 <div>
                                                     <p className="text-muted-foreground text-[10px]">Lý do cấm:</p>
                                                     <p className="font-semibold text-stone-850">{ban.reason || "Không ghi rõ"}</p>
@@ -355,11 +355,11 @@ function UserDetailModal({
                                                 </div>
                                                 <div className="col-span-2">
                                                     <p className="text-muted-foreground text-[10px]">Người cấm:</p>
-                                                    <p className="font-semibold text-[#4a3728]">{ban.bannedByDisplayName || "Hệ thống"}</p>
+                                                    <p className="font-semibold text-[#4a3728] dark:text-foreground">{ban.bannedByDisplayName || "Hệ thống"}</p>
                                                 </div>
                                             </div>
                                             {ban.isLifted ? (
-                                                <div className="p-2.5 bg-emerald-50/60 border border-emerald-100 rounded-lg text-[10px] text-emerald-800">
+                                                <div className="p-2.5  dark:bg-green-500/10/60 border border-emerald-100 rounded-lg text-[10px]  dark:text-green-400">
                                                     <div className="flex justify-between font-bold">
                                                         <span>✅ ĐÃ GỠ CẤM</span>
                                                         <span>Lúc: {ban.liftedAt ? formatDate(ban.liftedAt) : "—"}</span>
@@ -367,7 +367,7 @@ function UserDetailModal({
                                                     <p className="mt-1 leading-relaxed"><span className="font-semibold text-emerald-950">Lý do gỡ:</span> {ban.liftReason || "Không có ghi chú"}</p>
                                                 </div>
                                             ) : (
-                                                <div className="p-2 bg-rose-50 border border-rose-100 rounded-lg text-[10px] text-rose-800 flex justify-between font-bold">
+                                                <div className="p-2  dark:bg-red-500/10 border border-rose-100 rounded-lg text-[10px]  dark:text-red-400 flex justify-between font-bold">
                                                     <span>⚠️ ĐANG HIỆU LỰC KHÓA</span>
                                                 </div>
                                             )}
@@ -459,7 +459,7 @@ function BanUserModal({
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-red-600 flex items-center gap-2">
+                    <DialogTitle className=" dark:text-red-400 flex items-center gap-2">
                         <Ban className="w-5 h-5" /> Khóa quyền người dùng
                     </DialogTitle>
                     <DialogDescription>
@@ -468,7 +468,7 @@ function BanUserModal({
                 </DialogHeader>
                 <div className="flex flex-col gap-4 py-2">
                     {error && (
-                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg animate-in fade-in duration-200">
+                        <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg animate-in fade-in duration-200">
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{error}</span>
                         </div>
@@ -556,18 +556,18 @@ function ConfirmDeactivateModal({
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-red-600 font-semibold">
+                    <DialogTitle className="flex items-center gap-2  dark:text-red-400 font-semibold">
                         <UserX className="w-5 h-5 shrink-0" /> Vô hiệu hóa tài khoản
                     </DialogTitle>
                     <DialogDescription className="text-sm text-muted-foreground mt-1">
                         Bạn có chắc chắn muốn vô hiệu hóa tài khoản của <strong>{user?.displayName}</strong> ({user?.email})?
                         <br />
-                        <span className="text-red-500 font-medium">Lưu ý:</span> Trạng thái tài khoản sẽ chuyển thành <span className="font-semibold text-yellow-600">Inactive</span> (isActive = false). Chỉ có SuperAdmin mới được vô hiệu hóa tài khoản của các Admin khác.
+                        <span className="text-red-500 font-medium">Lưu ý:</span> Trạng thái tài khoản sẽ chuyển thành <span className="font-semibold  dark:text-amber-500">Inactive</span> (isActive = false). Chỉ có SuperAdmin mới được vô hiệu hóa tài khoản của các Admin khác.
                     </DialogDescription>
                 </DialogHeader>
 
                 {error && (
-                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg my-2 animate-in fade-in duration-200">
+                    <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg my-2 animate-in fade-in duration-200">
                         <AlertCircle className="w-4 h-4 shrink-0" />
                         <span>{error}</span>
                     </div>
@@ -699,7 +699,7 @@ function GrantPermissionModal({
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 font-semibold text-[#4a3728]">
+                    <DialogTitle className="flex items-center gap-2 font-semibold text-[#4a3728] dark:text-foreground">
                         <Shield className="w-5 h-5 shrink-0 text-purple-600" /> Quản lý quyền hạn
                     </DialogTitle>
                     <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -717,7 +717,7 @@ function GrantPermissionModal({
                 ) : (
                     <div className="flex flex-col gap-4 py-2">
                         {error && (
-                            <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg animate-in fade-in duration-200">
+                            <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg animate-in fade-in duration-200">
                                 <AlertCircle className="w-4 h-4 shrink-0" />
                                 <span>{error}</span>
                             </div>
@@ -738,7 +738,7 @@ function GrantPermissionModal({
                                                     className={`flex items-start gap-3 p-2.5 rounded-xl border transition-all cursor-pointer select-none
                                                         ${isChecked 
                                                             ? "border-purple-200 bg-purple-50/20 hover:bg-purple-50/30" 
-                                                            : "border-[#f5efe6] bg-[#fdfaf7] hover:bg-stone-50"
+                                                            : "border-[#f5efe6] dark:border-border bg-[#fdfaf7] dark:bg-card hover:bg-muted/50"
                                                         }`}
                                                 >
                                                     <input
@@ -748,7 +748,7 @@ function GrantPermissionModal({
                                                         className="mt-1 h-4 w-4 rounded border-stone-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
                                                     />
                                                     <div className="flex flex-col">
-                                                        <span className="text-sm font-semibold text-[#4a3728]">
+                                                        <span className="text-sm font-semibold text-[#4a3728] dark:text-foreground">
                                                             {p.name}
                                                         </span>
                                                         <span className="text-xs font-mono text-purple-600 font-semibold mt-0.5">
@@ -771,7 +771,7 @@ function GrantPermissionModal({
                         <Button
                             type="button"
                             variant="outline"
-                            className="w-full text-amber-700 hover:text-amber-800 border-amber-200 hover:bg-amber-50 gap-1.5 mt-2"
+                            className="w-full  dark:text-amber-400 hover: dark:text-amber-400  dark:border-amber-500/20 hover: dark:bg-amber-500/10 gap-1.5 mt-2"
                             onClick={handleResetToDefault}
                             disabled={loading || loadingData}
                         >
@@ -832,7 +832,7 @@ function UpdateRoleModal({
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-amber-600 font-semibold">
+                    <DialogTitle className="flex items-center gap-2  dark:text-amber-500 font-semibold">
                         <UserCog className="w-5 h-5 shrink-0" /> Cập nhật vai trò người dùng
                     </DialogTitle>
                     <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -844,7 +844,7 @@ function UpdateRoleModal({
 
                 <div className="flex flex-col gap-4 py-3">
                     {error && (
-                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg animate-in fade-in duration-200">
+                        <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg animate-in fade-in duration-200">
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{error}</span>
                         </div>
@@ -931,7 +931,7 @@ function EditAdminInternalModal({
 
                 <div className="flex flex-col gap-4 py-3">
                     {error && (
-                        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg animate-in fade-in duration-200">
+                        <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg animate-in fade-in duration-200">
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{error}</span>
                         </div>
@@ -1127,9 +1127,9 @@ export function UserManagement() {
     };
 
     const getStatusInfo = (user: AdminUser) => {
-        if (user.isBanned) return { label: "Banned", color: "bg-red-500", text: "text-red-600 bg-red-50 border-red-200" };
-        if (!user.isActive) return { label: "Inactive", color: "bg-yellow-400", text: "text-yellow-600 bg-yellow-50 border-yellow-200" };
-        return { label: "Active", color: "bg-green-500", text: "text-green-600 bg-green-50 border-green-200" };
+        if (user.isBanned) return { label: "Banned", color: " dark:bg-red-500/100", text: " dark:text-red-400  dark:bg-red-500/10  dark:border-red-500/20" };
+        if (!user.isActive) return { label: "Inactive", color: "bg-yellow-400", text: " dark:text-amber-500  dark:bg-amber-500/10  dark:border-amber-500/20" };
+        return { label: "Active", color: " dark:bg-green-500/100", text: " dark:text-green-400  dark:bg-green-500/10  dark:border-green-500/20" };
     };
 
     return (
@@ -1139,14 +1139,14 @@ export function UserManagement() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728]">Quản lý người dùng</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] dark:text-foreground">Quản lý người dùng</h2>
                     <p className="text-muted-foreground mt-1">Danh sách người dùng Admin/Moderator trong hệ thống.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Button variant="outline" size="icon" onClick={fetchUsers} title="Làm mới">
                         <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                     </Button>
-                    <Button className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                    <Button className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground"
                         onClick={() => setCreateOpen(true)}>
                         <UserPlus className="w-4 h-4 mr-2" /> Tạo tài khoản
                     </Button>
@@ -1207,10 +1207,10 @@ export function UserManagement() {
 
             {/* Error */}
             {error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+                <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-4 py-3 rounded-xl">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{error}</span>
-                    <Button variant="ghost" size="sm" className="ml-auto text-red-600 hover:text-red-700 h-7"
+                    <Button variant="ghost" size="sm" className="ml-auto  dark:text-red-400 hover: dark:text-red-400 h-7"
                         onClick={fetchUsers}>Thử lại</Button>
                 </div>
             )}
@@ -1233,7 +1233,7 @@ export function UserManagement() {
                             <TableRow>
                                 <TableCell colSpan={6} className="py-20 text-center">
                                     <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                                        <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                        <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
                                         <span>Đang tải dữ liệu...</span>
                                     </div>
                                 </TableCell>
@@ -1256,7 +1256,7 @@ export function UserManagement() {
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-9 w-9 border border-[#dccbb5]">
                                                     <AvatarImage src={user.avatarUrl ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`} />
-                                                    <AvatarFallback className="bg-[#f5efe6] text-[#4a3728] text-xs font-bold">
+                                                    <AvatarFallback className="bg-[#f5efe6] dark:bg-muted text-[#4a3728] dark:text-foreground text-xs font-bold">
                                                         {user.displayName?.charAt(0) ?? "?"}
                                                     </AvatarFallback>
                                                 </Avatar>
@@ -1287,7 +1287,7 @@ export function UserManagement() {
                                             <div className="flex items-center justify-end gap-1">
                                                 {/* View detail */}
                                                 <Button variant="ghost" size="icon"
-                                                    className="h-8 w-8 text-muted-foreground hover:text-blue-600"
+                                                    className="h-8 w-8 text-muted-foreground hover: dark:text-blue-400"
                                                     title="Xem chi tiết"
                                                     onClick={() => setDetailUserId(user.userId)}>
                                                     <Eye className="h-4 w-4" />
@@ -1296,7 +1296,7 @@ export function UserManagement() {
                                                 {/* Reactivate */}
                                                 {!user.isActive && (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-green-600"
+                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-green-400"
                                                         title="Kích hoạt lại tài khoản"
                                                         onClick={() => handleReactivate(user)}>
                                                         <UserCheck className="h-4 w-4" />
@@ -1306,7 +1306,7 @@ export function UserManagement() {
                                                 {/* Deactivate */}
                                                 {user.isActive && (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-amber-600"
+                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-amber-500"
                                                         title="Vô hiệu hóa tài khoản"
                                                         onClick={() => setDeactivateUser(user)}>
                                                         <UserX className="h-4 w-4" />
@@ -1316,7 +1316,7 @@ export function UserManagement() {
                                                 {/* Update Role (For active users) */}
                                                 {user.isActive && (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-amber-600"
+                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-amber-500"
                                                         title="Cập nhật vai trò"
                                                         onClick={() => setRoleUser(user)}>
                                                         <UserCog className="h-4 w-4" />
@@ -1336,14 +1336,14 @@ export function UserManagement() {
                                                 {/* Ban / Unban */}
                                                 {user.isBanned ? (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-green-600"
+                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-green-400"
                                                         title="Gỡ khóa"
                                                         onClick={() => handleUnban(user)}>
                                                         <ShieldOff className="h-4 w-4" />
                                                     </Button>
                                                 ) : (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-red-600"
+                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-red-400"
                                                         title="Khóa quyền"
                                                         onClick={() => setBanUser(user)}>
                                                         <Ban className="h-4 w-4" />
@@ -1373,7 +1373,7 @@ export function UserManagement() {
                             const p = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
                             return (
                                 <Button key={p} variant={p === page ? "default" : "outline"}
-                                    size="icon" className={`h-8 w-8 text-xs ${p === page ? "bg-[#4a3728] hover:bg-[#3d2d21]" : ""}`}
+                                    size="icon" className={`h-8 w-8 text-xs ${p === page ? "bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90" : ""}`}
                                     onClick={() => setPage(p)}>
                                     {p}
                                 </Button>

@@ -320,55 +320,55 @@ export function Dashboard() {
             label: "Tổng người dùng",
             value: loading ? null : (metrics?.totalUserCount ?? 0).toLocaleString(),
             sub: loading ? "Đang tải..." : `+${(metrics as any)?.newUsersTodayCount ?? (metrics as any)?.newUsersLast24h ?? 0} mới (24h)`,
-            subColor: "text-green-600",
-            icon: <Users className="w-4 h-4 text-[#4a3728]" />,
-            gradient: "from-stone-50",
+            subColor: "text-green-600 dark:text-green-400",
+            icon: <Users className="w-4 h-4 text-[#4a3728] dark:text-foreground" />,
+            gradient: "from-stone-50 dark:from-stone-900/30",
             path: "/admin/users"
         },
         {
             label: "Doanh thu Premium",
             value: loading ? null : `${(metrics?.totalPremiumRevenue ?? 0).toLocaleString("vi-VN")} ₫`,
             sub: "Tổng giao dịch gói nâng cấp",
-            subColor: "text-stone-500",
-            icon: <DollarSign className="w-4 h-4 text-emerald-600" />,
-            gradient: "from-emerald-50",
+            subColor: "text-muted-foreground",
+            icon: <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />,
+            gradient: "from-emerald-50 dark:from-emerald-950/30",
             path: "/admin/subscriptions"
         },
         {
             label: "Premium hiệu lực",
             value: loading ? null : (metrics?.activePremiumSubscriptionCount ?? 0).toLocaleString(),
             sub: "Tài khoản đang gia hạn",
-            subColor: "text-stone-500",
-            icon: <CreditCard className="w-4 h-4 text-purple-600" />,
-            gradient: "from-purple-50",
+            subColor: "text-muted-foreground",
+            icon: <CreditCard className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
+            gradient: "from-purple-50 dark:from-purple-950/30",
             path: "/admin/subscriptions"
         },
         {
             label: "Tín dụng QC",
             value: loading ? null : (metrics?.totalSystemAdCredits ?? 0).toLocaleString(),
             sub: "Ngân sách quảng cáo hệ thống",
-            subColor: "text-stone-500",
-            icon: <Activity className="w-4 h-4 text-blue-600" />,
-            gradient: "from-blue-50",
+            subColor: "text-muted-foreground",
+            icon: <Activity className="w-4 h-4 text-blue-600 dark:text-blue-400" />,
+            gradient: "from-blue-50 dark:from-blue-950/30",
             path: "/admin/campaigns"
         },
         {
             label: "Đối tác chờ duyệt",
             value: loading ? null : (metrics?.pendingBrandCount ?? 0).toString(),
             sub: !loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "⚠️ Cần xác minh ngay" : "Đã duyệt hoàn tất",
-            subColor: !loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-600 animate-pulse font-semibold" : "text-stone-500",
-            icon: <Shield className={`w-4 h-4 ${!loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-500" : "text-stone-400"}`} />,
-            gradient: "from-amber-50",
-            valueColor: !loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-600" : undefined,
+            subColor: !loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-600 dark:text-amber-400 animate-pulse font-semibold" : "text-muted-foreground",
+            icon: <Shield className={`w-4 h-4 ${!loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-500" : "text-muted-foreground"}`} />,
+            gradient: "from-amber-50 dark:from-amber-950/30",
+            valueColor: !loading && (metrics?.pendingBrandCount ?? 0) > 0 ? "text-amber-600 dark:text-amber-400" : undefined,
             path: "/admin/affiliate"
         },
         {
             label: "Báo cáo chờ duyệt",
             value: loading ? null : (metrics?.pendingReportCount ?? 0).toString(),
             sub: !loading && (metrics?.pendingReportCount ?? 0) > 0 ? "🔴 Có tố cáo chưa xử lý" : "Hệ thống an toàn",
-            subColor: !loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500 font-semibold" : "text-stone-500",
-            icon: <AlertTriangle className={`w-4 h-4 ${!loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500 animate-bounce" : "text-stone-400"}`} />,
-            gradient: "from-red-50",
+            subColor: !loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500 font-semibold" : "text-muted-foreground",
+            icon: <AlertTriangle className={`w-4 h-4 ${!loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500 animate-bounce" : "text-muted-foreground"}`} />,
+            gradient: "from-red-50 dark:from-red-950/30",
             valueColor: !loading && (metrics?.pendingReportCount ?? 0) > 0 ? "text-red-500" : undefined,
             path: "/admin/reports"
         },
@@ -379,7 +379,7 @@ export function Dashboard() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-[#4a3728]">Tổng quan hệ thống V-Closet</h2>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#4a3728] dark:text-foreground">Tổng quan hệ thống V-Closet</h2>
                     <p className="text-sm text-muted-foreground mt-1">
                         Theo dõi doanh thu Premium, hoa hồng Shopee, chi phí API AI và cảnh báo bảo mật.
                     </p>
@@ -414,10 +414,10 @@ export function Dashboard() {
                     <Card 
                         key={i} 
                         onClick={() => card.path && navigate(card.path)}
-                        className={`hover:shadow-md hover:border-[#4a3728]/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 border-stone-200 bg-gradient-to-br ${card.gradient} to-white cursor-pointer select-none`}
+                        className={`hover:shadow-md hover:border-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 border-border bg-gradient-to-br ${card.gradient} to-white dark:to-card cursor-pointer select-none`}
                     >
                         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                            <CardTitle className="text-xs font-semibold text-stone-600">{card.label}</CardTitle>
+                            <CardTitle className="text-xs font-semibold text-muted-foreground">{card.label}</CardTitle>
                             {card.icon}
                         </CardHeader>
                         <CardContent>
@@ -437,27 +437,27 @@ export function Dashboard() {
             {/* Chart + Alerts row */}
             <div className="grid gap-6 md:grid-cols-7">
                 {/* Biểu đồ doanh thu */}
-                <Card className="md:col-span-4 shadow-sm border-muted bg-card">
+                <Card className="md:col-span-4 shadow-sm border-muted bg-card min-w-0">
                     <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4">
                         <div>
-                            <CardTitle className="text-[#4a3728] text-base">Biến động Tài chính & Tăng trưởng</CardTitle>
+                            <CardTitle className="text-[#4a3728] dark:text-foreground text-base">Biến động Tài chính & Tăng trưởng</CardTitle>
                             <CardDescription className="text-xs">Premium Sales vs Hoa hồng Affiliate</CardDescription>
                         </div>
-                        <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg text-xs border border-stone-200">
+                        <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg text-xs border border-border">
                             <button
                                 onClick={() => setPeriod("month")}
-                                className={`px-3 py-1.5 rounded-md font-medium transition-all ${period === "month" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+                                className={`px-3 py-1.5 rounded-md font-medium transition-all ${period === "month" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                             >Theo tháng</button>
                             <button
                                 onClick={() => setPeriod("week")}
-                                className={`px-3 py-1.5 rounded-md font-medium transition-all ${period === "week" ? "bg-white text-stone-900 shadow-sm" : "text-stone-500 hover:text-stone-900"}`}
+                                className={`px-3 py-1.5 rounded-md font-medium transition-all ${period === "week" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
                             >Theo tuần</button>
                         </div>
                     </CardHeader>
                     <CardContent className="pl-2 relative">
                         {chartLoading && (
                             <div className="absolute inset-0 bg-card/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-b-xl">
-                                <span className="text-xs text-[#4a3728] font-medium animate-pulse">Đang cập nhật biểu đồ...</span>
+                                <span className="text-xs text-foreground font-medium animate-pulse">Đang cập nhật biểu đồ...</span>
                             </div>
                         )}
                         <div className="h-[280px] w-full">
@@ -465,37 +465,37 @@ export function Dashboard() {
                                 <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#4a3728" stopOpacity={0.15} />
-                                            <stop offset="95%" stopColor="#4a3728" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
                                         </linearGradient>
                                         <linearGradient id="colorAffiliate" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#22c55e" stopOpacity={0.12} />
                                             <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                                    <XAxis dataKey="timeLabel" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted)" />
+                                    <XAxis dataKey="timeLabel" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                                     <YAxis
-                                        stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false}
+                                        stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false}
                                         tickFormatter={(v) => v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}Tr` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}k` : `${v}`}
                                     />
                                     <RechartsTooltip
-                                        contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", fontSize: "11px", borderRadius: "8px" }}
+                                        contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", fontSize: "11px", borderRadius: "8px" }}
                                         formatter={(value: any, name: string) => [`${Number(value).toLocaleString("vi-VN")} ₫`, name]}
                                     />
-                                    <Area type="monotone" dataKey="revenue" name="Doanh thu Premium" stroke="#4a3728" strokeWidth={2.5} fill="url(#colorRevenue)" dot={{ r: 3, fill: "#4a3728", strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                                    <Area type="monotone" dataKey="revenue" name="Doanh thu Premium" stroke="var(--primary)" strokeWidth={2.5} fill="url(#colorRevenue)" dot={{ r: 3, fill: "var(--primary)", strokeWidth: 0 }} activeDot={{ r: 6 }} />
                                     <Area type="monotone" dataKey="affiliateCommission" name="Hoa hồng Shopee" stroke="#22c55e" strokeWidth={2} fill="url(#colorAffiliate)" dot={{ r: 3, fill: "#22c55e", strokeWidth: 0 }} activeDot={{ r: 6 }} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </div>
                         {/* Legend */}
                         <div className="flex items-center gap-5 mt-2 px-2">
-                            <div className="flex items-center gap-1.5 text-[11px] text-stone-600">
-                                <span className="w-3 h-3 rounded-full bg-[#4a3728] inline-block" />
+                            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                <span className="w-3 h-3 rounded-full bg-[#4a3728] dark:bg-primary inline-block" />
                                 Doanh thu Premium
                             </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-stone-600">
-                                <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
+                            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                <span className="w-3 h-3 rounded-full  dark:bg-green-500/100 inline-block" />
                                 Hoa hồng Affiliate
                             </div>
                         </div>
@@ -507,7 +507,7 @@ export function Dashboard() {
                     {/* System Alerts */}
                     <Card className="shadow-sm border-muted flex-1">
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-[#4a3728] text-sm font-semibold flex items-center gap-2">
+                            <CardTitle className="text-foreground text-sm font-semibold flex items-center gap-2">
                                 <Bell className="w-4 h-4 text-orange-500" /> Cảnh báo & Thông báo hệ thống
                             </CardTitle>
                         </CardHeader>
@@ -530,10 +530,10 @@ export function Dashboard() {
                             ) : (
                                 systemAlerts.slice(0, 4).map((alert, idx) => (
                                     <div key={idx} className={`flex gap-2.5 items-start p-2.5 rounded-lg border text-xs
-                                        ${alert.type === "warning" ? "bg-amber-50 border-amber-200" :
-                                            alert.type === "error" ? "bg-red-50 border-red-200" :
-                                                alert.type === "success" ? "bg-green-50 border-green-200" :
-                                                    "bg-blue-50 border-blue-200"}`}>
+                                        ${alert.type === "warning" ? " dark:bg-amber-500/10  dark:border-amber-500/20" :
+                                            alert.type === "error" ? " dark:bg-red-500/10  dark:border-red-500/20" :
+                                                alert.type === "success" ? " dark:bg-green-500/10  dark:border-green-500/20" :
+                                                    " dark:bg-blue-500/10  dark:border-blue-500/20"}`}>
                                         {alert.type === "warning" && <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />}
                                         {alert.type === "success" && <CheckCircle className="w-3.5 h-3.5 text-green-500 shrink-0 mt-0.5" />}
                                         {alert.type === "info" && <Cpu className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />}
@@ -551,7 +551,7 @@ export function Dashboard() {
                     {/* Recent Signups */}
                     <Card className="shadow-sm border-muted bg-card">
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-semibold text-[#4a3728] flex items-center gap-2">
+                            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
                                 <UserPlus className="w-4 h-4" /> Người dùng mới nhất
                             </CardTitle>
                         </CardHeader>
@@ -575,7 +575,7 @@ export function Dashboard() {
                                         <div key={i} className="flex items-center gap-3">
                                             <Avatar className="h-8 w-8 border shrink-0">
                                                 <AvatarImage src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.displayName || user.email}`} />
-                                                <AvatarFallback className="bg-[#4a3728] text-white text-[10px]">
+                                                <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">
                                                     {(user.displayName || "US").slice(0, 2).toUpperCase()}
                                                 </AvatarFallback>
                                             </Avatar>
@@ -599,10 +599,10 @@ export function Dashboard() {
             </div>
 
             {/* Onboarding Demographics Section */}
-            <Card className="shadow-sm border-stone-200">
+            <Card className="shadow-sm border-stone-200 dark:border-border">
                 <CardHeader>
-                    <CardTitle className="text-[#4a3728] text-base flex items-center gap-2">
-                        <Users className="w-5 h-5 text-[#4a3728]" /> Phân tích nhân khẩu học người dùng (Onboarding)
+                    <CardTitle className="text-foreground text-base flex items-center gap-2">
+                        <Users className="w-5 h-5 text-primary" /> Phân tích nhân khẩu học người dùng (Onboarding)
                     </CardTitle>
                     <CardDescription className="text-xs">
                         Dữ liệu tổng hợp từ thông tin người dùng cung cấp khi đăng ký tài khoản (Onboarding).
@@ -612,7 +612,7 @@ export function Dashboard() {
                     {loading ? (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {Array.from({ length: 6 }).map((_, i) => (
-                                <div key={i} className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100 animate-pulse">
+                                <div key={i} className="space-y-4 p-4 rounded-xl  dark:bg-muted/50 border border-stone-100 dark:border-border animate-pulse">
                                     <div className="h-3 bg-stone-200 rounded w-1/3" />
                                     <div className="space-y-3">
                                         {Array.from({ length: 3 }).map((_, j) => (
@@ -631,23 +631,23 @@ export function Dashboard() {
                     ) : (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {/* Gender */}
-                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
-                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Phân bố Giới tính</h4>
+                            <div className="space-y-4 p-4 rounded-xl  dark:bg-card border border-stone-100 dark:border-border">
+                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Phân bố Giới tính</h4>
                                 <div className="space-y-3">
                                     {demographics?.genders && demographics.genders.length > 0 ? (
                                         demographics.genders.map((item, idx) => (
                                             <div key={idx} className="space-y-1">
-                                                <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <div className="flex justify-between text-xs font-semibold text-stone-600 dark:text-stone-300">
                                                     <span>{item.label}</span>
-                                                    <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                                    <span className="font-mono text-muted-foreground">{item.count} ({item.percentage}%)</span>
                                                 </div>
-                                                <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
-                                                    <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                                <div className="w-full bg-stone-200/60 dark:bg-primary/20 rounded-full h-1.5 overflow-hidden">
+                                                    <div className="bg-[#4a3728] dark:bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="py-8 text-center text-xs text-stone-400 italic">
+                                        <div className="py-8 text-center text-xs text-muted-foreground italic">
                                             Chưa có dữ liệu khảo sát
                                         </div>
                                     )}
@@ -655,23 +655,23 @@ export function Dashboard() {
                             </div>
 
                             {/* Age Groups */}
-                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
-                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Phân bố Nhóm tuổi</h4>
+                            <div className="space-y-4 p-4 rounded-xl  dark:bg-card border border-stone-100 dark:border-border">
+                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Phân bố Nhóm tuổi</h4>
                                 <div className="space-y-3">
                                     {demographics?.ageGroups && demographics.ageGroups.length > 0 ? (
                                         demographics.ageGroups.map((item, idx) => (
                                             <div key={idx} className="space-y-1">
-                                                <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <div className="flex justify-between text-xs font-semibold text-stone-600 dark:text-stone-300">
                                                     <span>{item.label}</span>
-                                                    <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                                    <span className="font-mono text-muted-foreground">{item.count} ({item.percentage}%)</span>
                                                 </div>
-                                                <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
-                                                    <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                                <div className="w-full bg-stone-200/60 dark:bg-primary/20 rounded-full h-1.5 overflow-hidden">
+                                                    <div className="bg-[#4a3728] dark:bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="py-8 text-center text-xs text-stone-400 italic">
+                                        <div className="py-8 text-center text-xs text-muted-foreground italic">
                                             Chưa có dữ liệu khảo sát
                                         </div>
                                     )}
@@ -679,23 +679,23 @@ export function Dashboard() {
                             </div>
 
                             {/* Lifestyle */}
-                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
-                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Phong cách thời trang (Lifestyle)</h4>
+                            <div className="space-y-4 p-4 rounded-xl  dark:bg-card border border-stone-100 dark:border-border">
+                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Phong cách thời trang (Lifestyle)</h4>
                                 <div className="space-y-3">
                                     {demographics?.lifestyles && demographics.lifestyles.length > 0 ? (
                                         demographics.lifestyles.map((item, idx) => (
                                             <div key={idx} className="space-y-1">
-                                                <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <div className="flex justify-between text-xs font-semibold text-stone-600 dark:text-stone-300">
                                                     <span>{item.label}</span>
-                                                    <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                                    <span className="font-mono text-muted-foreground">{item.count} ({item.percentage}%)</span>
                                                 </div>
-                                                <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
-                                                    <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                                <div className="w-full bg-stone-200/60 dark:bg-primary/20 rounded-full h-1.5 overflow-hidden">
+                                                    <div className="bg-[#4a3728] dark:bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="py-8 text-center text-xs text-stone-400 italic">
+                                        <div className="py-8 text-center text-xs text-muted-foreground italic">
                                             Chưa có dữ liệu khảo sát
                                         </div>
                                     )}
@@ -703,23 +703,23 @@ export function Dashboard() {
                             </div>
 
                             {/* Country */}
-                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
-                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Quốc gia</h4>
+                            <div className="space-y-4 p-4 rounded-xl  dark:bg-card border border-stone-100 dark:border-border">
+                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Quốc gia</h4>
                                 <div className="space-y-3">
                                     {demographics?.countries && demographics.countries.length > 0 ? (
                                         demographics.countries.map((item, idx) => (
                                             <div key={idx} className="space-y-1">
-                                                <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <div className="flex justify-between text-xs font-semibold text-stone-600 dark:text-stone-300">
                                                     <span>{item.label}</span>
-                                                    <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                                    <span className="font-mono text-muted-foreground">{item.count} ({item.percentage}%)</span>
                                                 </div>
-                                                <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
-                                                    <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                                <div className="w-full bg-stone-200/60 dark:bg-primary/20 rounded-full h-1.5 overflow-hidden">
+                                                    <div className="bg-[#4a3728] dark:bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="py-8 text-center text-xs text-stone-400 italic">
+                                        <div className="py-8 text-center text-xs text-muted-foreground italic">
                                             Chưa có dữ liệu khảo sát
                                         </div>
                                     )}
@@ -727,23 +727,23 @@ export function Dashboard() {
                             </div>
 
                             {/* Eye Color */}
-                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
-                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Màu mắt</h4>
+                            <div className="space-y-4 p-4 rounded-xl  dark:bg-card border border-stone-100 dark:border-border">
+                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Màu mắt</h4>
                                 <div className="space-y-3">
                                     {demographics?.eyeColors && demographics.eyeColors.length > 0 ? (
                                         demographics.eyeColors.map((item, idx) => (
                                             <div key={idx} className="space-y-1">
-                                                <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <div className="flex justify-between text-xs font-semibold text-stone-600 dark:text-stone-300">
                                                     <span>{item.label}</span>
-                                                    <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                                    <span className="font-mono text-muted-foreground">{item.count} ({item.percentage}%)</span>
                                                 </div>
-                                                <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
-                                                    <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                                <div className="w-full bg-stone-200/60 dark:bg-primary/20 rounded-full h-1.5 overflow-hidden">
+                                                    <div className="bg-[#4a3728] dark:bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="py-8 text-center text-xs text-stone-400 italic">
+                                        <div className="py-8 text-center text-xs text-muted-foreground italic">
                                             Chưa có dữ liệu khảo sát
                                         </div>
                                     )}
@@ -751,23 +751,23 @@ export function Dashboard() {
                             </div>
 
                             {/* Hair Color */}
-                            <div className="space-y-4 p-4 rounded-xl bg-stone-50/50 border border-stone-100">
-                                <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Kiểu tóc / Màu tóc</h4>
+                            <div className="space-y-4 p-4 rounded-xl  dark:bg-card border border-stone-100 dark:border-border">
+                                <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Kiểu tóc / Màu tóc</h4>
                                 <div className="space-y-3">
                                     {demographics?.hairColors && demographics.hairColors.length > 0 ? (
                                         demographics.hairColors.map((item, idx) => (
                                             <div key={idx} className="space-y-1">
-                                                <div className="flex justify-between text-xs font-semibold text-stone-600">
+                                                <div className="flex justify-between text-xs font-semibold text-stone-600 dark:text-stone-300">
                                                     <span>{item.label}</span>
-                                                    <span className="font-mono text-stone-500">{item.count} ({item.percentage}%)</span>
+                                                    <span className="font-mono text-muted-foreground">{item.count} ({item.percentage}%)</span>
                                                 </div>
-                                                <div className="w-full bg-stone-200/60 rounded-full h-1.5 overflow-hidden">
-                                                    <div className="bg-[#4a3728] h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
+                                                <div className="w-full bg-stone-200/60 dark:bg-primary/20 rounded-full h-1.5 overflow-hidden">
+                                                    <div className="bg-[#4a3728] dark:bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${item.percentage}%` }} />
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="py-8 text-center text-xs text-stone-400 italic">
+                                        <div className="py-8 text-center text-xs text-muted-foreground italic">
                                             Chưa có dữ liệu khảo sát
                                         </div>
                                     )}
@@ -781,10 +781,10 @@ export function Dashboard() {
 
 
             {/* CH Play Reviews Stats Section */}
-            <Card className="border-stone-200">
+            <Card className="border-stone-200 dark:border-border">
                 <CardHeader>
-                    <CardTitle className="text-[#4a3728] text-base flex items-center gap-2">
-                        <Star className="w-5 h-5 text-green-600 fill-green-600" /> Đánh giá ứng dụng từ Google Play
+                    <CardTitle className="text-foreground text-base flex items-center gap-2">
+                        <Star className="w-5 h-5  dark:text-green-400 fill-green-600" /> Đánh giá ứng dụng từ Google Play
                     </CardTitle>
                     <CardDescription className="text-xs">
                         Dữ liệu được đồng bộ trực tiếp từ cửa hàng ứng dụng CH Play.
@@ -793,27 +793,27 @@ export function Dashboard() {
                 <CardContent>
                     <div className="grid gap-6 md:grid-cols-12">
                         {/* KPI Average Star Rating */}
-                        <div className="md:col-span-3 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-green-50/50 to-white border border-green-100 shadow-sm min-h-[200px]">
+                        <div className="md:col-span-3 flex flex-col justify-between p-5 rounded-xl bg-gradient-to-br from-green-50/50 dark:from-green-950/20 to-white dark:to-card border border-green-100 dark:border-border shadow-sm min-h-[200px]">
                             <div>
-                                <span className="text-[10px] font-bold text-green-800 uppercase tracking-wider">Đánh giá trung bình</span>
+                                <span className="text-[10px] font-bold text-green-800 dark:text-green-500 uppercase tracking-wider">Đánh giá trung bình</span>
                                 <div className="flex items-baseline gap-1 mt-3">
-                                    <span className="text-4xl font-extrabold text-[#4a3728] font-mono">{appReviews?.averageRating ?? 0}</span>
-                                    <span className="text-xs font-semibold text-stone-500">/ 5 ★</span>
+                                    <span className="text-4xl font-extrabold text-foreground font-mono">{appReviews?.averageRating ?? 0}</span>
+                                    <span className="text-xs font-semibold text-muted-foreground">/ 5 ★</span>
                                 </div>
-                                <div className="flex gap-1 mt-2 text-green-600 text-base">
+                                <div className="flex gap-1 mt-2  dark:text-green-400 text-base">
                                     {Array.from({ length: 5 }).map((_, i) => (
-                                        <span key={i} className={i < Math.round(appReviews?.averageRating ?? 0) ? "fill-green-600 text-green-600" : "text-stone-300"}>★</span>
+                                        <span key={i} className={i < Math.round(appReviews?.averageRating ?? 0) ? "fill-green-600  dark:text-green-400" : "text-stone-300 dark:text-stone-700 dark:text-stone-300"}>★</span>
                                     ))}
                                 </div>
                             </div>
-                            <div className="pt-3 border-t border-green-100 text-[11px] font-medium text-stone-500 mt-4">
-                                Tổng số lượt đánh giá: <strong className="text-stone-700">{appReviews?.totalReviews ?? 0}</strong> lượt
+                            <div className="pt-3 border-t border-green-100 dark:border-border text-[11px] font-medium text-muted-foreground mt-4">
+                                Tổng số lượt đánh giá: <strong className="text-foreground">{appReviews?.totalReviews ?? 0}</strong> lượt
                             </div>
                         </div>
 
                         {/* Chart Star Distribution */}
-                        <div className="md:col-span-5 p-4 rounded-xl border bg-stone-50/30">
-                            <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider mb-3">Phân bố số sao</h4>
+                        <div className="md:col-span-5 p-4 rounded-xl border border-border  dark:bg-muted/50/30 dark:bg-card min-w-0">
+                            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider mb-3">Phân bố số sao</h4>
                             <div className="h-[140px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart
@@ -828,7 +828,7 @@ export function Dashboard() {
                                         margin={{ top: 0, right: 10, left: -25, bottom: 0 }}
                                     >
                                         <XAxis type="number" hide />
-                                        <YAxis dataKey="name" type="category" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+                                        <YAxis dataKey="name" type="category" stroke="var(--muted-foreground)" fontSize={10} tickLine={false} axisLine={false} />
                                         <RechartsTooltip formatter={(v) => [`${v} lượt`, "Số lượng"]} contentStyle={{ fontSize: "10px", borderRadius: "8px" }} />
                                         <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={10} fill="#facc15" />
                                     </BarChart>
@@ -837,29 +837,29 @@ export function Dashboard() {
                         </div>
 
                         {/* Recent Comments Feed */}
-                        <div className="md:col-span-4 p-4 rounded-xl border bg-card flex flex-col">
-                            <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Nhận xét mới nhất</h4>
+                        <div className="md:col-span-4 p-4 rounded-xl border border-border bg-card flex flex-col">
+                            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider mb-2">Nhận xét mới nhất</h4>
                             <div className="flex-1 max-h-[140px] overflow-y-auto space-y-2 pr-1.5 scrollbar-thin">
                                 {!appReviews || appReviews.recentReviews.length === 0 ? (
-                                    <p className="text-center py-6 text-xs text-stone-400 italic">Chưa có bình luận nào</p>
+                                    <p className="text-center py-6 text-xs text-muted-foreground italic">Chưa có bình luận nào</p>
                                 ) : (
                                     appReviews.recentReviews.map(r => (
-                                        <div key={r.reviewId} className="p-2 rounded-lg bg-stone-50 border text-[11px] space-y-0.5">
+                                        <div key={r.reviewId} className="p-2 rounded-lg bg-muted/50 border border-border text-[11px] space-y-0.5">
                                             <div className="flex items-center justify-between">
-                                                <span className="font-bold text-[#4a3728] truncate max-w-[120px]">{r.authorName}</span>
+                                                <span className="font-bold text-foreground truncate max-w-[120px]">{r.authorName}</span>
                                                 <div className="flex items-center gap-1 shrink-0">
                                                     {r.starRating && r.starRating > 0 && (
                                                         <span className="text-[10px] text-amber-500 font-medium">{"★".repeat(r.starRating)}</span>
                                                     )}
-                                                    <Badge variant="outline" className="text-[8px] h-4 py-0 px-1 border-stone-200 text-stone-500 font-normal shrink-0">
+                                                    <Badge variant="outline" className="text-[8px] h-4 py-0 px-1 border-border text-muted-foreground font-normal shrink-0">
                                                         {r.device}
                                                     </Badge>
                                                 </div>
                                             </div>
-                                            <p className="text-stone-700 break-words line-clamp-2 mt-1">
-                                                {r.text || <span className="text-stone-400 italic font-normal">Chỉ đánh giá {r.starRating} sao</span>}
+                                            <p className="text-foreground break-words line-clamp-2 mt-1">
+                                                {r.text || <span className="text-muted-foreground italic font-normal">Chỉ đánh giá {r.starRating} sao</span>}
                                             </p>
-                                            <p className="text-[9px] text-stone-400 mt-0.5">
+                                            <p className="text-[9px] text-muted-foreground mt-0.5">
                                                 {new Date(r.lastModified).toLocaleDateString("vi-VN")}
                                             </p>
                                         </div>
@@ -874,13 +874,13 @@ export function Dashboard() {
             {/* Quick Stats Bottom Row */}
             {/* <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                 {[
-                    { label: "Giao dịch Premium tháng này", icon: <TrendingUp className="w-5 h-5 text-emerald-600" />, desc: "Tính từ đầu tháng hiện tại", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" },
-                    { label: "Hoa hồng Affiliate tích lũy", icon: <Sparkles className="w-5 h-5 text-amber-500" />, desc: "Tổng hoa hồng từ Shopee", color: "text-amber-700", bg: "bg-amber-50 border-amber-200" },
+                    { label: "Giao dịch Premium tháng này", icon: <TrendingUp className="w-5 h-5  dark:text-green-400" />, desc: "Tính từ đầu tháng hiện tại", color: " dark:text-green-400", bg: " dark:bg-green-500/10  dark:border-green-500/20" },
+                    { label: "Hoa hồng Affiliate tích lũy", icon: <Sparkles className="w-5 h-5 text-amber-500" />, desc: "Tổng hoa hồng từ Shopee", color: " dark:text-amber-400", bg: " dark:bg-amber-500/10  dark:border-amber-500/20" },
                     { label: "Bộ trang phục (Outfits)", icon: <Shirt className="w-5 h-5 text-violet-500" />, desc: "Outfit đã tạo toàn hệ thống", color: "text-violet-700", bg: "bg-violet-50 border-violet-200" },
-                    { label: "AI Jobs xử lý", icon: <Zap className="w-5 h-5 text-blue-500" />, desc: "Tổng tác vụ AI tách nền + lookbook", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" },
+                    { label: "AI Jobs xử lý", icon: <Zap className="w-5 h-5 text-blue-500" />, desc: "Tổng tác vụ AI tách nền + lookbook", color: " dark:text-blue-400", bg: " dark:bg-blue-500/10  dark:border-blue-500/20" },
                 ].map((item, i) => (
                     <div key={i} className={`rounded-xl border p-4 flex items-center gap-4 ${item.bg} shadow-sm`}>
-                        <div className={`w-10 h-10 rounded-lg bg-white/70 flex items-center justify-center shadow-sm shrink-0`}>
+                        <div className={`w-10 h-10 rounded-lg bg-card/70 flex items-center justify-center shadow-sm shrink-0`}>
                             {item.icon}
                         </div>
                         <div className="min-w-0">

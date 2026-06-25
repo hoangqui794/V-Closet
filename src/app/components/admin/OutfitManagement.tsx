@@ -183,32 +183,32 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
             {showHeader ? (
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] flex items-center gap-2">
+                        <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] dark:text-foreground flex items-center gap-2">
                             <Sparkles className="w-8 h-8" /> Quản lý Bộ phối đồ (Outfit)
                         </h2>
                         <p className="text-muted-foreground mt-1">
                             Quản lý các bộ trang phục tự thiết kế của người dùng ghép từ Canvas 2D.
                         </p>
                     </div>
-                    <Badge className="bg-[#4a3728]/10 text-[#4a3728] hover:bg-[#4a3728]/15 border-[#4a3728]/20 px-3 py-1 text-sm font-semibold">
+                    <Badge className="bg-[#4a3728]/10 dark:bg-primary/10 text-[#4a3728] dark:text-foreground hover:bg-[#4a3728]/15 dark:bg-primary/15 border-[#4a3728]/20 dark:border-primary/20 px-3 py-1 text-sm font-semibold">
                         Tổng số lượng: {totalCount} bộ đồ
                     </Badge>
                 </div>
             ) : (
                 <div className="flex justify-end mb-2">
-                    <Badge className="bg-[#4a3728]/10 text-[#4a3728] hover:bg-[#4a3728]/15 border-[#4a3728]/20 px-3 py-1 text-sm font-semibold">
+                    <Badge className="bg-[#4a3728]/10 dark:bg-primary/10 text-[#4a3728] dark:text-foreground hover:bg-[#4a3728]/15 dark:bg-primary/15 border-[#4a3728]/20 dark:border-primary/20 px-3 py-1 text-sm font-semibold">
                         Tổng số lượng: {totalCount} bộ đồ
                     </Badge>
                 </div>
             )}
 
             {/* Filters */}
-            <Card className="border-[#4a3728]/10 shadow-sm bg-card/60 backdrop-blur-md">
+            <Card className="border-[#4a3728]/10 dark:border-primary/10 shadow-sm bg-card/60 backdrop-blur-md">
                 <CardContent className="pt-6">
                     <form onSubmit={handleSearchSubmit} className="grid gap-4 md:grid-cols-12 items-end">
                         {/* Search Input */}
                         <div className="md:col-span-4 space-y-1.5">
-                            <label className="text-xs font-bold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-bold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 Tìm theo tiêu đề bộ đồ
                             </label>
                             <div className="relative">
@@ -218,20 +218,20 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                     placeholder="Nhập tiêu đề bộ trang phục..."
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    className="pl-9 bg-white border-border"
+                                    className="pl-9 bg-card border-border"
                                 />
                             </div>
                         </div>
 
                         {/* Visibility Select */}
                         <div className="md:col-span-3 space-y-1.5">
-                            <label className="text-xs font-bold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-bold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 Trạng thái hiển thị
                             </label>
                             <select
                                 value={isPublicFilter}
                                 onChange={e => { setIsPublicFilter(e.target.value); setPage(1); }}
-                                className="w-full flex h-10 rounded-xl border border-input bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                className="w-full flex h-10 rounded-xl border border-input bg-card px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                                 <option value="">Tất cả trạng thái</option>
                                 <option value="true">Công khai (Public)</option>
@@ -241,7 +241,7 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
 
                         {/* User ID Filter */}
                         <div className="md:col-span-3 space-y-1.5">
-                            <label className="text-xs font-bold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-bold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 ID Thành viên
                             </label>
                             <Input
@@ -249,13 +249,13 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                 placeholder="Nhập ID User thiết kế..."
                                 value={userIdFilter}
                                 onChange={e => { setUserIdFilter(e.target.value === "" ? "" : Number(e.target.value)); setPage(1); }}
-                                className="bg-white border-border"
+                                className="bg-card border-border"
                             />
                         </div>
 
                         {/* Actions */}
                         <div className="md:col-span-2 flex gap-2 w-full">
-                            <Button type="submit" className="bg-[#4a3728] hover:bg-[#3d2d21] text-white flex-1 rounded-xl">
+                            <Button type="submit" className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground flex-1 rounded-xl">
                                 Tìm kiếm
                             </Button>
                             <Button type="button" variant="outline" onClick={handleResetFilters} className="rounded-xl px-2.5">
@@ -268,12 +268,12 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
 
             {/* Grid list */}
             {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-32 text-muted-foreground bg-white/40 border border-border/50 rounded-2xl">
-                    <Loader2 className="w-10 h-10 animate-spin text-[#4a3728] mb-2" />
+                <div className="flex flex-col items-center justify-center py-32 text-muted-foreground bg-card/40 border border-border/50 rounded-2xl">
+                    <Loader2 className="w-10 h-10 animate-spin text-[#4a3728] dark:text-foreground mb-2" />
                     <p className="text-sm font-semibold">Đang tải danh sách bộ phối đồ...</p>
                 </div>
             ) : outfits.length === 0 ? (
-                <div className="text-center py-24 bg-white/40 border border-border/50 rounded-2xl text-muted-foreground space-y-3">
+                <div className="text-center py-24 bg-card/40 border border-border/50 rounded-2xl text-muted-foreground space-y-3">
                     <Sparkles className="w-16 h-16 mx-auto text-muted-foreground/30 animate-pulse" />
                     <p className="text-base font-semibold">Không tìm thấy bộ phối đồ nào</p>
                     <p className="text-xs max-w-md mx-auto">
@@ -282,7 +282,7 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                 </div>
             ) : (
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between bg-white/60 backdrop-blur-md p-3.5 border border-[#4a3728]/10 rounded-xl">
+                    <div className="flex items-center justify-between bg-card/60 backdrop-blur-md p-3.5 border border-[#4a3728]/10 dark:border-primary/10 rounded-xl">
                         <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
@@ -295,14 +295,14 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                         setSelectedIds([]);
                                     }
                                 }}
-                                className="w-4 h-4 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728]"
+                                className="w-4 h-4 rounded border-[#4a3728]/30 dark:border-primary text-[#4a3728] dark:text-foreground focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728]"
                             />
-                            <label htmlFor="selectAllOutfits" className="text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                            <label htmlFor="selectAllOutfits" className="text-xs font-semibold  dark:text-muted-foreground cursor-pointer select-none">
                                 Chọn tất cả trên trang này
                             </label>
                         </div>
                         {selectedIds.length > 0 && (
-                            <span className="text-xs font-semibold text-[#4a3728]">
+                            <span className="text-xs font-semibold text-[#4a3728] dark:text-foreground">
                                 Đang chọn {selectedIds.length} bộ phối đồ
                             </span>
                         )}
@@ -319,10 +319,10 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                             const isSelected = selectedIds.includes(outfit.id);
 
                             return (
-                                <Card key={outfit.id} className={`overflow-hidden border/60 shadow-sm hover:shadow-md transition-all duration-300 bg-white/80 group
-                                    ${isSelected ? "ring-2 ring-[#4a3728] border-transparent bg-[#4a3728]/5" : ""}`}>
+                                <Card key={outfit.id} className={`overflow-hidden border/60 shadow-sm hover:shadow-md transition-all duration-300 bg-card/80 group
+                                    ${isSelected ? "ring-2 ring-[#4a3728] border-transparent bg-[#4a3728]/5 dark:bg-primary/5" : ""}`}>
                                     {/* Snapshot Image Container */}
-                                    <div className="relative aspect-square bg-slate-100 flex items-center justify-center overflow-hidden border-b">
+                                    <div className="relative aspect-square  dark:bg-muted flex items-center justify-center overflow-hidden border-b">
                                         {/* Checkbox Overlay */}
                                         <div className="absolute top-2.5 left-2 z-20">
                                             <input
@@ -335,7 +335,7 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                                         setSelectedIds(prev => prev.filter(id => id !== outfit.id));
                                                     }
                                                 }}
-                                                className="w-5 h-5 rounded border-[#4a3728]/30 text-[#4a3728] focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728] bg-white/80"
+                                                className="w-5 h-5 rounded border-[#4a3728]/30 dark:border-primary text-[#4a3728] dark:text-foreground focus:ring-[#4a3728]/20 cursor-pointer accent-[#4a3728] bg-card/80"
                                             />
                                         </div>
 
@@ -355,18 +355,18 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                         {/* Status badge */}
                                         <div className="absolute top-2.5 left-9 flex flex-col gap-1 z-10">
                                             {outfit.isPublic ? (
-                                                <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
+                                                <Badge className=" dark:bg-green-500/100/10  dark:text-green-400  dark:border-green-500/20 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
                                                     <Globe className="w-2.5 h-2.5" /> Công khai
                                                 </Badge>
                                             ) : (
-                                                <Badge className="bg-slate-500/10 text-slate-600 border-slate-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
+                                                <Badge className=" dark:bg-muted/500/10  dark:text-muted-foreground border-slate-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
                                                     <Lock className="w-2.5 h-2.5" /> Riêng tư
                                                 </Badge>
                                             )}
                                         </div>
 
                                         <div className="absolute top-2 right-2 z-10">
-                                            <Badge className="bg-rose-500/10 text-rose-600 border-rose-200 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
+                                            <Badge className=" dark:bg-red-500/100/10  dark:text-red-400  dark:border-red-500/20 text-[10px] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-semibold">
                                                 <Heart className="w-2.5 h-2.5 fill-rose-500 text-rose-500" /> {outfit.likeCount} thích
                                             </Badge>
                                         </div>
@@ -379,7 +379,7 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                                     variant="secondary"
                                                     size="icon"
                                                     onClick={() => setPreviewUrl(outfit.canvasSnapshotUrl)}
-                                                    className="w-8 h-8 rounded-full bg-white/95 backdrop-blur shadow hover:bg-white text-[#4a3728]"
+                                                    className="w-8 h-8 rounded-full bg-card/95 backdrop-blur shadow hover:bg-card text-[#4a3728] dark:text-foreground"
                                                     title="Phóng to ảnh phối đồ"
                                                 >
                                                     <Eye className="w-4 h-4" />
@@ -391,21 +391,21 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                     {/* Card Info Details */}
                                     <CardContent className="p-4 space-y-3">
                                         <div className="space-y-0.5">
-                                            <h4 className="font-bold text-slate-800 text-sm truncate" title={outfit.title || "Bộ đồ không tiêu đề"}>
+                                            <h4 className="font-bold  dark:text-foreground text-sm truncate" title={outfit.title || "Bộ đồ không tiêu đề"}>
                                                 {outfit.title || "Bộ đồ tự thiết kế"}
                                             </h4>
                                         </div>
 
-                                        <div className="text-[11px] bg-slate-50 border p-2 rounded-lg space-y-1 text-slate-600">
+                                        <div className="text-[11px]  dark:bg-muted/50 border p-2 rounded-lg space-y-1  dark:text-muted-foreground">
                                             <div className="flex justify-between">
                                                 <span className="font-medium">Người thiết kế:</span>
-                                                <span className="font-bold text-[#4a3728] truncate max-w-[120px]" title={`${outfit.userDisplayName} (ID: ${outfit.userInternalId})`}>
+                                                <span className="font-bold text-[#4a3728] dark:text-foreground truncate max-w-[120px]" title={`${outfit.userDisplayName} (ID: ${outfit.userInternalId})`}>
                                                     {outfit.userDisplayName}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="font-medium">Mã ID User:</span>
-                                                <span className="font-bold font-mono text-slate-700">{outfit.userInternalId}</span>
+                                                <span className="font-bold font-mono  dark:text-muted-foreground">{outfit.userInternalId}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="font-medium">Ngày tạo:</span>
@@ -418,7 +418,7 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
                                             <Button
                                                 onClick={() => setDeleteId(outfit.id)}
                                                 variant="ghost"
-                                                className="w-full rounded-xl h-8 text-xs font-semibold flex items-center justify-center gap-1.5 text-rose-600 hover:bg-rose-50 hover:text-rose-700 border border-rose-200"
+                                                className="w-full rounded-xl h-8 text-xs font-semibold flex items-center justify-center gap-1.5  dark:text-red-400 hover: dark:bg-red-500/10 hover: dark:text-red-400 border  dark:border-red-500/20"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
                                                 Xóa bộ đồ vi phạm
@@ -463,8 +463,8 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
             <Dialog open={deleteId !== null} onOpenChange={open => !open && setDeleteId(null)}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-rose-700 font-bold">
-                            <Trash2 className="w-5 h-5 text-rose-600 animate-pulse" /> Xác nhận xóa bộ phối đồ?
+                        <DialogTitle className="flex items-center gap-2  dark:text-red-400 font-bold">
+                            <Trash2 className="w-5 h-5  dark:text-red-400 animate-pulse" /> Xác nhận xóa bộ phối đồ?
                         </DialogTitle>
                         <DialogDescription>
                             Bộ phối đồ này sẽ bị xóa vĩnh viễn khỏi tài khoản của người dùng và cơ sở dữ liệu. Hành động này không thể hoàn tác.
@@ -501,15 +501,15 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
             <Dialog open={previewUrl !== null} onOpenChange={open => !open && setPreviewUrl(null)}>
                 <DialogContent className="sm:max-w-md p-4 flex flex-col items-center">
                     <DialogHeader className="w-full text-left">
-                        <DialogTitle className="text-[#4a3728] font-bold">Hình ảnh thiết kế bộ trang phục</DialogTitle>
+                        <DialogTitle className="text-[#4a3728] dark:text-foreground font-bold">Hình ảnh thiết kế bộ trang phục</DialogTitle>
                     </DialogHeader>
                     {previewUrl && (
-                        <div className="border rounded-xl bg-white flex items-center justify-center p-2 max-w-full max-h-[70vh] aspect-square overflow-hidden shadow-inner mt-2">
+                        <div className="border rounded-xl bg-card flex items-center justify-center p-2 max-w-full max-h-[70vh] aspect-square overflow-hidden shadow-inner mt-2">
                             <img src={previewUrl} alt="Outfit Canvas Full" className="max-w-full max-h-full object-contain" />
                         </div>
                     )}
                     <DialogFooter className="w-full mt-4">
-                        <Button type="button" onClick={() => setPreviewUrl(null)} className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                        <Button type="button" onClick={() => setPreviewUrl(null)} className="w-full bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                             Đóng cửa sổ
                         </Button>
                     </DialogFooter>
@@ -520,11 +520,11 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
             <Dialog open={bulkConfirmOpen} onOpenChange={open => !open && setBulkConfirmOpen(false)}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-rose-700 font-bold">
-                            <Trash2 className="w-5 h-5 text-rose-600 animate-pulse" /> Xác nhận xóa hàng loạt?
+                        <DialogTitle className="flex items-center gap-2  dark:text-red-400 font-bold">
+                            <Trash2 className="w-5 h-5  dark:text-red-400 animate-pulse" /> Xác nhận xóa hàng loạt?
                         </DialogTitle>
                         <DialogDescription>
-                            Bạn sắp xóa vĩnh viễn <strong className="text-rose-600">{selectedIds.length} bộ phối đồ</strong> khỏi hệ thống. Hành động này sẽ loại bỏ hoàn toàn các bộ phối đồ này khỏi tài khoản của tất cả người dùng tương ứng và cơ sở dữ liệu, không thể hoàn tác.
+                            Bạn sắp xóa vĩnh viễn <strong className=" dark:text-red-400">{selectedIds.length} bộ phối đồ</strong> khỏi hệ thống. Hành động này sẽ loại bỏ hoàn toàn các bộ phối đồ này khỏi tài khoản của tất cả người dùng tương ứng và cơ sở dữ liệu, không thể hoàn tác.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -556,16 +556,16 @@ export function OutfitManagement({ showHeader = true }: { showHeader?: boolean }
 
             {/* Floating Bulk Actions Bar */}
             {selectedIds.length > 0 && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-[#4a3728]/20 shadow-2xl px-6 py-4 rounded-2xl flex items-center gap-6 z-40 animate-in slide-in-from-bottom-8 duration-300">
-                    <span className="text-sm font-semibold text-slate-800">
-                        Đã chọn <strong className="text-[#4a3728]">{selectedIds.length}</strong> bộ phối đồ
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-[#4a3728]/20 dark:border-primary/20 shadow-2xl px-6 py-4 rounded-2xl flex items-center gap-6 z-40 animate-in slide-in-from-bottom-8 duration-300">
+                    <span className="text-sm font-semibold  dark:text-foreground">
+                        Đã chọn <strong className="text-[#4a3728] dark:text-foreground">{selectedIds.length}</strong> bộ phối đồ
                     </span>
                     <div className="flex items-center gap-3">
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedIds([])}
-                            className="rounded-xl border-[#4a3728]/20 text-slate-700 h-9"
+                            className="rounded-xl border-[#4a3728]/20 dark:border-primary/20  dark:text-muted-foreground h-9"
                         >
                             Hủy chọn
                         </Button>

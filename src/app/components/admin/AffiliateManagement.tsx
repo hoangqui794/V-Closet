@@ -477,13 +477,13 @@ export function AffiliateManagement() {
             <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728]">Quản lý Sản phẩm Affiliate</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] dark:text-foreground">Quản lý Sản phẩm Affiliate</h2>
                     <p className="text-muted-foreground mt-1">
                         Quản lý luồng sản phẩm trending từ Shopee Affiliate hiển thị trên tab Khám Phá của người dùng.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Badge className="bg-orange-500 hover:bg-orange-600 text-white border-none py-1.5 px-3 flex items-center gap-1.5 text-xs font-medium">
+                    <Badge className=" dark:bg-amber-500/100 hover:bg-orange-600 text-white border-none py-1.5 px-3 flex items-center gap-1.5 text-xs font-medium">
                         <Database className="w-3.5 h-3.5" /> Shopee Partner Active
                     </Badge>
                 </div>
@@ -494,8 +494,8 @@ export function AffiliateManagement() {
                 <button
                     onClick={() => setActiveTab("products")}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${activeTab === "products"
-                        ? "border-[#4a3728] text-[#4a3728]"
-                        : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                        ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                         }`}
                 >
                     Danh sách sản phẩm Shopee ({totalCount})
@@ -503,8 +503,8 @@ export function AffiliateManagement() {
                 <button
                     onClick={() => setActiveTab("crawler")}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${activeTab === "crawler"
-                        ? "border-[#4a3728] text-[#4a3728]"
-                        : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                        ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                         }`}
                 >
                     Cấu hình Crawler & Đối soát
@@ -512,8 +512,8 @@ export function AffiliateManagement() {
                 <button
                     onClick={() => setActiveTab("brands")}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${activeTab === "brands"
-                        ? "border-[#4a3728] text-[#4a3728]"
-                        : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                        ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                         }`}
                 >
                     Đối tác Brand Partner
@@ -539,7 +539,7 @@ export function AffiliateManagement() {
                                     }}
                                 />
                             </div>
-                            <Button onClick={() => fetchProducts(1)} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                            <Button onClick={() => fetchProducts(1)} className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                                 Tìm
                             </Button>
                         </div>
@@ -554,7 +554,7 @@ export function AffiliateManagement() {
                                 <SelectItem value="hidden">Đã ẩn (Hidden)</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button onClick={handleOpenAddDialog} className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                        <Button onClick={handleOpenAddDialog} className="w-full bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                             <Plus className="w-4 h-4 mr-2" /> Thêm sản phẩm thủ công
                         </Button>
                     </div>
@@ -578,7 +578,7 @@ export function AffiliateManagement() {
                                     <TableRow>
                                         <TableCell colSpan={8} className="text-center py-12">
                                             <div className="flex flex-col items-center justify-center gap-2">
-                                                <Loader2 className="w-8 h-8 text-[#4a3728] animate-spin" />
+                                                <Loader2 className="w-8 h-8 text-[#4a3728] dark:text-foreground animate-spin" />
                                                 <span className="text-sm text-muted-foreground">Đang tải danh sách sản phẩm...</span>
                                             </div>
                                         </TableCell>
@@ -618,7 +618,7 @@ export function AffiliateManagement() {
                                                     <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                                                         Shop: {product.shopeeShopId || "Shopee Partner"}
                                                         {product.affiliateLink && (
-                                                            <a href={product.affiliateLink} target="_blank" rel="noreferrer" className="text-[#4a3728] hover:underline">
+                                                            <a href={product.affiliateLink} target="_blank" rel="noreferrer" className="text-[#4a3728] dark:text-foreground hover:underline">
                                                                 <ExternalLink className="w-3 h-3 inline" />
                                                             </a>
                                                         )}
@@ -629,7 +629,7 @@ export function AffiliateManagement() {
                                                 {product.price.toLocaleString("vi-VN")} đ
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <Badge className="bg-orange-50 text-orange-800 hover:bg-orange-100 border-none font-medium text-xs">
+                                                <Badge className=" dark:bg-amber-500/10  dark:text-amber-400 hover: dark:bg-amber-500/10 border-none font-medium text-xs">
                                                     {product.category}
                                                 </Badge>
                                             </TableCell>
@@ -643,7 +643,7 @@ export function AffiliateManagement() {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-center font-mono font-semibold text-sm text-[#4a3728]">
+                                            <TableCell className="text-center font-mono font-semibold text-sm text-[#4a3728] dark:text-foreground">
                                                 {product.ctr ?? 0}%
                                             </TableCell>
                                             <TableCell className="text-center">
@@ -652,10 +652,10 @@ export function AffiliateManagement() {
                                                     onValueChange={(val) => handleToggleStatus(product, val as "pinned" | "public" | "hidden")}
                                                 >
                                                     <SelectTrigger className={`h-7 w-24 text-xs border font-medium mx-auto ${product.isTrending
-                                                        ? "bg-[#4a3728] text-white border-[#4a3728] hover:bg-[#3d2d21]"
+                                                        ? "bg-[#4a3728] dark:bg-primary text-white dark:text-primary-foreground border-[#4a3728] dark:border-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90"
                                                         : product.isActive
-                                                            ? "bg-green-50 text-green-700 border-green-400 hover:bg-green-100"
-                                                            : "bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200"
+                                                            ? " dark:bg-green-500/10  dark:text-green-400 border-green-400 hover: dark:bg-green-500/10"
+                                                            : " dark:bg-muted text-gray-500 border-gray-300 hover:bg-gray-200"
                                                         }`}>
                                                         <SelectValue />
                                                     </SelectTrigger>
@@ -683,7 +683,7 @@ export function AffiliateManagement() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-[#4a3728]"
+                                                        className="h-8 w-8 text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                                                         onClick={() => handleOpenEditDialog(product)}
                                                         title="Sửa thông tin sản phẩm"
                                                     >
@@ -742,7 +742,7 @@ export function AffiliateManagement() {
                     {/* Bảng cấu hình keywords */}
                     <Card className="md:col-span-1 shadow-sm border-muted">
                         <CardHeader>
-                            <CardTitle className="text-[#4a3728] flex items-center gap-2 text-lg">
+                            <CardTitle className="text-[#4a3728] dark:text-foreground flex items-center gap-2 text-lg">
                                 <Tag className="w-5 h-5" /> Từ khóa cào sản phẩm
                             </CardTitle>
                             <CardDescription>
@@ -760,7 +760,7 @@ export function AffiliateManagement() {
                                 />
                                 <Button
                                     onClick={handleAddKeyword}
-                                    className="bg-[#4a3728] hover:bg-[#3d2d21] text-white shrink-0"
+                                    className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground shrink-0"
                                 >
                                     Thêm
                                 </Button>
@@ -769,11 +769,11 @@ export function AffiliateManagement() {
                                 {keywords.map((kw, i) => (
                                     <Badge
                                         key={i}
-                                        className="bg-[#4a3728]/10 hover:bg-[#4a3728]/20 text-[#4a3728] border-none py-1 px-2.5 flex items-center gap-1 font-medium text-xs"
+                                        className="bg-[#4a3728]/10 dark:bg-primary/10 hover:bg-[#4a3728]/20 dark:bg-primary/20 text-[#4a3728] dark:text-foreground border-none py-1 px-2.5 flex items-center gap-1 font-medium text-xs"
                                     >
                                         {kw}
                                         <X
-                                            className="w-3.5 h-3.5 cursor-pointer hover:bg-[#4a3728]/35 rounded-full"
+                                            className="w-3.5 h-3.5 cursor-pointer hover:bg-[#4a3728]/35 dark:bg-primary rounded-full"
                                             onClick={() => handleRemoveKeyword(kw)}
                                         />
                                     </Badge>
@@ -785,7 +785,7 @@ export function AffiliateManagement() {
                     {/* Cài đặt chu kỳ và chạy crawler */}
                     <Card className="md:col-span-1 shadow-sm border-muted">
                         <CardHeader>
-                            <CardTitle className="text-[#4a3728] flex items-center gap-2 text-lg">
+                            <CardTitle className="text-[#4a3728] dark:text-foreground flex items-center gap-2 text-lg">
                                 <RefreshCw className="w-5 h-5" /> Cài đặt & Chạy thử
                             </CardTitle>
                             <CardDescription>
@@ -828,7 +828,7 @@ export function AffiliateManagement() {
                             <Button
                                 disabled={isCrawling}
                                 onClick={handleStartCrawl}
-                                className="bg-orange-500 hover:bg-orange-600 text-white"
+                                className=" dark:bg-amber-500/100 hover:bg-orange-600 text-white"
                             >
                                 <Play className="w-4 h-4 mr-2" /> {isCrawling ? "Đang đồng bộ..." : "Kích hoạt cào ngay"}
                             </Button>
@@ -838,7 +838,7 @@ export function AffiliateManagement() {
                     {/* Đối soát Shopee Affiliate CSV */}
                     <Card className="md:col-span-1 shadow-sm border-muted">
                         <CardHeader>
-                            <CardTitle className="text-[#4a3728] flex items-center gap-2 text-lg">
+                            <CardTitle className="text-[#4a3728] dark:text-foreground flex items-center gap-2 text-lg">
                                 <Database className="w-5 h-5 text-orange-500" /> Đối soát Shopee Affiliate
                             </CardTitle>
                             <CardDescription>
@@ -854,7 +854,7 @@ export function AffiliateManagement() {
                                     <Input
                                         type="file"
                                         accept=".csv"
-                                        className="bg-background border-muted text-sm cursor-pointer file:cursor-pointer file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#4a3728] file:text-white hover:file:bg-[#3d2d21]"
+                                        className="bg-background border-muted text-sm cursor-pointer file:cursor-pointer file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#4a3728] dark:bg-primary file:text-white dark:text-primary-foreground hover:file:bg-[#3d2d21]"
                                         onChange={(e) => {
                                             if (e.target.files && e.target.files.length > 0) {
                                                 setSelectedCsvFile(e.target.files[0]);
@@ -863,7 +863,7 @@ export function AffiliateManagement() {
                                         required
                                     />
                                     {selectedCsvFile && (
-                                        <p className="text-xs text-emerald-600 font-medium mt-1">
+                                        <p className="text-xs  dark:text-green-400 font-medium mt-1">
                                             Đã chọn: {selectedCsvFile.name} ({(selectedCsvFile.size / 1024).toFixed(1)} KB)
                                         </p>
                                     )}
@@ -873,7 +873,7 @@ export function AffiliateManagement() {
                                 <Button
                                     type="submit"
                                     disabled={csvUploading || !selectedCsvFile}
-                                    className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                                    className="w-full bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground"
                                 >
                                     {csvUploading ? (
                                         <>
@@ -916,7 +916,7 @@ export function AffiliateManagement() {
                             </SelectContent>
                         </Select>
                         <div className="flex gap-2">
-                            <Button type="submit" className="w-full bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                            <Button type="submit" className="w-full bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                                 <Search className="w-4 h-4 mr-2" /> Tìm kiếm
                             </Button>
                             <Button
@@ -933,14 +933,14 @@ export function AffiliateManagement() {
 
                     {/* Hiển thị lỗi nếu có */}
                     {brandsError && (
-                        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3">
+                        <div className="p-4  dark:bg-red-500/10 border  dark:border-red-500/20 rounded-xl flex items-start gap-3">
                             <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                             <div className="text-sm">
-                                <p className="font-semibold text-rose-800">Không thể tải dữ liệu</p>
-                                <p className="text-rose-600 mt-0.5 leading-relaxed text-xs">{brandsError}</p>
+                                <p className="font-semibold  dark:text-red-400">Không thể tải dữ liệu</p>
+                                <p className=" dark:text-red-400 mt-0.5 leading-relaxed text-xs">{brandsError}</p>
                                 <Button
                                     variant="link"
-                                    className="p-0 h-auto text-rose-700 hover:text-rose-800 text-xs font-semibold mt-2 underline"
+                                    className="p-0 h-auto  dark:text-red-400 hover: dark:text-red-400 text-xs font-semibold mt-2 underline"
                                     onClick={() => fetchBrands(brandStatusFilter, brandSearch)}
                                 >
                                     Thử lại ngay
@@ -968,7 +968,7 @@ export function AffiliateManagement() {
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-16">
                                             <div className="flex flex-col items-center justify-center gap-3">
-                                                <Loader2 className="w-8 h-8 text-[#4a3728] animate-spin" />
+                                                <Loader2 className="w-8 h-8 text-[#4a3728] dark:text-foreground animate-spin" />
                                                 <span className="text-sm text-muted-foreground font-medium">Đang tải danh sách đối tác thương hiệu...</span>
                                             </div>
                                         </TableCell>
@@ -990,7 +990,7 @@ export function AffiliateManagement() {
                                         <TableRow key={brand.brandId} className="hover:bg-muted/10 transition-colors">
                                             <TableCell>
                                                 <div className="flex items-center gap-3.5">
-                                                    <div className="w-11 h-11 rounded-full overflow-hidden border bg-muted flex items-center justify-center text-[#4a3728] font-bold text-sm shrink-0 shadow-inner">
+                                                    <div className="w-11 h-11 rounded-full overflow-hidden border bg-muted flex items-center justify-center text-[#4a3728] dark:text-foreground font-bold text-sm shrink-0 shadow-inner">
                                                         {brand.logoUrl ? (
                                                             <img src={brand.logoUrl} alt={brand.brandName} className="w-full h-full object-cover" />
                                                         ) : (
@@ -1027,7 +1027,7 @@ export function AffiliateManagement() {
                                                         href={brand.websiteUrl.startsWith("http") ? brand.websiteUrl : `https://${brand.websiteUrl}`}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="text-xs text-[#4a3728] hover:underline font-semibold flex items-center gap-1 hover:text-[#3d2d21] transition-colors"
+                                                        className="text-xs text-[#4a3728] dark:text-foreground hover:underline font-semibold flex items-center gap-1 hover:text-[#3d2d21] transition-colors"
                                                     >
                                                         <Globe className="w-3.5 h-3.5" />
                                                         {brand.websiteUrl.replace(/https?:\/\/(www\.)?/, "")}
@@ -1037,16 +1037,16 @@ export function AffiliateManagement() {
                                                     <span className="text-xs text-muted-foreground/60 italic">—</span>
                                                 )}
                                             </TableCell>
-                                            <TableCell className="text-right font-mono text-sm font-semibold text-emerald-600">
+                                            <TableCell className="text-right font-mono text-sm font-semibold  dark:text-green-400">
                                                 {brand.creditBalance.toLocaleString("vi-VN")} đ
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Badge
                                                     className={`font-medium border text-xs px-2.5 py-1 ${brand.status === "Verified"
-                                                        ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100/70"
+                                                        ? " dark:bg-green-500/10  dark:text-green-400  dark:border-green-500/20 hover: dark:bg-green-500/10/70"
                                                         : brand.status === "Pending"
-                                                            ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100/70"
-                                                            : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100/70"
+                                                            ? " dark:bg-amber-500/10  dark:text-amber-400  dark:border-amber-500/20 hover: dark:bg-amber-500/10/70"
+                                                            : " dark:bg-red-500/10  dark:text-red-400  dark:border-red-500/20 hover: dark:bg-red-500/10/70"
                                                         }`}
                                                 >
                                                     {brand.status === "Verified" && <Check className="w-3 h-3 mr-1 inline stroke-[2.5]" />}
@@ -1064,7 +1064,7 @@ export function AffiliateManagement() {
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
-                                                        className="h-8 border-[#4a3728]/20 hover:bg-[#4a3728]/5 text-[#4a3728] font-medium text-xs px-2.5 flex items-center gap-1.5 transition-all shadow-sm"
+                                                        className="h-8 border-[#4a3728]/20 dark:border-primary/20 hover:bg-[#4a3728]/5 dark:bg-primary/5 text-[#4a3728] dark:text-foreground font-medium text-xs px-2.5 flex items-center gap-1.5 transition-all shadow-sm"
                                                         onClick={() => {
                                                             setSelectedBrand(brand);
                                                             setCreditModalOpen(true);
@@ -1074,7 +1074,7 @@ export function AffiliateManagement() {
                                                         }}
                                                         title="Nạp tiền quảng cáo"
                                                     >
-                                                        <Coins className="w-3.5 h-3.5 text-amber-600" /> Nạp tiền
+                                                        <Coins className="w-3.5 h-3.5  dark:text-amber-500" /> Nạp tiền
                                                     </Button>
                                                     {brand.status === "Pending" && (
                                                         <>
@@ -1088,7 +1088,7 @@ export function AffiliateManagement() {
                                                             <Button
                                                                 size="sm"
                                                                 variant="outline"
-                                                                className="h-8 border-rose-200 hover:bg-rose-50 text-rose-600 font-medium text-xs px-3"
+                                                                className="h-8  dark:border-red-500/20 hover: dark:bg-red-500/10  dark:text-red-400 font-medium text-xs px-3"
                                                                 onClick={() => handleUpdateBrandStatus(brand.brandId, "Suspended")}
                                                             >
                                                                 Từ chối
@@ -1099,7 +1099,7 @@ export function AffiliateManagement() {
                                                         <Button
                                                             size="sm"
                                                             variant="outline"
-                                                            className="h-8 border-rose-100 hover:bg-rose-50 text-rose-600 font-medium text-xs px-2.5 flex items-center gap-1 transition-all"
+                                                            className="h-8 border-rose-100 hover: dark:bg-red-500/10  dark:text-red-400 font-medium text-xs px-2.5 flex items-center gap-1 transition-all"
                                                             onClick={() => handleUpdateBrandStatus(brand.brandId, "Suspended")}
                                                             title="Đình chỉ đối tác hoạt động"
                                                         >
@@ -1109,7 +1109,7 @@ export function AffiliateManagement() {
                                                     {brand.status === "Suspended" && (
                                                         <Button
                                                             size="sm"
-                                                            className="h-8 bg-[#4a3728] hover:bg-[#3d2d21] text-white font-medium text-xs px-3 flex items-center gap-1 transition-all"
+                                                            className="h-8 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-medium text-xs px-3 flex items-center gap-1 transition-all"
                                                             onClick={() => handleUpdateBrandStatus(brand.brandId, "Verified")}
                                                             title="Kích hoạt lại đối tác"
                                                         >
@@ -1131,7 +1131,7 @@ export function AffiliateManagement() {
             <Dialog open={creditModalOpen} onOpenChange={setCreditModalOpen}>
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] font-bold text-lg">
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] dark:text-foreground font-bold text-lg">
                             <Coins className="w-5 h-5 text-amber-500" /> Nạp tiền quảng cáo
                         </DialogTitle>
                     </DialogHeader>
@@ -1141,7 +1141,7 @@ export function AffiliateManagement() {
                                 Đối tác nhận
                             </label>
                             <div className="p-3 bg-muted/20 border border-muted rounded-xl flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-[#4a3728] font-bold text-xs shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-[#4a3728] dark:text-foreground font-bold text-xs shrink-0">
                                     {selectedBrand?.logoUrl ? (
                                         <img src={selectedBrand.logoUrl} alt={selectedBrand.brandName} className="w-full h-full object-cover" />
                                     ) : (
@@ -1150,7 +1150,7 @@ export function AffiliateManagement() {
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-foreground">{selectedBrand?.brandName}</p>
-                                    <p className="text-xs text-muted-foreground mt-0.5">Số dư hiện tại: <span className="font-semibold text-emerald-600">{selectedBrand?.creditBalance.toLocaleString("vi-VN")} đ</span></p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">Số dư hiện tại: <span className="font-semibold  dark:text-green-400">{selectedBrand?.creditBalance.toLocaleString("vi-VN")} đ</span></p>
                                 </div>
                             </div>
                         </div>
@@ -1192,14 +1192,14 @@ export function AffiliateManagement() {
                         </div>
 
                         {depositError && (
-                            <p className="text-xs font-medium text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-100">{depositError}</p>
+                            <p className="text-xs font-medium  dark:text-red-400  dark:bg-red-500/10 p-2.5 rounded-lg border border-rose-100">{depositError}</p>
                         )}
 
                         <DialogFooter className="flex items-center gap-2 justify-end border-t border-muted pt-4">
                             <Button type="button" variant="outline" className="border-muted hover:bg-muted/10 text-xs h-9" onClick={() => setCreditModalOpen(false)}>
                                 Hủy bỏ
                             </Button>
-                            <Button type="submit" className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9" disabled={depositLoading}>
+                            <Button type="submit" className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground text-xs h-9" disabled={depositLoading}>
                                 {depositLoading ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1216,7 +1216,7 @@ export function AffiliateManagement() {
             <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
                 <DialogContent className="sm:max-w-lg bg-card border border-muted shadow-lg text-foreground max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="text-[#4a3728] font-bold text-lg">
+                        <DialogTitle className="text-[#4a3728] dark:text-foreground font-bold text-lg">
                             {editingProduct ? "Cập nhật sản phẩm Affiliate" : "Thêm sản phẩm Affiliate mới"}
                         </DialogTitle>
                         <DialogDescription>
@@ -1276,7 +1276,7 @@ export function AffiliateManagement() {
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            className="w-full text-xs h-9 border-[#4a3728]/35 text-[#4a3728] hover:bg-[#4a3728]/5 flex items-center justify-center gap-1"
+                                            className="w-full text-xs h-9 border-[#4a3728]/35 dark:border-primary text-[#4a3728] dark:text-foreground hover:bg-[#4a3728]/5 dark:bg-primary/5 flex items-center justify-center gap-1"
                                             disabled={bgRemovalLoading}
                                         >
                                             {bgRemovalLoading ? (
@@ -1345,7 +1345,7 @@ export function AffiliateManagement() {
                                     placeholder="Nhập mô tả sản phẩm..."
                                     value={formDescription}
                                     onChange={(e) => setFormDescription(e.target.value)}
-                                    className="flex min-h-[80px] w-full rounded-md border border-[#4a3728]/25 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4a3728]/35 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex min-h-[80px] w-full rounded-md border border-[#4a3728]/25 dark:border-primary bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4a3728]/35 disabled:cursor-not-allowed disabled:opacity-50"
                                 />
                             </div>
 
@@ -1379,7 +1379,7 @@ export function AffiliateManagement() {
                                             type="button"
                                             variant="outline"
                                             size="sm"
-                                            className="h-8 text-xs border-[#4a3728]/35 text-[#4a3728] hover:bg-[#4a3728]/5 flex items-center gap-1.5"
+                                            className="h-8 text-xs border-[#4a3728]/35 dark:border-primary text-[#4a3728] dark:text-foreground hover:bg-[#4a3728]/5 dark:bg-primary/5 flex items-center gap-1.5"
                                             onClick={() => {
                                                 setFormShopeeProductId(generateRandomId(11));
                                                 setFormShopeeShopId(generateRandomId(9));
@@ -1398,7 +1398,7 @@ export function AffiliateManagement() {
                                     id="formIsTrending"
                                     checked={formIsTrending}
                                     onChange={(e) => setFormIsTrending(e.target.checked)}
-                                    className="rounded border-muted text-[#4a3728] focus:ring-[#4a3728] h-4 w-4"
+                                    className="rounded border-muted text-[#4a3728] dark:text-foreground focus:ring-[#4a3728] h-4 w-4"
                                 />
                                 <Label htmlFor="formIsTrending" className="cursor-pointer">Ghim sản phẩm (Trending)</Label>
                             </div>
@@ -1409,7 +1409,7 @@ export function AffiliateManagement() {
                                     id="formIsActive"
                                     checked={formIsActive}
                                     onChange={(e) => setFormIsActive(e.target.checked)}
-                                    className="rounded border-muted text-[#4a3728] focus:ring-[#4a3728] h-4 w-4"
+                                    className="rounded border-muted text-[#4a3728] dark:text-foreground focus:ring-[#4a3728] h-4 w-4"
                                 />
                                 <Label htmlFor="formIsActive" className="cursor-pointer">Công khai hiển thị (Active)</Label>
                             </div>
@@ -1419,7 +1419,7 @@ export function AffiliateManagement() {
                             <Button type="button" variant="outline" className="border-muted hover:bg-muted/10 text-xs h-9" onClick={() => setProductDialogOpen(false)}>
                                 Hủy bỏ
                             </Button>
-                            <Button type="submit" className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9" disabled={actionLoading}>
+                            <Button type="submit" className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground text-xs h-9" disabled={actionLoading}>
                                 {actionLoading ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1436,7 +1436,7 @@ export function AffiliateManagement() {
             <Dialog open={deleteProductConfirmOpen} onOpenChange={setDeleteProductConfirmOpen}>
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-650 text-red-650 flex items-center gap-2 font-bold text-lg text-red-600">
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-650 text-red-650 flex items-center gap-2 font-bold text-lg  dark:text-red-400">
                             <Trash2 className="w-5 h-5 shrink-0 text-red-500" /> Xác nhận xóa sản phẩm
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground mt-1">

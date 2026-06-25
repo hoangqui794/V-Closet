@@ -47,6 +47,7 @@ import imgLogoVcloset from "@/assets/logoVcloset.png";
 import { setToken as apiSetToken, getToken as apiGetToken, clearToken as apiClearToken, logoutAdmin, changePassword, getCurrentUserProfile, updateCurrentUserProfile, updateCurrentUserAvatar } from "@/lib/api";
 import { toast } from "sonner";
 import { AdminNotifications } from "./AdminNotifications";
+import { ModeToggle } from "../mode-toggle";
 
 const menuItems = [
     {
@@ -255,7 +256,7 @@ export function AdminLayout() {
             <Dialog open={tokenOpen} onOpenChange={setTokenOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-[#4a3728]">
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] dark:text-foreground">
                             <KeyRound className="w-5 h-5" /> Cài đặt Bearer Token
                         </DialogTitle>
                         <DialogDescription>
@@ -270,7 +271,7 @@ export function AdminLayout() {
                     />
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setTokenOpen(false)}>Hủy</Button>
-                        <Button className="bg-[#4a3728] hover:bg-[#3d2d21] text-white" onClick={saveToken}>
+                        <Button className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground" onClick={saveToken}>
                             Lưu Token
                         </Button>
                     </DialogFooter>
@@ -281,7 +282,7 @@ export function AdminLayout() {
             <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-[#4a3728]">
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] dark:text-foreground">
                             <Lock className="w-5 h-5" /> Đổi mật khẩu
                         </DialogTitle>
                         <DialogDescription>
@@ -290,7 +291,7 @@ export function AdminLayout() {
                     </DialogHeader>
                     <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 Mật khẩu cũ
                             </label>
                             <Input
@@ -302,7 +303,7 @@ export function AdminLayout() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 Mật khẩu mới
                             </label>
                             <Input
@@ -314,7 +315,7 @@ export function AdminLayout() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 Xác nhận mật khẩu mới
                             </label>
                             <Input
@@ -327,13 +328,13 @@ export function AdminLayout() {
                         </div>
 
                         {changePasswordError && (
-                            <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-xs text-rose-700 font-medium whitespace-pre-line text-left">
+                            <div className="p-3  dark:bg-red-500/10 border border-rose-100 rounded-xl text-xs  dark:text-red-400 font-medium whitespace-pre-line text-left">
                                 {changePasswordError}
                             </div>
                         )}
 
                         {changePasswordSuccess && (
-                            <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-800 font-medium">
+                            <div className="p-3  dark:bg-green-500/10 border border-emerald-100 rounded-xl text-xs  dark:text-green-400 font-medium">
                                 {changePasswordSuccess}
                             </div>
                         )}
@@ -342,7 +343,7 @@ export function AdminLayout() {
                             <Button type="button" variant="outline" onClick={() => setChangePasswordOpen(false)}>
                                 Hủy
                             </Button>
-                            <Button type="submit" disabled={changePasswordLoading} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                            <Button type="submit" disabled={changePasswordLoading} className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                                 {changePasswordLoading ? "Đang đổi..." : "Cập nhật mật khẩu"}
                             </Button>
                         </DialogFooter>
@@ -354,7 +355,7 @@ export function AdminLayout() {
             <Dialog open={editProfileOpen} onOpenChange={setEditProfileOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-[#4a3728]">
+                        <DialogTitle className="flex items-center gap-2 text-[#4a3728] dark:text-foreground">
                             <Users className="w-5 h-5" /> Hồ sơ cá nhân
                         </DialogTitle>
                         <DialogDescription>
@@ -365,7 +366,7 @@ export function AdminLayout() {
                         <div className="flex flex-col items-center gap-2">
                             <Avatar className="w-20 h-20 cursor-pointer border-2 border-muted hover:opacity-80 transition-opacity" onClick={() => fileInputRef.current?.click()}>
                                 <AvatarImage src={profileAvatarUrl || ""} />
-                                <AvatarFallback className="bg-[#4a3728] text-white">
+                                <AvatarFallback className="bg-[#4a3728] dark:bg-primary text-white dark:text-primary-foreground">
                                     {isAvatarUploading ? "..." : (profileDisplayName || adminUser?.displayName || "AD").slice(0, 2).toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
@@ -373,7 +374,7 @@ export function AdminLayout() {
                             <input type="file" hidden accept="image/*" ref={fileInputRef} onChange={handleAvatarChange} />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 Tên hiển thị
                             </label>
                             <Input
@@ -384,7 +385,7 @@ export function AdminLayout() {
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide">
                                 Số điện thoại
                             </label>
                             <Input
@@ -397,7 +398,7 @@ export function AdminLayout() {
                             <Button type="button" variant="outline" onClick={() => setEditProfileOpen(false)}>
                                 Hủy
                             </Button>
-                            <Button type="submit" disabled={editProfileLoading || isAvatarUploading} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white">
+                            <Button type="submit" disabled={editProfileLoading || isAvatarUploading} className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground">
                                 {editProfileLoading ? "Đang lưu..." : "Lưu thay đổi"}
                             </Button>
                         </DialogFooter>
@@ -413,7 +414,7 @@ export function AdminLayout() {
                                 <div className="w-10 h-10 shrink-0 flex items-center justify-center">
                                     <img src={imgLogoVcloset} alt="V-Closet Logo" className="w-full h-full object-cover rounded-[22%]" />
                                 </div>
-                                <span className="font-bold text-xl tracking-tight text-[#4a3728] group-data-[collapsible=icon]:hidden">
+                                <span className="font-bold text-xl tracking-tight text-[#4a3728] dark:text-foreground group-data-[collapsible=icon]:hidden">
                                     V-Closet Admin
                                 </span>
                             </div>
@@ -458,7 +459,7 @@ export function AdminLayout() {
                     </Sidebar>
 
                     <SidebarInset className="flex flex-col flex-1 overflow-hidden">
-                        <header className="flex h-16 shrink-0 items-center justify-between px-6 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+                        <header className="flex h-16 shrink-0 items-center justify-between px-4 md:px-6 border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
                             <div className="flex items-center gap-4">
                                 <SidebarTrigger className="-ml-1" />
                                 <Separator orientation="vertical" className="mr-2 h-4" />
@@ -488,12 +489,13 @@ export function AdminLayout() {
                                         className="pl-8 w-64 bg-background"
                                     />
                                 </div>
-                                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-green-600" title="Cài đặt Bearer Token" onClick={() => setTokenOpen(true)}>
+                                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover: dark:text-green-400" title="Cài đặt Bearer Token" onClick={() => setTokenOpen(true)}>
                                     <KeyRound className="h-5 w-5" />
                                 </Button>
-                                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-[#4a3728]" title="Đổi mật khẩu" onClick={() => setChangePasswordOpen(true)}>
+                                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-[#4a3728] dark:text-foreground" title="Đổi mật khẩu" onClick={() => setChangePasswordOpen(true)}>
                                     <Lock className="h-5 w-5" />
                                 </Button>
+                                <ModeToggle />
                                 <AdminNotifications />
                                 <div className="flex items-center gap-3 pl-4 border-l cursor-pointer hover:opacity-80 transition-opacity" onClick={handleOpenProfile} title="Xem hồ sơ">
                                     <div className="text-right hidden sm:block">
@@ -510,7 +512,7 @@ export function AdminLayout() {
                                     </div>
                                     <Avatar>
                                         <AvatarImage src={adminUser?.avatarUrl || ""} />
-                                        <AvatarFallback className="bg-[#4a3728] text-white">
+                                        <AvatarFallback className="bg-[#4a3728] dark:bg-primary text-white dark:text-primary-foreground">
                                             {(adminUser?.displayName || "AD").slice(0, 2).toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
@@ -518,7 +520,7 @@ export function AdminLayout() {
                             </div>
                         </header>
 
-                        <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-muted/20">
+                        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8 bg-muted/20">
                             <Outlet />
                         </main>
                     </SidebarInset>

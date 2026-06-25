@@ -113,19 +113,43 @@ export function AdminLoginPage() {
 
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-[#fcf8f2] relative overflow-hidden font-poppins px-4">
-            {/* Background decorative blurry circles */}
-            <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4a3728]/5 blur-[80px]" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[#dccbb5]/20 blur-[100px]" />
+        <div className="min-h-screen w-full lg:grid lg:grid-cols-2 bg-[#fcf8f2] dark:bg-background relative overflow-hidden font-poppins">
+            {/* Left side: Beautiful Animated Showcase (Hidden on Mobile) */}
+            <div className="hidden lg:flex flex-col items-center justify-center relative bg-[#dccbb5]/10 dark:bg-[#1a120f] overflow-hidden">
+                <img 
+                    src="https://media.giphy.com/media/xT0xezQGU5xCDJuCPe/giphy.gif" 
+                    alt="V-Closet Showcase"
+                    className="absolute inset-0 w-full h-full object-cover opacity-60 dark:opacity-40 mix-blend-luminosity dark:mix-blend-lighten"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#fcf8f2] via-transparent to-transparent dark:from-background" />
+                <div className="relative z-10 text-center space-y-6 px-12 pt-40">
+                    <div className="w-24 h-24 bg-white/40 dark:bg-black/30 backdrop-blur-lg rounded-[2rem] mx-auto flex items-center justify-center border border-white/50 dark:border-white/10 shadow-2xl">
+                        <img src="/favicon.png" alt="V-Closet Logo" className="w-14 h-14" />
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-4xl lg:text-5xl font-extrabold text-[#4a3728] dark:text-white tracking-tight">Khám phá<br/>V-Closet</h1>
+                        <p className="text-[#4a3728]/80 dark:text-white/70 font-medium text-lg max-w-md mx-auto leading-relaxed">
+                            Nền tảng quản lý tủ đồ và phối đồ thông minh hàng đầu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right side: Login Form */}
+            <div className="w-full h-full flex items-center justify-center relative px-4 lg:px-12">
+                {/* Background decorative blurry circles with animations */}
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4a3728]/10 dark:bg-amber-500/15 blur-[100px] animate-blob mix-blend-multiply dark:mix-blend-screen" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[#dccbb5]/30 dark:bg-orange-500/15 blur-[120px] animate-blob animation-delay-2000 mix-blend-multiply dark:mix-blend-screen" />
+            <div className="absolute top-[40%] left-[20%] w-[400px] h-[400px] rounded-full bg-rose-500/10 dark:bg-rose-500/10 blur-[100px] animate-blob animation-delay-4000 mix-blend-multiply dark:mix-blend-screen" />
 
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full max-w-[480px] bg-white/70 backdrop-blur-md border border-white rounded-3xl shadow-xl overflow-hidden relative z-10 p-8 md:p-10"
+                className="w-full max-w-[480px] bg-card/70 backdrop-blur-md border border-white dark:border-white/15 rounded-3xl shadow-xl overflow-hidden relative z-10 p-8 md:p-10"
             >
                 {/* Logo & Header */}
-                <div className="flex flex-col items-center justify-center text-center pb-8 border-b border-[#4a3728]/10 mb-8">
+                <div className="flex flex-col items-center justify-center text-center pb-8 border-b border-[#4a3728]/10 dark:border-primary/10 mb-8">
                     <motion.div
                         initial={{ scale: 0.8 }}
                         animate={{ scale: 1 }}
@@ -138,22 +162,22 @@ export function AdminLoginPage() {
                             className="w-full h-full object-cover rounded-[22%] drop-shadow-[0_8px_16px_rgba(74,55,40,0.1)]"
                         />
                     </motion.div>
-                    <h2 className="text-2xl font-bold text-[#4a3728] tracking-tight">Cổng Quản Trị V-Closet</h2>
-                    <p className="text-sm text-[#4a3728]/70 mt-1.5 font-medium">Dành riêng cho Quản trị viên & Kiểm duyệt viên</p>
+                    <h2 className="text-2xl font-bold text-[#4a3728] dark:text-foreground tracking-tight">Cổng Quản Trị V-Closet</h2>
+                    <p className="text-sm text-[#4a3728]/70 dark:text-foreground mt-1.5 font-medium">Dành riêng cho Quản trị viên & Kiểm duyệt viên</p>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleLogin} className="space-y-6">
                     {/* Email */}
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide flex items-center gap-1.5 pl-1">
+                        <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide flex items-center gap-1.5 pl-1">
                             <Mail className="w-3.5 h-3.5" /> Email Quản Trị
                         </label>
                         <input
                             type="email"
                             required
                             placeholder="admin@vcloset.com"
-                            className="w-full h-12 bg-white rounded-xl border border-[#dccbb5]/80 px-4 text-sm text-[#4a3728] placeholder-[#a68d73]/60 focus:border-[#4a3728] focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
+                            className="w-full h-12 bg-card rounded-xl border border-[#dccbb5]/80 dark:border-border px-4 text-sm text-[#4a3728] dark:text-foreground placeholder-[#a68d73]/60 dark:placeholder-muted-foreground focus:border-[#4a3728] dark:border-primary focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -162,7 +186,7 @@ export function AdminLoginPage() {
                     {/* Password */}
                     <div className="space-y-2">
                         <div className="flex items-center justify-between pl-1">
-                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide flex items-center gap-1.5">
+                            <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide flex items-center gap-1.5">
                                 <Lock className="w-3.5 h-3.5" /> Mật khẩu
                             </label>
                             <button
@@ -177,7 +201,7 @@ export function AdminLoginPage() {
                                     setForgotSuccessMessage("");
                                     setShowForgotModal(true);
                                 }}
-                                className="text-xs font-semibold text-[#4a3728]/60 hover:text-[#4a3728] transition-colors cursor-pointer border-none bg-transparent hover:underline"
+                                className="text-xs font-semibold text-[#4a3728]/60 dark:text-foreground hover:text-[#4a3728] dark:text-foreground transition-colors cursor-pointer border-none bg-transparent hover:underline"
                             >
                                 Quên mật khẩu?
                             </button>
@@ -186,7 +210,7 @@ export function AdminLoginPage() {
                             type="password"
                             required
                             placeholder="••••••••"
-                            className="w-full h-12 bg-white rounded-xl border border-[#dccbb5]/80 px-4 text-sm text-[#4a3728] placeholder-[#a68d73]/60 focus:border-[#4a3728] focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
+                            className="w-full h-12 bg-card rounded-xl border border-[#dccbb5]/80 dark:border-border px-4 text-sm text-[#4a3728] dark:text-foreground placeholder-[#a68d73]/60 dark:placeholder-muted-foreground focus:border-[#4a3728] dark:border-primary focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -197,10 +221,10 @@ export function AdminLoginPage() {
                         <motion.div
                             initial={{ opacity: 0, y: -5 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-3.5 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-2.5"
+                            className="p-3.5  dark:bg-red-500/10 border border-rose-100 rounded-xl flex items-start gap-2.5"
                         >
                             <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                            <span className="text-xs text-rose-700 font-medium leading-relaxed">{error}</span>
+                            <span className="text-xs  dark:text-red-400 font-medium leading-relaxed">{error}</span>
                         </motion.div>
                     )}
 
@@ -209,7 +233,7 @@ export function AdminLoginPage() {
                         type="submit"
                         disabled={loading}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full h-12 bg-[#4a3728] hover:bg-[#3d2d21] text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#4a3728]/10 cursor-pointer border-none transition-all disabled:bg-[#4a3728]/50"
+                        className="w-full h-12 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#4a3728]/10 cursor-pointer border-none transition-all disabled:bg-[#4a3728]/50 dark:bg-primary"
                     >
                         {loading ? (
                             <span className="flex items-center gap-2 text-sm font-semibold">
@@ -228,57 +252,57 @@ export function AdminLoginPage() {
 
             {/* Forgot Password Modal */}
             {showForgotModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#4a3728]/45 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#4a3728]/45 dark:bg-primary backdrop-blur-sm">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="w-full max-w-[480px] bg-white rounded-3xl shadow-2xl border border-[#dccbb5]/30 overflow-hidden p-8 relative z-50"
+                        className="w-full max-w-[480px] bg-card rounded-3xl shadow-2xl border border-[#dccbb5]/30 overflow-hidden p-8 relative z-50"
                     >
                         {/* Close button */}
                         <button
                             onClick={() => setShowForgotModal(false)}
-                            className="absolute top-5 right-5 text-[#4a3728]/50 hover:text-[#4a3728] hover:bg-[#4a3728]/5 p-1.5 rounded-full transition-all cursor-pointer border-none bg-transparent"
+                            className="absolute top-5 right-5 text-[#4a3728]/50 dark:text-foreground hover:text-[#4a3728] dark:text-foreground hover:bg-[#4a3728]/5 dark:bg-primary/5 p-1.5 rounded-full transition-all cursor-pointer border-none bg-transparent"
                         >
                             <X className="w-5 h-5" />
                         </button>
 
                         {/* Modal Header */}
-                        <div className="flex flex-col items-center justify-center text-center pb-6 border-b border-[#4a3728]/10 mb-6">
-                            <div className="w-12 h-12 rounded-2xl bg-[#4a3728]/5 flex items-center justify-center text-[#4a3728] mb-3">
+                        <div className="flex flex-col items-center justify-center text-center pb-6 border-b border-[#4a3728]/10 dark:border-primary/10 mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-[#4a3728]/5 dark:bg-primary/5 flex items-center justify-center text-[#4a3728] dark:text-foreground mb-3">
                                 <KeyRound className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold text-[#4a3728] tracking-tight">Khôi phục mật khẩu</h3>
-                            <p className="text-xs text-[#4a3728]/60 mt-1 font-medium">Dành cho tài khoản quản trị viên V-Closet</p>
+                            <h3 className="text-xl font-bold text-[#4a3728] dark:text-foreground tracking-tight">Khôi phục mật khẩu</h3>
+                            <p className="text-xs text-[#4a3728]/60 dark:text-foreground mt-1 font-medium">Dành cho tài khoản quản trị viên V-Closet</p>
                         </div>
 
                         {/* Step 1: Request OTP */}
                         {forgotStep === 1 && (
                             <form onSubmit={handleSendOTP} className="space-y-5">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide flex items-center gap-1.5 pl-1">
+                                    <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide flex items-center gap-1.5 pl-1">
                                         <Mail className="w-3.5 h-3.5" /> Nhập Email Quản Trị
                                     </label>
                                     <input
                                         type="email"
                                         required
                                         placeholder="admin@vcloset.vn"
-                                        className="w-full h-12 bg-white rounded-xl border border-[#dccbb5]/80 px-4 text-sm text-[#4a3728] placeholder-[#a68d73]/60 focus:border-[#4a3728] focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
+                                        className="w-full h-12 bg-card rounded-xl border border-[#dccbb5]/80 dark:border-border px-4 text-sm text-[#4a3728] dark:text-foreground placeholder-[#a68d73]/60 dark:placeholder-muted-foreground focus:border-[#4a3728] dark:border-primary focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
                                         value={forgotEmail}
                                         onChange={(e) => setForgotEmail(e.target.value)}
                                     />
                                 </div>
 
                                 {forgotError && (
-                                    <div className="p-3.5 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-2.5 animate-fadeIn">
+                                    <div className="p-3.5  dark:bg-red-500/10 border border-rose-100 rounded-xl flex items-start gap-2.5 animate-fadeIn">
                                         <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                                        <span className="text-xs text-rose-700 font-medium leading-relaxed whitespace-pre-line text-left">{forgotError}</span>
+                                        <span className="text-xs  dark:text-red-400 font-medium leading-relaxed whitespace-pre-line text-left">{forgotError}</span>
                                     </div>
                                 )}
 
                                 <button
                                     type="submit"
                                     disabled={forgotLoading}
-                                    className="w-full h-12 bg-[#4a3728] hover:bg-[#3d2d21] text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer border-none transition-all disabled:bg-[#4a3728]/50"
+                                    className="w-full h-12 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer border-none transition-all disabled:bg-[#4a3728]/50 dark:bg-primary"
                                 >
                                     {forgotLoading ? (
                                         <span className="flex items-center gap-2 text-sm font-semibold">
@@ -298,56 +322,56 @@ export function AdminLoginPage() {
                         {/* Step 2: Reset Password with OTP */}
                         {forgotStep === 2 && (
                             <form onSubmit={handleResetPassword} className="space-y-4">
-                                <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 text-xs rounded-xl font-medium mb-2 leading-relaxed">
+                                <div className="p-3  dark:bg-green-500/10 border border-emerald-100  dark:text-green-400 text-xs rounded-xl font-medium mb-2 leading-relaxed">
                                     {forgotSuccessMessage}
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide pl-1">
+                                    <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide pl-1">
                                         Mã OTP (Đã gửi qua Email)
                                     </label>
                                     <input
                                         type="text"
                                         required
                                         placeholder="Nhập mã OTP 6 ký tự"
-                                        className="w-full h-12 bg-white rounded-xl border border-[#dccbb5]/80 px-4 text-sm text-[#4a3728] tracking-widest text-center font-bold placeholder-[#a68d73]/60 focus:border-[#4a3728] focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
+                                        className="w-full h-12 bg-card rounded-xl border border-[#dccbb5]/80 dark:border-border px-4 text-sm text-[#4a3728] dark:text-foreground tracking-widest text-center font-bold placeholder-[#a68d73]/60 dark:placeholder-muted-foreground focus:border-[#4a3728] dark:border-primary focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value)}
                                     />
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide pl-1">
+                                    <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide pl-1">
                                         Mật khẩu mới
                                     </label>
                                     <input
                                         type="password"
                                         required
                                         placeholder="••••••••"
-                                        className="w-full h-12 bg-white rounded-xl border border-[#dccbb5]/80 px-4 text-sm text-[#4a3728] placeholder-[#a68d73]/60 focus:border-[#4a3728] focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
+                                        className="w-full h-12 bg-card rounded-xl border border-[#dccbb5]/80 dark:border-border px-4 text-sm text-[#4a3728] dark:text-foreground placeholder-[#a68d73]/60 dark:placeholder-muted-foreground focus:border-[#4a3728] dark:border-primary focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
                                     />
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide pl-1">
+                                    <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide pl-1">
                                         Xác nhận mật khẩu mới
                                     </label>
                                     <input
                                         type="password"
                                         required
                                         placeholder="••••••••"
-                                        className="w-full h-12 bg-white rounded-xl border border-[#dccbb5]/80 px-4 text-sm text-[#4a3728] placeholder-[#a68d73]/60 focus:border-[#4a3728] focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
+                                        className="w-full h-12 bg-card rounded-xl border border-[#dccbb5]/80 dark:border-border px-4 text-sm text-[#4a3728] dark:text-foreground placeholder-[#a68d73]/60 dark:placeholder-muted-foreground focus:border-[#4a3728] dark:border-primary focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                     />
                                 </div>
 
                                 {forgotError && (
-                                    <div className="p-3.5 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-2.5">
+                                    <div className="p-3.5  dark:bg-red-500/10 border border-rose-100 rounded-xl flex items-start gap-2.5">
                                         <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                                        <span className="text-xs text-rose-700 font-medium leading-relaxed whitespace-pre-line text-left">{forgotError}</span>
+                                        <span className="text-xs  dark:text-red-400 font-medium leading-relaxed whitespace-pre-line text-left">{forgotError}</span>
                                     </div>
                                 )}
 
@@ -355,14 +379,14 @@ export function AdminLoginPage() {
                                     <button
                                         type="button"
                                         onClick={() => setForgotStep(1)}
-                                        className="w-1/3 h-12 border border-[#dccbb5] hover:bg-[#4a3728]/5 text-[#4a3728] font-bold rounded-xl text-xs transition-all cursor-pointer bg-transparent"
+                                        className="w-1/3 h-12 border border-[#dccbb5] dark:border-border hover:bg-[#4a3728]/5 dark:bg-primary/5 text-[#4a3728] dark:text-foreground font-bold rounded-xl text-xs transition-all cursor-pointer bg-transparent"
                                     >
                                         Quay lại
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={forgotLoading}
-                                        className="flex-1 h-12 bg-[#4a3728] hover:bg-[#3d2d21] text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer border-none transition-all disabled:bg-[#4a3728]/50 text-sm"
+                                        className="flex-1 h-12 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer border-none transition-all disabled:bg-[#4a3728]/50 dark:bg-primary text-sm"
                                     >
                                         {forgotLoading ? (
                                             <span className="flex items-center gap-2 text-sm font-semibold">
@@ -384,13 +408,13 @@ export function AdminLoginPage() {
                                     initial={{ scale: 0.5, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                                    className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"
+                                    className="w-16 h-16 rounded-full  dark:bg-green-500/10 flex items-center justify-center  dark:text-green-400"
                                 >
                                     <CheckCircle2 className="w-10 h-10" />
                                 </motion.div>
                                 <div className="space-y-2">
-                                    <h4 className="text-lg font-bold text-[#4a3728]">Đặt lại mật khẩu thành công!</h4>
-                                    <p className="text-xs text-[#4a3728]/70 px-4 leading-relaxed font-medium">
+                                    <h4 className="text-lg font-bold text-[#4a3728] dark:text-foreground">Đặt lại mật khẩu thành công!</h4>
+                                    <p className="text-xs text-[#4a3728]/70 dark:text-foreground px-4 leading-relaxed font-medium">
                                         Mật khẩu quản trị của bạn đã được thay đổi thành công. Bạn hiện có thể đăng nhập bằng mật khẩu mới.
                                     </p>
                                 </div>
@@ -400,7 +424,7 @@ export function AdminLoginPage() {
                                         setEmail(forgotEmail);
                                         setPassword("");
                                     }}
-                                    className="w-full h-12 bg-[#4a3728] hover:bg-[#3d2d21] text-white font-bold rounded-xl cursor-pointer border-none transition-all text-sm"
+                                    className="w-full h-12 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-bold rounded-xl cursor-pointer border-none transition-all text-sm"
                                 >
                                     Quay lại màn hình Đăng nhập
                                 </button>
@@ -409,6 +433,7 @@ export function AdminLoginPage() {
                     </motion.div>
                 </div>
             )}
+            </div>
         </div>
     );
 }

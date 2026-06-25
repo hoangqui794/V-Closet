@@ -43,15 +43,15 @@ function formatDate(iso: string) {
 function getReasonBadge(reason: string) {
     const r = reason.toLowerCase();
     if (r.includes("inappropriate") || r.includes("phản cảm") || r.includes("nude")) {
-        return "bg-rose-50 text-rose-700 border-rose-200";
+        return " dark:bg-red-500/10  dark:text-red-400  dark:border-red-500/20";
     }
     if (r.includes("spam") || r.includes("quảng cáo")) {
-        return "bg-amber-50 text-amber-700 border-amber-200";
+        return " dark:bg-amber-500/10  dark:text-amber-400  dark:border-amber-500/20";
     }
     if (r.includes("hate") || r.includes("công kích") || r.includes("bạo lực")) {
-        return "bg-red-50 text-red-700 border-red-200";
+        return " dark:bg-red-500/10  dark:text-red-400  dark:border-red-500/20";
     }
-    return "bg-stone-50 text-stone-700 border-stone-200";
+    return "bg-muted/50 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-border";
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
@@ -144,8 +144,8 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-[#4a3728] font-bold text-lg">
-                        <AlertOctagon className="w-5 h-5 text-red-600 shrink-0" /> Chi tiết báo cáo vi phạm
+                    <DialogTitle className="flex items-center gap-2 text-[#4a3728] dark:text-foreground font-bold text-lg">
+                        <AlertOctagon className="w-5 h-5  dark:text-red-400 shrink-0" /> Chi tiết báo cáo vi phạm
                     </DialogTitle>
                     <DialogDescription className="text-xs text-muted-foreground">
                         Mã báo cáo: <span className="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">{report.reportId}</span>
@@ -154,17 +154,17 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
 
                 <div className="flex flex-col gap-4 py-2 mt-2">
                     {/* Post Context */}
-                    <div className="bg-[#fdfaf7] border border-[#f5efe6] rounded-xl p-4 flex flex-col gap-2.5">
+                    <div className="bg-[#fdfaf7] dark:bg-card border border-[#f5efe6] dark:border-border rounded-xl p-4 flex flex-col gap-2.5">
                         <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-[#4a3728] shrink-0" />
+                            <FileText className="w-4 h-4 text-[#4a3728] dark:text-foreground shrink-0" />
                             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Bài viết bị báo cáo</span>
                         </div>
-                        <div className="text-sm font-semibold text-[#4a3728] leading-relaxed">
+                        <div className="text-sm font-semibold text-[#4a3728] dark:text-foreground leading-relaxed">
                             "{report.postCaption || "Không có chú thích bài đăng"}"
                         </div>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-stone-500">
-                            <span className="font-medium text-stone-700">Tác giả bài đăng:</span>
-                            <span className="font-semibold bg-[#e8dfd5] text-[#4a3728] px-2 py-0.5 rounded">
+                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                            <span className="font-medium text-stone-700 dark:text-stone-300">Tác giả bài đăng:</span>
+                            <span className="font-semibold bg-[#e8dfd5] text-[#4a3728] dark:text-foreground px-2 py-0.5 rounded">
                                 {report.postCreatorDisplayName}
                             </span>
                             <span className="text-[10px] text-stone-400">|</span>
@@ -174,17 +174,17 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
 
                     {/* Post Canvas Preview */}
                     {loadingDetail ? (
-                        <div className="flex flex-col items-center justify-center py-6 bg-stone-50/30 border border-dashed border-[#dccbb5] rounded-xl gap-2 text-stone-500 animate-pulse">
-                            <Loader2 className="w-5 h-5 animate-spin text-[#4a3728]" />
+                        <div className="flex flex-col items-center justify-center py-6  dark:bg-muted/50/30 dark:bg-muted/50 border border-dashed border-[#dccbb5] rounded-xl gap-2 text-muted-foreground animate-pulse">
+                            <Loader2 className="w-5 h-5 animate-spin text-[#4a3728] dark:text-foreground" />
                             <span className="text-xs font-medium">Đang tải thiết kế Canvas vi phạm...</span>
                         </div>
                     ) : postDetail?.canvasImage ? (
-                        <div className="flex flex-col gap-2 bg-[#fdfaf7] border border-[#f5efe6] rounded-xl p-3 items-center">
+                        <div className="flex flex-col gap-2 bg-[#fdfaf7] dark:bg-card border border-[#f5efe6] dark:border-border rounded-xl p-3 items-center">
                             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide self-start flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                                <span className="w-1.5 h-1.5 rounded-full  dark:bg-red-500/100 animate-ping" />
                                 Thiết kế Canvas bị báo cáo
                             </span>
-                            <div className="relative w-full max-h-[220px] rounded-lg overflow-hidden border border-[#f5efe6] bg-white flex items-center justify-center p-2">
+                            <div className="relative w-full max-h-[220px] rounded-lg overflow-hidden border border-[#f5efe6] dark:border-border bg-card flex items-center justify-center p-2">
                                 <img
                                     src={postDetail.canvasImage}
                                     alt="Thiết kế Canvas"
@@ -204,7 +204,7 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
                         </div>
                         <div className="bg-muted/20 border border-muted rounded-xl p-3">
                             <p className="text-xs text-muted-foreground mb-1">Thời gian báo cáo</p>
-                            <div className="flex items-center gap-1.5 font-medium text-stone-700 text-xs mt-1">
+                            <div className="flex items-center gap-1.5 font-medium text-stone-700 dark:text-stone-300 text-xs mt-1">
                                 <Calendar className="w-3.5 h-3.5 text-stone-400" />
                                 <span>{formatDate(report.createdAt)}</span>
                             </div>
@@ -214,26 +214,26 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
                     {/* Description details */}
                     <div className="bg-muted/10 border border-muted rounded-xl p-4 flex flex-col gap-1.5">
                         <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-stone-500 shrink-0" />
+                            <User className="w-4 h-4 text-muted-foreground shrink-0" />
                             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
-                                Người báo cáo: <strong className="text-stone-700">{report.reporterDisplayName}</strong>
+                                Người báo cáo: <strong className="text-stone-700 dark:text-stone-300">{report.reporterDisplayName}</strong>
                             </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">Nội dung chi tiết & Ghi chú xử lý:</p>
-                        <div className="text-sm text-stone-600 bg-card border border-stone-200 rounded-lg p-3 whitespace-pre-line leading-relaxed font-sans min-h-[60px]">
+                        <div className="text-sm text-stone-600 dark:text-stone-400 bg-card border border-stone-200 dark:border-border rounded-lg p-3 whitespace-pre-line leading-relaxed font-sans min-h-[60px]">
                             {report.description || "Không có mô tả chi tiết."}
                         </div>
                     </div>
 
                     {/* Resolution Status Indicator */}
                     <div className="flex items-center gap-3 py-1 px-2 border-b border-muted pb-3 mb-1">
-                        <span className="text-xs font-medium text-stone-500">Trạng thái hiện tại:</span>
+                        <span className="text-xs font-medium text-muted-foreground">Trạng thái hiện tại:</span>
                         {report.isResolved ? (
-                            <Badge className="bg-green-50 text-green-700 border-green-200 text-xs px-2.5 py-1 font-medium gap-1">
+                            <Badge className=" dark:bg-green-500/10  dark:text-green-400  dark:border-green-500/20 text-xs px-2.5 py-1 font-medium gap-1">
                                 <CheckCircle className="w-3 h-3 shrink-0" /> Đã xử lý / Đã ẩn vi phạm
                             </Badge>
                         ) : (
-                            <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs px-2.5 py-1 font-medium gap-1 animate-pulse">
+                            <Badge className=" dark:bg-amber-500/10  dark:text-amber-400  dark:border-amber-500/20 text-xs px-2.5 py-1 font-medium gap-1 animate-pulse">
                                 <AlertCircle className="w-3 h-3 shrink-0" /> Đang chờ duyệt xử lý
                             </Badge>
                         )}
@@ -241,23 +241,23 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
 
                     {/* Resolution Form (Only if unresolved) */}
                     {!report.isResolved && (
-                        <div className="bg-amber-50/40 border border-amber-200 rounded-xl p-4 flex flex-col gap-3">
+                        <div className=" dark:bg-amber-500/10/40 border  dark:border-amber-500/20 rounded-xl p-4 flex flex-col gap-3">
                             <div className="flex items-center gap-2">
-                                <AlertOctagon className="w-4 h-4 text-amber-600 shrink-0" />
-                                <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">Giải quyết báo cáo vi phạm</span>
+                                <AlertOctagon className="w-4 h-4  dark:text-amber-500 shrink-0" />
+                                <span className="text-xs font-bold  dark:text-amber-400 uppercase tracking-wide">Giải quyết báo cáo vi phạm</span>
                             </div>
                             
                             {resolveError && (
-                                <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                                <div className="flex items-center gap-2 text-xs  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg">
                                     <AlertCircle className="w-4 h-4 shrink-0" />
                                     <span>{resolveError}</span>
                                 </div>
                             )}
 
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-stone-600">Chọn hành động xử lý</label>
+                                <label className="text-xs font-semibold text-stone-600 dark:text-stone-400">Chọn hành động xử lý</label>
                                 <Select value={action} onValueChange={setAction}>
-                                    <SelectTrigger className="bg-white border-[#dccbb5] text-xs h-9 focus:ring-[#4a3728]">
+                                    <SelectTrigger className="bg-card border-[#dccbb5] text-xs h-9 focus:ring-[#4a3728]">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -268,10 +268,10 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
                             </div>
 
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-stone-600">Ghi chú giải quyết (Tùy chọn)</label>
+                                <label className="text-xs font-semibold text-stone-600 dark:text-stone-400">Ghi chú giải quyết (Tùy chọn)</label>
                                 <Input
                                     placeholder="Ví dụ: Bác bỏ do nội dung bài đăng hoàn toàn hợp lệ..."
-                                    className="bg-white border-[#dccbb5] text-xs h-9 focus:border-[#4a3728]"
+                                    className="bg-card border-[#dccbb5] text-xs h-9 focus:border-[#4a3728] dark:border-primary"
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
                                 />
@@ -280,7 +280,7 @@ function ReportDetailModal({ report, open, onClose, onSuccess }: ReportDetailMod
                             <Button
                                 onClick={handleResolve}
                                 disabled={resolving}
-                                className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9 mt-1 w-full gap-2 font-medium"
+                                className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground text-xs h-9 mt-1 w-full gap-2 font-medium"
                             >
                                 {resolving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                                 Xác nhận giải quyết báo cáo
@@ -345,8 +345,8 @@ function UpdatePostVisibilityModal({ post, open, onClose, onSuccess }: UpdatePos
         <Dialog open={open} onOpenChange={v => !v && onClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-[#4a3728] font-bold">
-                        <EyeOff className="w-5 h-5 text-amber-600" /> Thay đổi hiển thị bài đăng
+                    <DialogTitle className="flex items-center gap-2 text-[#4a3728] dark:text-foreground font-bold">
+                        <EyeOff className="w-5 h-5  dark:text-amber-500" /> Thay đổi hiển thị bài đăng
                     </DialogTitle>
                     <DialogDescription className="text-xs text-muted-foreground">
                         Ẩn hoặc hiển thị lại bài đăng của người dùng.
@@ -355,21 +355,21 @@ function UpdatePostVisibilityModal({ post, open, onClose, onSuccess }: UpdatePos
 
                 <div className="flex flex-col gap-4 py-3">
                     {error && (
-                        <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                        <div className="flex items-center gap-2 text-xs  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg">
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{error}</span>
                         </div>
                     )}
 
-                    <div className="bg-[#fdfaf7] border border-[#f5efe6] rounded-xl p-3 text-xs leading-relaxed text-stone-700">
-                        <span className="font-semibold block text-[#4a3728] mb-0.5">Bài đăng:</span>
+                    <div className="bg-[#fdfaf7] dark:bg-card border border-[#f5efe6] dark:border-border rounded-xl p-3 text-xs leading-relaxed text-stone-700 dark:text-stone-300">
+                        <span className="font-semibold block text-[#4a3728] dark:text-foreground mb-0.5">Bài đăng:</span>
                         "{post.postCaption || "Không có chú thích"}"
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-stone-600">Trạng thái hiển thị mới</label>
+                        <label className="text-xs font-semibold text-stone-600 dark:text-stone-400">Trạng thái hiển thị mới</label>
                         <Select value={isHidden ? "true" : "false"} onValueChange={v => setIsHidden(v === "true")}>
-                            <SelectTrigger className="bg-white border-[#dccbb5] text-xs h-9">
+                            <SelectTrigger className="bg-card border-[#dccbb5] text-xs h-9">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -380,10 +380,10 @@ function UpdatePostVisibilityModal({ post, open, onClose, onSuccess }: UpdatePos
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-stone-600">Lý do thay đổi</label>
+                        <label className="text-xs font-semibold text-stone-600 dark:text-stone-400">Lý do thay đổi</label>
                         <Input
                             placeholder="Nhập lý do ẩn bài viết (Ví dụ: Chứa hình ảnh nhạy cảm...)"
-                            className="bg-white border-[#dccbb5] text-xs h-9"
+                            className="bg-card border-[#dccbb5] text-xs h-9"
                             value={reason}
                             onChange={e => setReason(e.target.value)}
                         />
@@ -392,7 +392,7 @@ function UpdatePostVisibilityModal({ post, open, onClose, onSuccess }: UpdatePos
 
                 <DialogFooter className="gap-2 sm:gap-0">
                     <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-                    <Button onClick={handleUpdate} disabled={loading} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white gap-2 font-medium">
+                    <Button onClick={handleUpdate} disabled={loading} className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground gap-2 font-medium">
                         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                         Xác nhận thay đổi
                     </Button>
@@ -483,8 +483,8 @@ export function ReportManagement() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] flex items-center gap-2">
-                        <Flag className="w-8 h-8 text-rose-600 shrink-0" /> Quản lý báo cáo vi phạm
+                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] dark:text-foreground flex items-center gap-2">
+                        <Flag className="w-8 h-8  dark:text-red-400 shrink-0" /> Quản lý báo cáo vi phạm
                     </h2>
                     <p className="text-muted-foreground mt-1">Danh sách báo cáo vi phạm bài viết từ cộng đồng V-Closet.</p>
                 </div>
@@ -532,10 +532,10 @@ export function ReportManagement() {
 
             {/* Error handling alert */}
             {error && (
-                <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+                <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-4 py-3 rounded-xl">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{error}</span>
-                    <Button variant="ghost" size="sm" className="ml-auto text-red-600 hover:text-red-700 h-7"
+                    <Button variant="ghost" size="sm" className="ml-auto  dark:text-red-400 hover: dark:text-red-400 h-7"
                         onClick={fetchReports}>Thử lại</Button>
                 </div>
             )}
@@ -559,7 +559,7 @@ export function ReportManagement() {
                             <TableRow>
                                 <TableCell colSpan={7} className="py-20 text-center">
                                     <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                                        <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                        <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
                                         <span>Đang đồng bộ dữ liệu báo cáo...</span>
                                     </div>
                                 </TableCell>
@@ -578,7 +578,7 @@ export function ReportManagement() {
                                 <TableRow key={report.reportId} className="hover:bg-muted/30 transition-colors">
                                     {/* Post Caption */}
                                     <TableCell className="max-w-[200px]">
-                                        <div className="truncate font-semibold text-stone-800" title={report.postCaption}>
+                                        <div className="truncate font-semibold text-stone-800 dark:text-stone-200" title={report.postCaption}>
                                             "{report.postCaption || "Không có chú thích"}"
                                         </div>
                                         <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
@@ -590,17 +590,17 @@ export function ReportManagement() {
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Avatar className="h-7 w-7 border border-[#dccbb5]">
-                                                <AvatarFallback className="bg-[#e8dfd5] text-[#4a3728] text-[10px] font-bold">
+                                                <AvatarFallback className="bg-[#e8dfd5] text-[#4a3728] dark:text-foreground text-[10px] font-bold">
                                                     {report.postCreatorDisplayName?.charAt(0) ?? "?"}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <span className="text-sm font-medium text-stone-700">{report.postCreatorDisplayName}</span>
+                                            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{report.postCreatorDisplayName}</span>
                                         </div>
                                     </TableCell>
 
                                     {/* Reporter */}
                                     <TableCell>
-                                        <span className="text-xs font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
+                                        <span className="text-xs font-semibold text-stone-600 dark:text-stone-400 bg-muted px-2 py-0.5 rounded">
                                             {report.reporterDisplayName}
                                         </span>
                                     </TableCell>
@@ -620,18 +620,18 @@ export function ReportManagement() {
                                     {/* Resolution Status */}
                                     <TableCell>
                                         {report.isResolved ? (
-                                            <Badge className="bg-green-50 text-green-700 border-green-200 text-[11px] font-normal gap-1">
+                                            <Badge className=" dark:bg-green-500/10  dark:text-green-400  dark:border-green-500/20 text-[11px] font-normal gap-1">
                                                 <CheckCircle className="w-3 h-3 shrink-0" /> Đã ẩn/xử lý
                                             </Badge>
                                         ) : (
-                                            <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[11px] font-normal gap-1">
+                                            <Badge className=" dark:bg-amber-500/10  dark:text-amber-400  dark:border-amber-500/20 text-[11px] font-normal gap-1">
                                                 <AlertCircle className="w-3 h-3 shrink-0" /> Chờ xử lý
                                             </Badge>
                                         )}
                                     </TableCell>
 
                                     {/* Created Time */}
-                                    <TableCell className="text-xs text-stone-500 font-mono">
+                                    <TableCell className="text-xs text-muted-foreground font-mono">
                                         {formatDate(report.createdAt)}
                                     </TableCell>
 
@@ -639,13 +639,13 @@ export function ReportManagement() {
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-1">
                                             <Button variant="ghost" size="icon"
-                                                className="h-8 w-8 text-stone-500 hover:text-amber-600"
+                                                className="h-8 w-8 text-muted-foreground hover: dark:text-amber-500"
                                                 title="Thay đổi ẩn/hiện bài viết"
                                                 onClick={() => setVisibilityPost({ postId: report.postId, postCaption: report.postCaption })}>
                                                 <EyeOff className="h-4 w-4" />
                                             </Button>
                                             <Button variant="ghost" size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-blue-600"
+                                                className="h-8 w-8 text-muted-foreground hover: dark:text-blue-400"
                                                 title="Xem chi tiết báo cáo"
                                                 onClick={() => setSelectedReport(report)}>
                                                 <Eye className="h-4 w-4" />
@@ -671,7 +671,7 @@ export function ReportManagement() {
                             const p = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
                             return (
                                 <Button key={p} variant={p === page ? "default" : "outline"}
-                                    size="icon" className={`h-8 w-8 text-xs ${p === page ? "bg-[#4a3728] hover:bg-[#3d2d21]" : ""}`}
+                                    size="icon" className={`h-8 w-8 text-xs ${p === page ? "bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90" : ""}`}
                                     onClick={() => setPage(p)}>
                                     {p}
                                 </Button>

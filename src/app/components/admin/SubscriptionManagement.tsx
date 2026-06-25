@@ -26,7 +26,8 @@ import {
     TrendingUp,
     BarChart2,
     RefreshCw,
-    Search
+    Search,
+    Gift
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
@@ -62,7 +63,10 @@ import {
     getAdminPaymentTransactions,
     AdminPaymentTransaction,
     getAdminRevenueStats,
-    RevenueStats
+    RevenueStats,
+    grantAdminSubscription,
+    getAdminUsers,
+    AdminUser
 } from "../../../lib/api";
 import { HubConnectionBuilder, HubConnection, HubConnectionState } from "@microsoft/signalr";
 
@@ -202,9 +206,61 @@ export function SubscriptionManagement() {
     const [deletePlanConfirmOpen, setDeletePlanConfirmOpen] = useState(false);
     const [planToDelete, setPlanToDelete] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
-    
 
+    // States cho Tặng gói dịch vụ
+    const [giftModalOpen, setGiftModalOpen] = useState(false);
+    const [giftLoading, setGiftLoading] = useState(false);
+    const [giftTargetUser, setGiftTargetUser] = useState<AdminUser | null>(null);
+    const [giftSearchTerm, setGiftSearchTerm] = useState("");
+    const [giftUsersSearch, setGiftUsersSearch] = useState<AdminUser[]>([]);
+    const [giftSearching, setGiftSearching] = useState(false);
+    const [giftPlanId, setGiftPlanId] = useState<string>("");
+    const [giftNote, setGiftNote] = useState("");
 
+    // Debounce tìm kiếm người dùng để tặng gói
+    useEffect(() => {
+        if (!giftModalOpen || !giftSearchTerm.trim() || giftSearchTerm.trim().length < 2) {
+            setGiftUsersSearch([]);
+            return;
+        }
+        const delay = setTimeout(async () => {
+            setGiftSearching(true);
+            try {
+                const res = await getAdminUsers({ search: giftSearchTerm.trim(), pageSize: 10 });
+                setGiftUsersSearch(res.items || []);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setGiftSearching(false);
+            }
+        }, 500);
+        return () => clearTimeout(delay);
+    }, [giftSearchTerm, giftModalOpen]);
+
+    const handleGrantSubscription = async () => {
+        if (!giftTargetUser) return addToast("error", "Vui lòng chọn người dùng.");
+        if (!giftPlanId) return addToast("error", "Vui lòng chọn gói dịch vụ.");
+
+        setGiftLoading(true);
+        try {
+            const res = await grantAdminSubscription({
+                targetUserId: giftTargetUser.internalId,
+                planId: giftPlanId,
+                adminNote: giftNote
+            });
+            addToast("success", res.message || "Tặng gói dịch vụ thành công!");
+            setGiftModalOpen(false);
+            setGiftTargetUser(null);
+            setGiftPlanId("");
+            setGiftNote("");
+            setGiftSearchTerm("");
+            if (activeTab === "billing") loadSubscriptions();
+        } catch (err: any) {
+            addToast("error", err.message || "Đã xảy ra lỗi khi tặng gói.");
+        } finally {
+            setGiftLoading(false);
+        }
+    };
     // States quản lý gói Premium thực tế từ Backend
     const [plans, setPlans] = useState<SubscriptionPlanResponse[]>([]);
     const [loadingPlans, setLoadingPlans] = useState(false);
@@ -490,15 +546,133 @@ export function SubscriptionManagement() {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 font-poppins">
-            <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
+            {/* Modal Tặng Gói Dịch Vụ */}
+            <Dialog open={giftModalOpen} onOpenChange={setGiftModalOpen}>
+                <DialogContent className="sm:max-w-md bg-card border-[#4a3728]/10 dark:border-primary/10 rounded-2xl shadow-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-[#4a3728] dark:text-foreground flex items-center gap-2">
+                            <Gift className="w-5 h-5 text-amber-500" /> Tặng gói dịch vụ
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground pt-1">
+                            Tìm người dùng và tặng trực tiếp gói Premium mà không cần thanh toán.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                        {/* Chọn người dùng */}
+                        <div className="space-y-1.5 relative">
+                            <Label className="text-sm font-semibold text-[#4a3728] dark:text-foreground">Tìm người nhận <span className="text-red-500">*</span></Label>
+                            {giftTargetUser ? (
+                                <div className="flex items-center justify-between  dark:bg-amber-500/10 border  dark:border-amber-500/20 p-2.5 rounded-lg">
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        <Avatar className="w-8 h-8 shrink-0">
+                                            <AvatarImage src={giftTargetUser.avatarUrl || ""} />
+                                            <AvatarFallback className="bg-[#4a3728] dark:bg-primary text-white dark:text-primary-foreground text-xs">{giftTargetUser.displayName?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="text-sm font-bold  dark:text-foreground truncate">{giftTargetUser.displayName}</span>
+                                            <span className="text-xs text-muted-foreground truncate">{giftTargetUser.email} (ID: {giftTargetUser.internalId})</span>
+                                        </div>
+                                    </div>
+                                    <Button variant="ghost" size="icon" onClick={() => setGiftTargetUser(null)} className="h-8 w-8 text-red-500 hover: dark:text-red-400 hover: dark:bg-red-500/10 shrink-0">
+                                        <X className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" />
+                                    <Input 
+                                        placeholder="Nhập tên, email hoặc ID để tìm..." 
+                                        className="pl-9 bg-card"
+                                        value={giftSearchTerm}
+                                        onChange={e => setGiftSearchTerm(e.target.value)}
+                                    />
+                                    {giftSearching && <Loader2 className="w-4 h-4 animate-spin absolute right-2.5 top-2.5 text-muted-foreground" />}
+                                    
+                                    {/* Dropdown Kết quả */}
+                                    {giftUsersSearch.length > 0 && (
+                                        <div className="absolute z-50 mt-1 w-full bg-card border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                            {giftUsersSearch.map(u => (
+                                                <div 
+                                                    key={u.userId}
+                                                    onClick={() => { setGiftTargetUser(u); setGiftUsersSearch([]); setGiftSearchTerm(""); }}
+                                                    className="flex items-center gap-2 p-2 hover: dark:bg-muted/50 cursor-pointer border-b border-slate-100 last:border-0"
+                                                >
+                                                    <Avatar className="w-6 h-6 shrink-0">
+                                                        <AvatarImage src={u.avatarUrl || ""} />
+                                                        <AvatarFallback className="bg-slate-200 text-[10px]">{u.displayName?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-xs font-semibold  dark:text-foreground truncate">{u.displayName}</span>
+                                                        <span className="text-[10px] text-muted-foreground truncate">{u.email}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Chọn Gói */}
+                        <div className="space-y-1.5">
+                            <Label className="text-sm font-semibold text-[#4a3728] dark:text-foreground">Chọn gói dịch vụ <span className="text-red-500">*</span></Label>
+                            <Select value={giftPlanId} onValueChange={setGiftPlanId}>
+                                <SelectTrigger className="bg-card">
+                                    <SelectValue placeholder="-- Chọn gói --" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {plans.filter(p => p.isActive).map(p => (
+                                        <SelectItem key={p.id} value={p.id}>
+                                            <span className="font-semibold">{p.name}</span> <span className="text-muted-foreground">({p.durationDays} ngày)</span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Lời nhắn */}
+                        <div className="space-y-1.5">
+                            <Label className="text-sm font-semibold text-[#4a3728] dark:text-foreground">Lời nhắn / Ghi chú</Label>
+                            <Textarea 
+                                placeholder="Ví dụ: Đền bù lỗi hệ thống ngày 25/06..." 
+                                className="bg-card resize-none h-20"
+                                value={giftNote}
+                                onChange={e => setGiftNote(e.target.value)}
+                            />
+                            <p className="text-[10px] text-muted-foreground">Lời nhắn này sẽ được gửi vào email và thông báo đẩy của người dùng.</p>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setGiftModalOpen(false)}>Hủy</Button>
+                        <Button 
+                            onClick={handleGrantSubscription} 
+                            disabled={giftLoading || !giftTargetUser || !giftPlanId}
+                            className="bg-[#4a3728] dark:bg-primary hover:bg-[#3a2a1e] dark:hover:bg-primary/90 text-white dark:text-primary-foreground"
+                        >
+                            {giftLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Gift className="w-4 h-4 mr-2" />}
+                            Xác nhận tặng gói
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <ToastContainer toasts={toasts} onRemove={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728]">Quản lý Tài chính & Gói dịch vụ</h2>
+                    <h2 className="text-3xl font-bold tracking-tight text-[#4a3728] dark:text-foreground">Quản lý Tài chính & Gói dịch vụ</h2>
                     <p className="text-muted-foreground mt-1">
                         Thống kê doanh thu, quản lý mã coupon giảm giá và thiết lập các gói dịch vụ Premium.
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-0">
+                    <Button 
+                        onClick={() => setGiftModalOpen(true)}
+                        className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white shadow-md border-0"
+                    >
+                        <Gift className="w-4 h-4 mr-2" /> Tặng / Đền bù gói
+                    </Button>
                     <Button variant="outline"><Download className="w-4 h-4 mr-2" /> Báo cáo doanh thu</Button>
                 </div>
             </div>
@@ -509,8 +683,8 @@ export function SubscriptionManagement() {
                     onClick={() => setActiveTab("limits")}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
                         activeTab === "limits"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                            ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                     }`}
                 >
                     Gói dịch vụ Premium
@@ -519,8 +693,8 @@ export function SubscriptionManagement() {
                     onClick={() => setActiveTab("billing")}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
                         activeTab === "billing"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                            ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                     }`}
                 >
                     Tài khoản Premium đăng ký
@@ -529,13 +703,13 @@ export function SubscriptionManagement() {
                     onClick={() => setActiveTab("manual-payments")}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 relative ${
                         activeTab === "manual-payments"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                            ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                     }`}
                 >
                     Duyệt chuyển khoản thủ công
                     {pendingPayments.length > 0 && (
-                        <span className="absolute top-1.5 right-1 bg-red-500 text-white rounded-full text-[9px] font-bold h-4 w-4 flex items-center justify-center animate-pulse">
+                        <span className="absolute top-1.5 right-1  dark:bg-red-500/100 text-white rounded-full text-[9px] font-bold h-4 w-4 flex items-center justify-center animate-pulse">
                             {pendingPayments.length}
                         </span>
                     )}
@@ -544,8 +718,8 @@ export function SubscriptionManagement() {
                     onClick={() => { setActiveTab("transactions"); setTxPage(1); }}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
                         activeTab === "transactions"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                            ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                     }`}
                 >
                     Đối soát Giao dịch Momo/PayOS
@@ -554,8 +728,8 @@ export function SubscriptionManagement() {
                     onClick={() => { setActiveTab("revenue"); }}
                     className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 flex items-center gap-1.5 ${
                         activeTab === "revenue"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
+                            ? "border-[#4a3728] dark:border-primary text-[#4a3728] dark:text-foreground"
+                            : "border-transparent text-muted-foreground hover:text-[#4a3728] dark:text-foreground"
                     }`}
                 >
                     <TrendingUp className="w-3.5 h-3.5" />
@@ -656,7 +830,7 @@ export function SubscriptionManagement() {
                     <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
                         {loadingSubscriptions ? (
                             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-                                <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
                                 <span className="text-sm">Đang tải danh sách tài khoản Premium...</span>
                             </div>
                         ) : !Array.isArray(premiumSubscriptions) || premiumSubscriptions.length === 0 ? (
@@ -693,7 +867,7 @@ export function SubscriptionManagement() {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="text-sm font-semibold text-[#4a3728]">{sub.planName}</div>
+                                                    <div className="text-sm font-semibold text-[#4a3728] dark:text-foreground">{sub.planName}</div>
                                                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{sub.planType}</div>
                                                 </TableCell>
                                                 <TableCell className="text-sm font-semibold">
@@ -711,8 +885,8 @@ export function SubscriptionManagement() {
                                                     <Badge
                                                         variant={sub.isActive ? "default" : "secondary"}
                                                         className={sub.isActive 
-                                                            ? "bg-green-100 text-green-800 hover:bg-green-200 border-none font-normal" 
-                                                            : "bg-gray-100 text-gray-500 font-normal"
+                                                            ? " dark:bg-green-500/10  dark:text-green-400 hover:bg-green-200 border-none font-normal" 
+                                                            : " dark:bg-muted text-gray-500 font-normal"
                                                         }
                                                     >
                                                         {sub.isActive ? "Active" : "Expired"}
@@ -722,7 +896,7 @@ export function SubscriptionManagement() {
                                                     {sub.isActive && (
                                                         <Button
                                                             variant="ghost"
-                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs px-2.5 h-8 font-semibold"
+                                                            className=" dark:text-red-400 hover: dark:text-red-400 hover: dark:bg-red-500/10 text-xs px-2.5 h-8 font-semibold"
                                                             onClick={() => {
                                                                 setSubToRevoke(sub);
                                                                 setRevokeConfirmOpen(true);
@@ -776,7 +950,7 @@ export function SubscriptionManagement() {
                     <Card className="shadow-sm border-muted">
                         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
                             <div>
-                                <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                                <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
                                     <CreditCard className="w-5 h-5" /> Nhật ký giao dịch trực tuyến
                                 </CardTitle>
                                 <CardDescription>
@@ -826,7 +1000,7 @@ export function SubscriptionManagement() {
                         <CardContent className="pt-6">
                             {loadingTx ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
-                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
                                     <span className="text-sm">Đang tải lịch sử giao dịch trực tuyến...</span>
                                 </div>
                             ) : transactions.length === 0 ? (
@@ -867,13 +1041,13 @@ export function SubscriptionManagement() {
                                                         switch (status.toLowerCase()) {
                                                             case "paid":
                                                             case "success":
-                                                                return "bg-green-100 text-green-800 border-none";
+                                                                return " dark:bg-green-500/10  dark:text-green-400 border-none";
                                                             case "pending":
-                                                                return "bg-amber-100 text-amber-800 border-none animate-pulse";
+                                                                return " dark:bg-amber-500/10  dark:text-amber-400 border-none animate-pulse";
                                                             case "failed":
-                                                                return "bg-red-100 text-red-800 border-none";
+                                                                return " dark:bg-red-500/10  dark:text-red-400 border-none";
                                                             default:
-                                                                return "bg-gray-100 text-gray-800 border-none";
+                                                                return " dark:bg-muted  dark:text-foreground border-none";
                                                         }
                                                     };
 
@@ -882,11 +1056,11 @@ export function SubscriptionManagement() {
                                                             <TableCell className="text-center font-mono text-xs text-muted-foreground">
                                                                 {(txPage - 1) * txPageSize + idx + 1}
                                                             </TableCell>
-                                                            <TableCell className="font-mono text-xs font-semibold text-[#4a3728]">
+                                                            <TableCell className="font-mono text-xs font-semibold text-[#4a3728] dark:text-foreground">
                                                                 {tx.gatewayTransactionId && (tx.gatewayTransactionId.startsWith("http://") || tx.gatewayTransactionId.startsWith("https://")) ? (
                                                                     <button
                                                                         onClick={() => setZoomImage(tx.gatewayTransactionId)}
-                                                                        className="flex items-center gap-1.5 text-amber-800 hover:text-amber-950 hover:underline bg-[#4a3728]/5 hover:bg-[#4a3728]/10 px-2.5 py-1 rounded-lg transition-colors border border-amber-800/10 cursor-pointer font-semibold text-[11px]"
+                                                                        className="flex items-center gap-1.5  dark:text-amber-400 hover:text-amber-950 hover:underline bg-[#4a3728]/5 dark:bg-primary/5 hover:bg-[#4a3728]/10 dark:bg-primary/10 px-2.5 py-1 rounded-lg transition-colors border border-amber-800/10 cursor-pointer font-semibold text-[11px]"
                                                                         title="Nhấp để xem ảnh minh chứng chuyển khoản"
                                                                     >
                                                                         <Eye className="w-3.5 h-3.5 shrink-0" />
@@ -897,17 +1071,17 @@ export function SubscriptionManagement() {
                                                                 )}
                                                             </TableCell>
                                                             <TableCell>
-                                                                <div className="text-xs font-semibold text-slate-800">{tx.userDisplayName}</div>
+                                                                <div className="text-xs font-semibold  dark:text-foreground">{tx.userDisplayName}</div>
                                                                 <div className="text-[10px] text-muted-foreground font-mono">ID User: <span title={tx.userId}>{tx.userId ? (tx.userId.substring(0, 8) + '...') : ''}</span></div>
                                                             </TableCell>
-                                                            <TableCell className="text-xs font-medium text-slate-700">
+                                                            <TableCell className="text-xs font-medium  dark:text-muted-foreground">
                                                                 {tx.subscriptionPlanName}
                                                             </TableCell>
                                                             <TableCell className="font-mono font-bold text-xs">
                                                                 {tx.amount.toLocaleString("vi-VN")} {tx.currency}
                                                             </TableCell>
                                                             <TableCell className="text-xs font-semibold">
-                                                                <Badge variant="outline" className="border-muted bg-[#4a3728]/5 text-[#4a3728] text-[10px]">
+                                                                <Badge variant="outline" className="border-muted bg-[#4a3728]/5 dark:bg-primary/5 text-[#4a3728] dark:text-foreground text-[10px]">
                                                                     {tx.paymentGateway}
                                                                 </Badge>
                                                             </TableCell>
@@ -966,7 +1140,7 @@ export function SubscriptionManagement() {
                     <Card className="shadow-sm border-muted">
                         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
                             <div>
-                                <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                                <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
                                     <BarChart2 className="w-5 h-5" /> Thống kê Doanh thu
                                 </CardTitle>
                                 <CardDescription>Tổng hợp doanh thu từ các giao dịch thanh toán trực tuyến thành công.</CardDescription>
@@ -986,7 +1160,7 @@ export function SubscriptionManagement() {
                                     <option value="Momo">Momo</option>
                                     <option value="PayOS">PayOS</option>
                                 </select>
-                                <Button size="sm" className="h-9 bg-[#4a3728] hover:bg-[#3d2d21] text-white gap-1.5" onClick={fetchRevenue} disabled={loadingRevenue}>
+                                <Button size="sm" className="h-9 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground gap-1.5" onClick={fetchRevenue} disabled={loadingRevenue}>
                                     {loadingRevenue ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                                     Làm mới
                                 </Button>
@@ -996,7 +1170,7 @@ export function SubscriptionManagement() {
                         <CardContent className="pt-6">
                             {loadingRevenue ? (
                                 <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
-                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
                                     <span className="text-sm">Đang tải dữ liệu doanh thu...</span>
                                 </div>
                             ) : !revenue ? (
@@ -1011,22 +1185,22 @@ export function SubscriptionManagement() {
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div className="rounded-xl border border-muted bg-gradient-to-br from-emerald-50 to-white p-4 flex flex-col gap-1 shadow-sm">
                                             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Tổng doanh thu</span>
-                                            <span className="text-2xl font-bold text-emerald-700">{revenue.totalRevenue.toLocaleString("vi-VN")}đ</span>
+                                            <span className="text-2xl font-bold  dark:text-green-400">{revenue.totalRevenue.toLocaleString("vi-VN")}đ</span>
                                             <span className="text-[11px] text-muted-foreground">Đơn vị: {revenue.currency || "VND"}</span>
                                         </div>
                                         <div className="rounded-xl border border-muted bg-gradient-to-br from-blue-50 to-white p-4 flex flex-col gap-1 shadow-sm">
                                             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Tổng giao dịch</span>
-                                            <span className="text-2xl font-bold text-blue-700">{revenue.totalTransactions}</span>
+                                            <span className="text-2xl font-bold  dark:text-blue-400">{revenue.totalTransactions}</span>
                                             <span className="text-[11px] text-muted-foreground">Tất cả trạng thái</span>
                                         </div>
                                         <div className="rounded-xl border border-muted bg-gradient-to-br from-green-50 to-white p-4 flex flex-col gap-1 shadow-sm">
                                             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Đã thanh toán</span>
-                                            <span className="text-2xl font-bold text-green-700">{revenue.paidCount}</span>
+                                            <span className="text-2xl font-bold  dark:text-green-400">{revenue.paidCount}</span>
                                             <span className="text-[11px] text-muted-foreground">Giao dịch Paid/Success</span>
                                         </div>
                                         <div className="rounded-xl border border-muted bg-gradient-to-br from-amber-50 to-white p-4 flex flex-col gap-1 shadow-sm">
                                             <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Chờ / Thất bại</span>
-                                            <span className="text-2xl font-bold text-amber-700">{revenue.pendingCount + revenue.failedCount}</span>
+                                            <span className="text-2xl font-bold  dark:text-amber-400">{revenue.pendingCount + revenue.failedCount}</span>
                                             <span className="text-[11px] text-muted-foreground">{revenue.pendingCount} chờ · {revenue.failedCount} thất bại</span>
                                         </div>
                                     </div>
@@ -1034,7 +1208,7 @@ export function SubscriptionManagement() {
                                     {/* Breakdown by Gateway */}
                                     {revenue.byGateway && revenue.byGateway.length > 0 && (
                                         <div className="rounded-xl border border-muted p-5 shadow-sm">
-                                            <h3 className="text-sm font-semibold text-[#4a3728] mb-4 flex items-center gap-2">
+                                            <h3 className="text-sm font-semibold text-[#4a3728] dark:text-foreground mb-4 flex items-center gap-2">
                                                 <CreditCard className="w-4 h-4" /> Phân tích theo cổng thanh toán
                                             </h3>
                                             <div className="grid sm:grid-cols-2 gap-4">
@@ -1043,10 +1217,10 @@ export function SubscriptionManagement() {
                                                     return (
                                                         <div key={g.gateway} className="flex flex-col gap-2 p-4 rounded-lg bg-muted/30 border border-muted">
                                                             <div className="flex items-center justify-between">
-                                                                <span className="text-sm font-bold text-[#4a3728]">{g.gateway}</span>
-                                                                <Badge variant="outline" className="text-[11px] border-[#4a3728]/20 bg-[#4a3728]/5 text-[#4a3728]">{g.count} giao dịch</Badge>
+                                                                <span className="text-sm font-bold text-[#4a3728] dark:text-foreground">{g.gateway}</span>
+                                                                <Badge variant="outline" className="text-[11px] border-[#4a3728]/20 dark:border-primary/20 bg-[#4a3728]/5 dark:bg-primary/5 text-[#4a3728] dark:text-foreground">{g.count} giao dịch</Badge>
                                                             </div>
-                                                            <span className="text-xl font-bold text-slate-800">{g.totalAmount.toLocaleString("vi-VN")}đ</span>
+                                                            <span className="text-xl font-bold  dark:text-foreground">{g.totalAmount.toLocaleString("vi-VN")}đ</span>
                                                             <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                                                                 <div className="h-full rounded-full bg-gradient-to-r from-[#4a3728] to-amber-600 transition-all duration-500" style={{ width: `${pct}%` }} />
                                                             </div>
@@ -1065,7 +1239,7 @@ export function SubscriptionManagement() {
                                         const W = 100 / data.length;
                                         return (
                                             <div className="rounded-xl border border-muted p-5 shadow-sm">
-                                                <h3 className="text-sm font-semibold text-[#4a3728] mb-4 flex items-center gap-2">
+                                                <h3 className="text-sm font-semibold text-[#4a3728] dark:text-foreground mb-4 flex items-center gap-2">
                                                     <TrendingUp className="w-4 h-4" /> Doanh thu theo ngày (30 ngày gần nhất)
                                                 </h3>
                                                 <div className="relative w-full overflow-x-auto">
@@ -1106,7 +1280,7 @@ export function SubscriptionManagement() {
                                                 <div className="mt-2 flex flex-wrap gap-3">
                                                     {data.slice(-7).map(d => (
                                                         <div key={d.date} className="text-[10px] text-muted-foreground">
-                                                            <span className="font-semibold text-slate-700">{d.date.slice(5)}</span>: {d.totalAmount.toLocaleString("vi-VN")}đ
+                                                            <span className="font-semibold  dark:text-muted-foreground">{d.date.slice(5)}</span>: {d.totalAmount.toLocaleString("vi-VN")}đ
                                                         </div>
                                                     ))}
                                                 </div>
@@ -1127,7 +1301,7 @@ export function SubscriptionManagement() {
                     <Card className="shadow-sm border-muted">
                             <CardHeader className="flex flex-row items-center justify-between pb-3">
                                 <div>
-                                    <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                                    <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
                                         <CreditCard className="w-5 h-5" /> Danh sách gói dịch vụ Premium
                                     </CardTitle>
                                     <CardDescription>
@@ -1136,7 +1310,7 @@ export function SubscriptionManagement() {
                                 </div>
                                 <Button
                                     onClick={handleOpenCreatePlan}
-                                    className="bg-[#4a3728] hover:bg-[#3d2d21] text-white size-sm"
+                                    className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground size-sm"
                                 >
                                     <Plus className="w-4 h-4 mr-1.5" /> Tạo gói mới
                                 </Button>
@@ -1144,11 +1318,11 @@ export function SubscriptionManagement() {
                             <CardContent className="p-0">
                                 {loadingPlans ? (
                                     <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-                                        <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                        <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
                                         <span className="text-sm">Đang tải các gói Premium từ máy chủ...</span>
                                     </div>
                                 ) : errorPlans ? (
-                                    <div className="p-6 text-center text-sm text-red-600 bg-red-50 border-t">
+                                    <div className="p-6 text-center text-sm  dark:text-red-400  dark:bg-red-500/10 border-t">
                                         {errorPlans}
                                     </div>
                                 ) : !Array.isArray(plans) || plans.length === 0 ? (
@@ -1171,7 +1345,7 @@ export function SubscriptionManagement() {
                                                 {(plans || []).map((plan) => (
                                                     <TableRow key={plan.id} className="hover:bg-muted/30 transition-colors">
                                                         <TableCell className="max-w-[200px]">
-                                                            <p className="font-semibold text-sm text-[#4a3728]">{plan.name || "Chưa có tên"}</p>
+                                                            <p className="font-semibold text-sm text-[#4a3728] dark:text-foreground">{plan.name || "Chưa có tên"}</p>
                                                             {plan.description && (
                                                                 <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
                                                                     {plan.description}
@@ -1190,8 +1364,8 @@ export function SubscriptionManagement() {
                                                             <Badge
                                                                 variant={plan.isActive ? "default" : "secondary"}
                                                                 className={plan.isActive 
-                                                                    ? "bg-green-100 text-green-800 hover:bg-green-200 border-none"
-                                                                    : "bg-gray-100 text-gray-500"
+                                                                    ? " dark:bg-green-500/10  dark:text-green-400 hover:bg-green-200 border-none"
+                                                                    : " dark:bg-muted text-gray-500"
                                                                 }
                                                             >
                                                                 {plan.isActive ? "Active" : "Inactive"}
@@ -1202,7 +1376,7 @@ export function SubscriptionManagement() {
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="icon"
-                                                                    className="h-8 w-8 text-[#4a3728] hover:bg-stone-100"
+                                                                    className="h-8 w-8 text-[#4a3728] dark:text-foreground hover:bg-muted"
                                                                     onClick={() => handleOpenEditPlan(plan)}
                                                                     title="Chỉnh sửa thông tin gói"
                                                                 >
@@ -1236,11 +1410,11 @@ export function SubscriptionManagement() {
                     <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
                         {loadingPayments ? (
                             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-                                <Loader2 className="w-8 h-8 animate-spin text-[#4a3728]" />
+                                <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
                                 <span className="text-sm">Đang tải danh sách chờ duyệt...</span>
                             </div>
                         ) : errorPayments ? (
-                            <div className="p-6 text-center text-sm text-red-600 bg-red-50 border-t">
+                            <div className="p-6 text-center text-sm  dark:text-red-400  dark:bg-red-500/10 border-t">
                                 {errorPayments}
                             </div>
                         ) : !Array.isArray(pendingPayments) || pendingPayments.length === 0 ? (
@@ -1270,7 +1444,7 @@ export function SubscriptionManagement() {
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-sm font-medium">{payment.planName}</TableCell>
-                                            <TableCell className="text-sm font-semibold text-[#4a3728]">
+                                            <TableCell className="text-sm font-semibold text-[#4a3728] dark:text-foreground">
                                                 {payment.amount.toLocaleString("vi-VN")} {payment.currency}
                                             </TableCell>
                                             <TableCell>
@@ -1297,7 +1471,7 @@ export function SubscriptionManagement() {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700 font-semibold text-xs h-8 px-2.5"
+                                                        className=" dark:text-green-400  dark:border-green-500/20 hover: dark:bg-green-500/10 hover: dark:text-green-400 font-semibold text-xs h-8 px-2.5"
                                                         onClick={() => {
                                                             setSelectedPayment(payment);
                                                             setReviewAction("approve");
@@ -1308,7 +1482,7 @@ export function SubscriptionManagement() {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 font-semibold text-xs h-8 px-2.5"
+                                                        className="text-red-500  dark:border-red-500/20 hover: dark:bg-red-500/10 hover: dark:text-red-400 font-semibold text-xs h-8 px-2.5"
                                                         onClick={() => {
                                                             setSelectedPayment(payment);
                                                             setReviewAction("reject");
@@ -1339,7 +1513,7 @@ export function SubscriptionManagement() {
             >
                 <DialogContent className="sm:max-w-md font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="text-[#4a3728] font-bold">
+                        <DialogTitle className="text-[#4a3728] dark:text-foreground font-bold">
                             {editingPlan ? "Cập nhật gói Premium" : "Tạo gói Premium mới"}
                         </DialogTitle>
                         <DialogDescription>
@@ -1349,7 +1523,7 @@ export function SubscriptionManagement() {
 
                     <div className="flex flex-col gap-4 py-2">
                         {errorPlans && (
-                            <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-lg">
+                            <div className="flex items-center gap-2 text-sm  dark:text-red-400  dark:bg-red-500/10 border  dark:border-red-500/20 px-3 py-2 rounded-lg">
                                 <X className="w-4 h-4 shrink-0" />
                                 <span>{errorPlans}</span>
                             </div>
@@ -1463,7 +1637,7 @@ export function SubscriptionManagement() {
                         </Button>
                         <Button
                             onClick={editingPlan ? handleUpdatePlan : handleCreatePlan}
-                            className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                            className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground"
                         >
                             {editingPlan ? "Cập nhật gói" : "Tạo gói"}
                         </Button>
@@ -1475,7 +1649,7 @@ export function SubscriptionManagement() {
             <Dialog open={deletePlanConfirmOpen} onOpenChange={setDeletePlanConfirmOpen}>
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-600">
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg  dark:text-red-400">
                             <Trash2 className="w-5 h-5 shrink-0 text-red-500" /> Xác nhận xóa gói Premium
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -1531,7 +1705,7 @@ export function SubscriptionManagement() {
                             />
                             <button 
                                 onClick={() => setZoomImage(null)}
-                                className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 text-white p-2 rounded-full transition-colors"
+                                className="absolute top-4 right-4 bg-card/20 hover:bg-card/40 text-white p-2 rounded-full transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -1553,8 +1727,8 @@ export function SubscriptionManagement() {
             >
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className={`flex items-center gap-2 font-bold text-lg ${reviewAction === "approve" ? "text-green-600" : "text-red-500"}`}>
-                            {reviewAction === "approve" ? <CheckCircle className="w-5 h-5 text-green-600" /> : <AlertCircle className="w-5 h-5 text-red-500" />}
+                        <DialogTitle className={`flex items-center gap-2 font-bold text-lg ${reviewAction === "approve" ? " dark:text-green-400" : "text-red-500"}`}>
+                            {reviewAction === "approve" ? <CheckCircle className="w-5 h-5  dark:text-green-400" /> : <AlertCircle className="w-5 h-5 text-red-500" />}
                             {reviewAction === "approve" ? "Duyệt giao dịch chuyển khoản" : "Từ chối giao dịch chuyển khoản"}
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -1628,8 +1802,8 @@ export function SubscriptionManagement() {
             >
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-600">
-                            <AlertCircle className="w-5 h-5 text-red-600" />
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg  dark:text-red-400">
+                            <AlertCircle className="w-5 h-5  dark:text-red-400" />
                             Xác nhận thu hồi Premium
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground mt-1">

@@ -380,7 +380,7 @@ export function CampaignManagement() {
             <ToastContainer toasts={toasts} onRemove={id => setToasts(prev => prev.filter(t => t.id !== id))} />
 
             <div className="flex flex-col gap-1.5">
-                <h1 className="text-2xl font-bold tracking-tight text-[#4a3728]">Chiến dịch tài trợ (Campaigns)</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-[#4a3728] dark:text-foreground">Chiến dịch tài trợ (Campaigns)</h1>
                 <p className="text-sm text-muted-foreground">
                     Quản lý và giám sát các chiến dịch đẩy sản phẩm tài trợ của các đối tác thương hiệu trên hệ thống.
                 </p>
@@ -393,10 +393,10 @@ export function CampaignManagement() {
                         <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                             Chiến dịch đang chạy
                         </CardTitle>
-                        <Play className="h-4 w-4 text-[#4a3728]" />
+                        <Play className="h-4 w-4 text-[#4a3728] dark:text-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-[#4a3728]">
+                        <div className="text-2xl font-bold text-[#4a3728] dark:text-foreground">
                             {metricsLoading ? <Loader2 className="w-5 h-5 animate-spin inline" /> : activeCampaigns}
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1">
@@ -413,7 +413,7 @@ export function CampaignManagement() {
                         <Coins className="h-4 w-4 text-amber-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-[#4a3728]">
+                        <div className="text-2xl font-bold text-[#4a3728] dark:text-foreground">
                             {metricsLoading ? <Loader2 className="w-5 h-5 animate-spin inline" /> : formatPrice(totalDailyBudget)}
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1">Tổng ngân sách chạy hàng ngày</p>
@@ -428,7 +428,7 @@ export function CampaignManagement() {
                         <TrendingUp className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-[#4a3728]">
+                        <div className="text-2xl font-bold text-[#4a3728] dark:text-foreground">
                             {metricsLoading ? <Loader2 className="w-5 h-5 animate-spin inline" /> : formatPrice(totalSpent)}
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1">Doanh thu quảng cáo lũy kế</p>
@@ -443,7 +443,7 @@ export function CampaignManagement() {
                         <BarChart3 className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-[#4a3728]">
+                        <div className="text-2xl font-bold text-[#4a3728] dark:text-foreground">
                             {metricsLoading ? <Loader2 className="w-5 h-5 animate-spin inline" /> : `${overallCtr}% CTR`}
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1.5">
@@ -461,7 +461,7 @@ export function CampaignManagement() {
                     {/* Row 1: Title + Actions */}
                     <div className="flex items-center justify-between gap-4">
                         <div className="min-w-0">
-                            <CardTitle className="text-[#4a3728] font-bold text-base">Danh sách chiến dịch quảng cáo</CardTitle>
+                            <CardTitle className="text-[#4a3728] dark:text-foreground font-bold text-base">Danh sách chiến dịch quảng cáo</CardTitle>
                             <CardDescription className="text-xs mt-0.5">
                                 Tổng cộng {totalCount} chiến dịch • Trang {currentPage}/{totalPages}
                             </CardDescription>
@@ -469,7 +469,7 @@ export function CampaignManagement() {
                         <div className="flex items-center gap-2 shrink-0">
                             <Button
                                 size="sm"
-                                className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-8 gap-1.5"
+                                className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground text-xs h-8 gap-1.5"
                                 onClick={handleOpenCreate}
                             >
                                 <Plus className="w-3.5 h-3.5" />
@@ -523,7 +523,7 @@ export function CampaignManagement() {
                                 <SelectItem value="stopped">Đã dừng</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button type="submit" size="sm" className="h-8 bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs px-4 shrink-0">
+                        <Button type="submit" size="sm" className="h-8 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground text-xs px-4 shrink-0">
                             Tìm
                         </Button>
                     </form>
@@ -550,7 +550,7 @@ export function CampaignManagement() {
                                     <TableRow>
                                         <TableCell colSpan={10} className="text-center py-12">
                                             <div className="flex flex-col items-center justify-center gap-2">
-                                                <Loader2 className="w-8 h-8 text-[#4a3728] animate-spin" />
+                                                <Loader2 className="w-8 h-8 text-[#4a3728] dark:text-foreground animate-spin" />
                                                 <span className="text-sm text-muted-foreground">Đang tải danh sách chiến dịch...</span>
                                             </div>
                                         </TableCell>
@@ -588,7 +588,7 @@ export function CampaignManagement() {
                                                         <span className="font-semibold text-sm line-clamp-1 text-foreground">
                                                             {campaign.productName}
                                                         </span>
-                                                        <span className="text-xs text-[#4a3728] font-medium mt-0.5">
+                                                        <span className="text-xs text-[#4a3728] dark:text-foreground font-medium mt-0.5">
                                                             Đối tác: {campaign.brandName}
                                                         </span>
                                                     </div>
@@ -596,10 +596,10 @@ export function CampaignManagement() {
                                                 <TableCell className="text-center font-mono text-xs">
                                                     Hạng {campaign.displayRank}
                                                 </TableCell>
-                                                <TableCell className="text-right font-mono text-sm font-semibold text-[#4a3728]">
+                                                <TableCell className="text-right font-mono text-sm font-semibold text-[#4a3728] dark:text-foreground">
                                                     {formatPrice(Number(campaign.dailyBudget))}
                                                 </TableCell>
-                                                <TableCell className="text-right font-mono text-sm font-semibold text-emerald-600">
+                                                <TableCell className="text-right font-mono text-sm font-semibold  dark:text-green-400">
                                                     {formatPrice(Number(campaign.totalSpent))}
                                                 </TableCell>
                                                 <TableCell className="text-center font-mono text-xs">
@@ -612,7 +612,7 @@ export function CampaignManagement() {
                                                         </span>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="text-center font-mono font-semibold text-xs text-[#4a3728]">
+                                                <TableCell className="text-center font-mono font-semibold text-xs text-[#4a3728] dark:text-foreground">
                                                     {ctr}%
                                                 </TableCell>
                                                 <TableCell className="text-xs">
@@ -626,8 +626,8 @@ export function CampaignManagement() {
                                                 <TableCell className="text-center">
                                                     <Badge
                                                         className={`font-normal ${campaign.isActive
-                                                            ? "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
-                                                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                                            ? "border-green-500  dark:text-green-400  dark:bg-green-500/10 hover: dark:bg-green-500/10"
+                                                            : " dark:bg-muted text-gray-500 hover:bg-gray-200"
                                                         }`}
                                                     >
                                                         {campaign.isActive ? "Đang chạy" : "Đã dừng"}
@@ -639,7 +639,7 @@ export function CampaignManagement() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="text-amber-600 hover:bg-amber-50 h-7 px-2 font-medium text-xs"
+                                                            className=" dark:text-amber-500 hover: dark:bg-amber-500/10 h-7 px-2 font-medium text-xs"
                                                             onClick={() => handleOpenAdjust(campaign)}
                                                             disabled={actionLoadingId === campaign.campaignId}
                                                             title="Điều chỉnh ngân sách & vị trí"
@@ -663,7 +663,7 @@ export function CampaignManagement() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="text-rose-600 hover:bg-rose-50 h-7 px-2 font-medium text-xs flex items-center gap-1"
+                                                                className=" dark:text-red-400 hover: dark:bg-red-500/10 h-7 px-2 font-medium text-xs flex items-center gap-1"
                                                                 onClick={() => handleOpenStopConfirm(campaign.campaignId)}
                                                                 disabled={actionLoadingId === campaign.campaignId}
                                                                 title="Dừng khẩn cấp chiến dịch"
@@ -681,7 +681,7 @@ export function CampaignManagement() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="text-green-600 hover:bg-green-50 h-7 px-2 font-medium text-xs flex items-center gap-1"
+                                                                className=" dark:text-green-400 hover: dark:bg-green-500/10 h-7 px-2 font-medium text-xs flex items-center gap-1"
                                                                 onClick={() => handleOpenResumeConfirm(campaign.campaignId)}
                                                                 disabled={actionLoadingId === campaign.campaignId}
                                                                 title="Khôi phục chiến dịch"
@@ -774,7 +774,7 @@ export function CampaignManagement() {
             <Dialog open={stopConfirmOpen} onOpenChange={setStopConfirmOpen}>
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-red-600">
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg  dark:text-red-400">
                             <StopCircle className="w-5 h-5 shrink-0 text-red-500" /> Xác nhận dừng chiến dịch
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -802,7 +802,7 @@ export function CampaignManagement() {
             <Dialog open={resumeConfirmOpen} onOpenChange={setResumeConfirmOpen}>
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-green-600">
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg  dark:text-green-400">
                             <Play className="w-5 h-5 shrink-0 text-green-500" /> Xác nhận khôi phục chiến dịch
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -830,7 +830,7 @@ export function CampaignManagement() {
             <Dialog open={adjustDialogOpen} onOpenChange={setAdjustDialogOpen}>
                 <DialogContent className="sm:max-w-sm bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-bold text-base text-amber-600">
+                        <DialogTitle className="flex items-center gap-2 font-bold text-base  dark:text-amber-500">
                             <SlidersHorizontal className="w-5 h-5 shrink-0" /> Điều chỉnh chiến dịch
                         </DialogTitle>
                         <DialogDescription className="text-xs text-muted-foreground mt-1">
@@ -873,7 +873,7 @@ export function CampaignManagement() {
                                 Hủy bỏ
                             </Button>
                             <Button type="submit"
-                                className="bg-amber-500 hover:bg-amber-600 text-white text-xs h-9"
+                                className=" dark:bg-amber-500/100 hover:bg-amber-600 text-white text-xs h-9"
                                 disabled={adjustLoading}>
                                 {adjustLoading ? (
                                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang lưu...</>
@@ -888,7 +888,7 @@ export function CampaignManagement() {
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogContent className="sm:max-w-md bg-card border border-muted shadow-lg text-foreground font-poppins">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-[#4a3728]">
+                        <DialogTitle className="flex items-center gap-2 font-bold text-lg text-[#4a3728] dark:text-foreground">
                             <Plus className="w-5 h-5 shrink-0" /> Tạo chiến dịch quảng cáo mới
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground mt-1">
@@ -973,7 +973,7 @@ export function CampaignManagement() {
                                 Hủy bỏ
                             </Button>
                             <Button type="submit"
-                                className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs h-9"
+                                className="bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground text-xs h-9"
                                 disabled={createLoading}>
                                 {createLoading ? (
                                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang tạo...</>

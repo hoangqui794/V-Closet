@@ -69,7 +69,7 @@ export function ItemManagement() {
                                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                             />
                             <div className="absolute top-2 right-2 flex flex-col gap-2">
-                                <Badge className={`${item.status === "Public" ? "bg-green-500/80" : "bg-gray-500/80"} backdrop-blur-md`}>
+                                <Badge className={`${item.status === "Public" ? " dark:bg-green-500/100/80" : " dark:bg-muted/500/80"} backdrop-blur-md`}>
                                     {item.status}
                                 </Badge>
                             </div>

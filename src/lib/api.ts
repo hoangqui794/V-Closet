@@ -1138,6 +1138,15 @@ export async function revokeAdminPremiumSubscription(
     });
 }
 
+export async function grantAdminSubscription(
+    body: { targetUserId: number; planId: string; adminNote: string | null }
+): Promise<{ success: boolean; message: string }> {
+    return request<{ success: boolean; message: string }>(`/api/admin/subscriptions/grant`, {
+        method: "POST",
+        body: JSON.stringify(body),
+    });
+}
+
 // ─── Admin Subscription Tier Config APIs ─────────────────────────────────
 
 export interface TierConfigResponse {
