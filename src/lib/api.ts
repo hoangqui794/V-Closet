@@ -1186,6 +1186,8 @@ export interface AdminNotificationItem {
     referenceId?: number | null;
     isRead: boolean;
     userInternalId: number;
+    userGuid?: string;
+    userDisplayName?: string;
     createdAt: string;
 }
 
