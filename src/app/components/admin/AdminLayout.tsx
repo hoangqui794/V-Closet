@@ -407,7 +407,7 @@ export function AdminLayout() {
             </Dialog>
 
             <SidebarProvider>
-                <div className="flex h-screen w-full bg-background overflow-hidden font-poppins">
+                <div className="flex h-[100dvh] w-full bg-background overflow-hidden font-poppins">
                     <Sidebar variant="inset" collapsible="icon">
                         <SidebarHeader className="h-20 flex items-center px-4">
                             <div className="flex items-center gap-3">
