@@ -121,7 +121,7 @@ export function SubscriptionManagement() {
             };
             if (txGatewayFilter) params.gateway = txGatewayFilter;
             if (txStatusFilter) params.status = txStatusFilter;
-            if (txUserIdFilter !== "") params.userInternalId = Number(txUserIdFilter);
+            if (txUserIdFilter !== "") params.userId = txUserIdFilter;
             if (txSearchTerm.trim()) params.searchTerm = txSearchTerm.trim();
 
             const res = await getAdminPaymentTransactions(params);
@@ -898,7 +898,7 @@ export function SubscriptionManagement() {
                                                             </TableCell>
                                                             <TableCell>
                                                                 <div className="text-xs font-semibold text-slate-800">{tx.userDisplayName}</div>
-                                                                <div className="text-[10px] text-muted-foreground font-mono">ID User: {tx.userInternalId}</div>
+                                                                <div className="text-[10px] text-muted-foreground font-mono">ID User: <span title={tx.userId}>{tx.userId ? (tx.userId.substring(0, 8) + '...') : ''}</span></div>
                                                             </TableCell>
                                                             <TableCell className="text-xs font-medium text-slate-700">
                                                                 {tx.subscriptionPlanName}

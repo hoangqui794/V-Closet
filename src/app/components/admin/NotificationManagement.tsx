@@ -80,6 +80,18 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
     );
 }
 
+const NOTIFICATION_TEMPLATES = [
+    { label: "Hệ thống - Bảo trì định kỳ", type: "System", title: "🛠 Thông báo bảo trì hệ thống định kỳ", body: "V-Closet sẽ tiến hành bảo trì nâng cấp hệ thống từ 02:00 AM đến 04:00 AM ngày mai. Trong thời gian này, ứng dụng có thể bị gián đoạn. Mong bạn thông cảm!" },
+    { label: "Hệ thống - Khắc phục sự cố", type: "System", title: "✅ Hệ thống đã hoạt động bình thường", body: "Sự cố tải ảnh vào tủ đồ đã được đội ngũ kỹ thuật khắc phục. Chúc bạn có những trải nghiệm phối đồ tuyệt vời cùng V-Closet." },
+    { label: "Marketing - Siêu Sale 50%", type: "Marketing", title: "🎉 Siêu Sale - Giảm ngay 50% gói Premium!", body: "Nâng cấp tủ đồ không giới hạn ngay hôm nay! Nhập mã VCLOSET50 để được giảm giá 50% gói Premium 1 năm. Ưu đãi chỉ áp dụng đến hết ngày mai. Chốt đơn ngay!" },
+    { label: "Marketing - Thử thách phối đồ", type: "Marketing", title: "👗 Tham gia thử thách phối đồ - Nhận quà liền tay!", body: "Khoe outfit đỉnh nhất tuần này của bạn tại group cộng đồng V-Closet để có cơ hội nhận ngay voucher mua sắm trị giá 500k. Xem chi tiết thể lệ ngay!" },
+    { label: "Update - Cập nhật phiên bản mới", type: "Update", title: "🚀 Cập nhật phiên bản mới", body: "V-Closet vừa ra mắt bản cập nhật mới với nhiều cải tiến về hiệu năng và trải nghiệm. Vui lòng cập nhật ứng dụng để có trải nghiệm mượt mà nhất nhé!" },
+    { label: "Update - Ra mắt AI Stylist", type: "Update", title: "✨ Ra mắt tính năng AI Stylist thông minh!", body: "Bạn không biết mặc gì hôm nay? Đã có AI Stylist lo! Tính năng mới sẽ tự động gợi ý trang phục dựa trên thời tiết và lịch trình của bạn. Trải nghiệm ngay!" },
+    { label: "Update - Sản phẩm Affiliate mới", type: "Update", title: "🛍️ Hàng trăm mẫu phụ kiện mới đã cập bến!", body: "V-Closet vừa bổ sung thêm hơn 300 mẫu túi xách và giày dép vào mục Sản phẩm Affiliate. Hãy vào thêm ngay vào tủ đồ ảo của bạn nhé." },
+    { label: "Alert - Cảnh báo đăng nhập lạ", type: "Alert", title: "⚠️ Cảnh báo đăng nhập từ thiết bị lạ", body: "Chúng tôi phát hiện tài khoản của bạn vừa đăng nhập từ một thiết bị mới. Nếu đây không phải là bạn, vui lòng thay đổi mật khẩu ngay lập tức để bảo vệ tài khoản." },
+    { label: "Alert - Gói Premium sắp hết hạn", type: "Alert", title: "⏰ Gói Premium của bạn sắp hết hạn!", body: "Gói V-Closet Premium của bạn sẽ hết hạn sau 3 ngày nữa. Gia hạn ngay hôm nay để không bị gián đoạn trải nghiệm các tính năng nâng cao bạn nhé!" },
+];
+
 export function NotificationManagement() {
     // Tabs state
     const [activeTab, setActiveTab] = useState("send");
@@ -97,8 +109,11 @@ export function NotificationManagement() {
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
     const [notifType, setNotifType] = useState("System");
+    const [quickSelectValue, setQuickSelectValue] = useState("");
     const [refType, setRefType] = useState("");
     const [refId, setRefId] = useState<number | "">("");
+    const [sendViaApp, setSendViaApp] = useState(true);
+    const [sendViaEmail, setSendViaEmail] = useState(false);
 
     // User Search states
     const [userSearch, setUserSearch] = useState("");
@@ -373,6 +388,10 @@ export function NotificationManagement() {
             addToast("error", "Vui lòng chọn người nhận thông báo.");
             return;
         }
+        if (!sendViaApp && !sendViaEmail) {
+            addToast("error", "Vui lòng chọn ít nhất một phương thức gửi (App hoặc Email).");
+            return;
+        }
         setConfirmOpen(true);
     };
 
@@ -384,7 +403,9 @@ export function NotificationManagement() {
                 body: body.trim(),
                 type: notifType,
                 referenceType: refType.trim() || null,
-                referenceId: refId !== "" ? Number(refId) : null
+                referenceId: refId !== "" ? Number(refId) : null,
+                sendViaApp: sendViaApp,
+                sendViaEmail: sendViaEmail
             };
 
             if (targetType === "broadcast") {
@@ -675,6 +696,67 @@ export function NotificationManagement() {
                                             </div>
                                         )}
 
+                                        {/* Delivery Method Options */}
+                                        <div className="space-y-2 pb-2">
+                                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
+                                                Phương thức gửi <span className="text-destructive">*</span>
+                                            </label>
+                                            <div className="flex gap-6 items-center">
+                                                <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={sendViaApp}
+                                                        onChange={(e) => setSendViaApp(e.target.checked)}
+                                                        className="w-4 h-4 rounded border-gray-300 text-[#4a3728] focus:ring-[#4a3728]"
+                                                    />
+                                                    Thông báo App (Push)
+                                                </label>
+                                                <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={sendViaEmail}
+                                                        onChange={(e) => setSendViaEmail(e.target.checked)}
+                                                        className="w-4 h-4 rounded border-gray-300 text-[#4a3728] focus:ring-[#4a3728]"
+                                                    />
+                                                    Gửi Email
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        {/* Quick Templates */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide flex items-center justify-between">
+                                                <span>Chọn mẫu thông báo nhanh <span className="text-[10px] text-muted-foreground font-normal lowercase">(Tùy chọn)</span></span>
+                                            </label>
+                                            <select
+                                                value={quickSelectValue}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === "custom") {
+                                                        setTitle("");
+                                                        setBody("");
+                                                        setNotifType("System");
+                                                        setQuickSelectValue("");
+                                                    } else {
+                                                        setQuickSelectValue(value);
+                                                        const template = NOTIFICATION_TEMPLATES[Number(value)];
+                                                        if (template) {
+                                                            setTitle(template.title);
+                                                            setBody(template.body);
+                                                            setNotifType(template.type);
+                                                        }
+                                                    }
+                                                }}
+                                                className="w-full flex h-10 rounded-xl border border-input bg-[#4a3728]/5 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                <option value="" disabled>-- Chọn một mẫu có sẵn --</option>
+                                                <option value="custom">✍️ Tự viết mới (Xóa nội dung)</option>
+                                                {NOTIFICATION_TEMPLATES.map((tpl, idx) => (
+                                                    <option key={idx} value={idx}>{tpl.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
                                         {/* Title Input */}
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-semibold text-[#4a3728]/80 uppercase tracking-wide">
@@ -684,7 +766,10 @@ export function NotificationManagement() {
                                                 type="text"
                                                 placeholder="Nhập tiêu đề ngắn gọn thu hút..."
                                                 value={title}
-                                                onChange={e => setTitle(e.target.value)}
+                                                onChange={e => {
+                                                    setTitle(e.target.value);
+                                                    setQuickSelectValue("");
+                                                }}
                                                 maxLength={100}
                                                 required
                                                 className="bg-white border-border font-medium text-foreground"
@@ -699,7 +784,10 @@ export function NotificationManagement() {
                                             <Textarea
                                                 placeholder="Viết nội dung thông báo đầy đủ gửi đến người dùng..."
                                                 value={body}
-                                                onChange={e => setBody(e.target.value)}
+                                                onChange={e => {
+                                                    setBody(e.target.value);
+                                                    setQuickSelectValue("");
+                                                }}
                                                 maxLength={500}
                                                 required
                                                 className="bg-white border-border min-h-[120px]"

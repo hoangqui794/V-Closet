@@ -1195,6 +1195,8 @@ export interface BroadcastNotificationRequest {
     type?: string;
     referenceType?: string | null;
     referenceId?: number | null;
+    sendViaApp?: boolean;
+    sendViaEmail?: boolean;
 }
 
 export interface SendTargetedNotificationRequest {
@@ -1204,6 +1206,8 @@ export interface SendTargetedNotificationRequest {
     type?: string;
     referenceType?: string | null;
     referenceId?: number | null;
+    sendViaApp?: boolean;
+    sendViaEmail?: boolean;
 }
 
 export interface GetAdminNotificationsParams {
@@ -1373,7 +1377,7 @@ export async function bulkDeleteOutfitsByAdmin(ids: string[]): Promise<{ message
 
 export interface AdminPaymentTransaction {
     id: string;
-    userInternalId: number;
+    userId: string;
     userDisplayName: string;
     userEmail: string;
     subscriptionPlanName: string;
@@ -1399,7 +1403,7 @@ export interface GetAdminPaymentTransactionsParams {
     pageSize?: number;
     gateway?: string;
     status?: string;
-    userInternalId?: number;
+    userId?: string;
     searchTerm?: string;
 }
 
@@ -1409,7 +1413,7 @@ export async function getAdminPaymentTransactions(params: GetAdminPaymentTransac
     if (params.pageSize !== undefined) query.set("pageSize", String(params.pageSize));
     if (params.gateway) query.set("gateway", params.gateway);
     if (params.status) query.set("status", params.status);
-    if (params.userInternalId !== undefined) query.set("userInternalId", String(params.userInternalId));
+    if (params.userId !== undefined) query.set("userId", params.userId);
     if (params.searchTerm) query.set("searchTerm", params.searchTerm);
 
     return request<PagedPaymentTransactionResponse>(`/api/admin/payments/transactions?${query.toString()}`);
