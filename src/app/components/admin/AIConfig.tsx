@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAdminTierConfigs, updateAdminTierConfig } from "@/lib/api";
+import { getAdminTierConfigs, updateAdminTierConfig, getAdminSurveys, updateSystemSurveyUrl } from "@/lib/api";
 import {
     Sparkles,
     Cpu,
@@ -62,6 +62,9 @@ export function AIConfig() {
     const [premiumBgCredits, setPremiumBgCredits] = useState<number>(0);
     const [premiumTryOnCredits, setPremiumTryOnCredits] = useState<number>(0);
 
+    const [surveyUrl, setSurveyUrl] = useState("https://forms.gle/vcloset-developer-2026");
+    const [isSavingSurveyUrl, setIsSavingSurveyUrl] = useState(false);
+
     const [isSavingKeys, setIsSavingKeys] = useState(false);
     const [isSavingQuotas, setIsSavingQuotas] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
@@ -93,7 +96,21 @@ export function AIConfig() {
                 console.error("Lỗi khi tải cấu hình hạn ngạch:", err);
             }
         }
+
+        async function fetchSurveyUrl() {
+            try {
+                const surveys = await getAdminSurveys();
+                const surveyLinkItem = surveys.find(s => s.type === "survey_link");
+                if (surveyLinkItem && surveyLinkItem.surveyUrl && isMounted) {
+                    setSurveyUrl(surveyLinkItem.surveyUrl);
+                }
+            } catch (err) {
+                console.error("Lỗi khi tải link khảo sát:", err);
+            }
+        }
+
         fetchTierConfigs();
+        fetchSurveyUrl();
         return () => { isMounted = false; };
     }, []);
 
@@ -130,6 +147,23 @@ export function AIConfig() {
             alert(err.message || "Đã xảy ra lỗi khi cập nhật hạn ngạch.");
         } finally {
             setIsSavingQuotas(false);
+        }
+    };
+
+    const handleSaveSurveyUrl = async () => {
+        if (!surveyUrl.trim()) {
+            alert("Vui lòng nhập liên kết khảo sát.");
+            return;
+        }
+        setIsSavingSurveyUrl(true);
+        try {
+            await updateSystemSurveyUrl(surveyUrl.trim());
+            showToast("Đã cập nhật liên kết khảo sát hệ thống thành công!");
+        } catch (err: any) {
+            console.error("Lỗi khi cập nhật liên kết khảo sát:", err);
+            alert(err.message || "Đã xảy ra lỗi khi cập nhật liên kết khảo sát.");
+        } finally {
+            setIsSavingSurveyUrl(false);
         }
     };
 
@@ -439,6 +473,48 @@ export function AIConfig() {
                     >
                         <Save className="w-4 h-4 mr-2" />
                         {isSavingKeys ? "Đang lưu..." : "Cập nhật API Keys"}
+                    </Button>
+                </CardFooter>
+            </Card>
+
+            {/* Cấu hình liên kết khảo sát hệ thống (survey_url) */}
+            <Card className="shadow-sm border-muted">
+                <CardHeader>
+                    <CardTitle className="text-[#4a3728] text-lg flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500/10" /> Cấu hình liên kết khảo sát hệ thống (survey_url)
+                    </CardTitle>
+                    <CardDescription>
+                        Cập nhật đường dẫn khảo sát hệ thống (Google Forms, Typeform, v.v.). Người dùng hoàn thành khảo sát qua link này để nhận ưu đãi từ app.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-foreground">
+                            Đường dẫn liên kết khảo sát (URL)
+                        </label>
+                        <Input
+                            type="url"
+                            placeholder="Nhập link khảo sát ngoài (ví dụ: https://forms.gle/...)"
+                            value={surveyUrl}
+                            onChange={(e) => setSurveyUrl(e.target.value)}
+                            className="bg-background border-muted font-mono text-xs"
+                        />
+                        <p className="text-[10px] text-muted-foreground">
+                            Link này được sử dụng trên ứng dụng di động để chuyển hướng người dùng khi họ nhấp vào Khảo sát nhận quà.
+                        </p>
+                    </div>
+                </CardContent>
+                <CardFooter className="border-t border-muted bg-muted/10 p-4 flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">
+                        Quyền hạn yêu cầu: Quản trị viên (subscription.manage)
+                    </span>
+                    <Button
+                        onClick={handleSaveSurveyUrl}
+                        disabled={isSavingSurveyUrl}
+                        className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
+                    >
+                        <Save className="w-4 h-4 mr-2" />
+                        {isSavingSurveyUrl ? "Đang lưu..." : "Cập nhật link khảo sát"}
                     </Button>
                 </CardFooter>
             </Card>

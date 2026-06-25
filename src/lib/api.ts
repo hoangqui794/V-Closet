@@ -119,7 +119,7 @@ async function request<T>(
                     ...options,
                     headers: hdrs,
                 });
-                
+
                 // Nếu sau khi thử lại bằng token mới vẫn bị 401 (ví dụ vừa bị ban/thu hồi quyền)
                 if (res.status === 401) {
                     clearToken();
@@ -139,7 +139,7 @@ async function request<T>(
 
     if (!res.ok) {
         let errMsg = "";
-        
+
         // Mapped user-friendly Vietnamese messages based on HTTP Status Codes
         switch (res.status) {
             case 400:
@@ -1822,6 +1822,32 @@ function initializeMockSurveysData() {
     }
 }
 
+export const updateSystemSurveyUrl = async (url: string): Promise<{ surveyUrl: string, message: string }> => {
+    const res = await request<{ surveyUrl: string, message: string }>("/api/admin/system-settings/survey-url", {
+        method: "PUT",
+        body: JSON.stringify({ surveyUrl: url }),
+    });
+
+    if (typeof window !== "undefined") {
+        try {
+            const data = localStorage.getItem("mock_surveys");
+            if (data) {
+                const surveys: AdminSurveyItem[] = JSON.parse(data);
+                const updated = surveys.map(s => {
+                    if (s.type === "survey_link") {
+                        return { ...s, surveyUrl: url };
+                    }
+                    return s;
+                });
+                localStorage.setItem("mock_surveys", JSON.stringify(updated));
+            }
+        } catch (e) {
+            console.error("Lỗi đồng bộ mock surveys local storage", e);
+        }
+    }
+    return res;
+};
+
 export const getAdminSurveys = async (): Promise<AdminSurveyItem[]> => {
     initializeMockSurveysData();
     if (typeof window !== "undefined") {
@@ -1833,6 +1859,16 @@ export const getAdminSurveys = async (): Promise<AdminSurveyItem[]> => {
 
 export const createAdminSurvey = async (payload: { title: string; question: string; type: string; quizOptions?: string[]; surveyUrl?: string }): Promise<AdminSurveyItem> => {
     initializeMockSurveysData();
+
+    if (payload.type === "survey_link" && payload.surveyUrl) {
+        try {
+            await updateSystemSurveyUrl(payload.surveyUrl);
+        } catch (e: any) {
+            console.error("[API] Failed to update backend system survey URL", e);
+            throw new Error(e.message || "Không thể cập nhật liên kết khảo sát lên hệ thống.");
+        }
+    }
+
     if (typeof window !== "undefined") {
         const surveys: AdminSurveyItem[] = JSON.parse(localStorage.getItem("mock_surveys") || "[]");
         const newSurvey: AdminSurveyItem = {
@@ -1902,11 +1938,11 @@ export const getSurveyDashboardStats = async (): Promise<SurveyDashboardStats> =
         responses = JSON.parse(localStorage.getItem("mock_survey_responses") || "[]");
     }
     const total = responses.length;
-    
+
     let sum = 0;
     let ratedCount = 0;
     const distribution = { stars5: 0, stars4: 0, stars3: 0, stars2: 0, stars1: 0 };
-    
+
     responses.forEach(r => {
         if (r.rating && r.rating > 0) {
             sum += r.rating;
