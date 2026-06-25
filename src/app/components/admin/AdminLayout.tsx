@@ -15,7 +15,8 @@ import {
     Lock,
     Megaphone,
     Shirt,
-    Palette
+    Palette,
+    Ticket
 } from "lucide-react";
 import {
     Dialog, DialogContent, DialogHeader,
@@ -87,6 +88,11 @@ const menuItems = [
         title: "Gói đăng ký",
         url: "/admin/subscriptions",
         icon: CreditCard,
+    },
+    {
+        title: "Mã giảm giá",
+        url: "/admin/coupons",
+        icon: Ticket,
     },
     {
         title: "Cấu hình AI & API",

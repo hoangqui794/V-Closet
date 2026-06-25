@@ -1930,5 +1930,53 @@ export const getSurveyDashboardStats = async (): Promise<SurveyDashboardStats> =
     };
 };
 
+// ─── Admin Coupons API ────────────────────────────────────────────────────────
+export interface Coupon {
+    id: string;
+    code: string;
+    discountType: string;
+    discountValue: number;
+    currentUses: number;
+    maxUses: number | null;
+    expiresAt: string | null;
+    isActive: boolean;
+    createdAt: string;
+}
 
+export interface CreateCouponPayload {
+    code: string;
+    discountType: number; // 1 = Percentage, 2 = FixedAmount
+    discountValue: number;
+    maxUses?: number | null;
+    expiresAt?: string | null;
+}
 
+export async function getAdminCoupons(): Promise<Coupon[]> {
+    return request<Coupon[]>("/api/admin/coupons");
+}
+
+export async function createAdminCoupon(payload: CreateCouponPayload): Promise<Coupon> {
+    return request<Coupon>("/api/admin/coupons", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function toggleAdminCoupon(id: string): Promise<Coupon> {
+    return request<Coupon>(`/api/admin/coupons/${id}/toggle`, {
+        method: "PUT",
+    });
+}
+
+export async function deleteAdminCoupon(id: string): Promise<{ message: string }> {
+    return request<{ message: string }>(`/api/admin/coupons/${id}`, {
+        method: "DELETE",
+    });
+}
+
+export async function updateAdminCoupon(id: string, payload: CreateCouponPayload): Promise<Coupon> {
+    return request<Coupon>(`/api/admin/coupons/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+    });
+}

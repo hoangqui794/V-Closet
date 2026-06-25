@@ -88,16 +88,8 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
     );
 }
 
-// Mockup dữ liệu mã giảm giá (Coupons)
-const initialCoupons = [
-    { id: "cp-1", code: "WELCOMEVCLOSET", discount: 20, type: "Percentage", used: 145, maxUses: 300, status: "Active", expiry: "2026-12-31" },
-    { id: "cp-2", code: "TRYONFIRST50", discount: 50, type: "Percentage", used: 50, maxUses: 50, status: "Expired", expiry: "2026-04-15" },
-    { id: "cp-3", code: "SUMMERVIBE", discount: 15, type: "Percentage", used: 34, maxUses: 100, status: "Active", expiry: "2026-08-31" },
-];
-
 export function SubscriptionManagement() {
-    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "coupons" | "manual-payments" | "transactions" | "revenue">("limits");
-    const [coupons, setCoupons] = useState(initialCoupons);
+    const [activeTab, setActiveTab] = useState<"limits" | "billing" | "manual-payments" | "transactions" | "revenue">("limits");
 
     // States cho Lịch sử Giao dịch thanh toán trực tuyến (Momo/PayOS)
     const [transactions, setTransactions] = useState<AdminPaymentTransaction[]>([]);
@@ -211,13 +203,6 @@ export function SubscriptionManagement() {
     const [planToDelete, setPlanToDelete] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
     
-    // States tạo Coupon mới
-    const [showCreateCoupon, setShowCreateCoupon] = useState(false);
-    const [newCode, setNewCode] = useState("");
-    const [newDiscount, setNewDiscount] = useState(10);
-    const [newMaxUses, setNewMaxUses] = useState(100);
-    const [newExpiry, setNewExpiry] = useState("2026-12-31");
-
 
 
     // States quản lý gói Premium thực tế từ Backend
@@ -456,40 +441,6 @@ export function SubscriptionManagement() {
         }
     };
 
-    const handleCreateCoupon = () => {
-        if (newCode.trim()) {
-            const newCoupon = {
-                id: `cp-${coupons.length + 1}`,
-                code: newCode.trim().toUpperCase(),
-                discount: newDiscount,
-                type: "Percentage",
-                used: 0,
-                maxUses: newMaxUses,
-                status: "Active",
-                expiry: newExpiry
-            };
-            setCoupons([...coupons, newCoupon]);
-            setNewCode("");
-            setShowCreateCoupon(false);
-            addToast("success", "Tạo mã giảm giá thành công!");
-        }
-    };
-
-    const handleDeleteCoupon = (id: string) => {
-        setCoupons(coupons.filter(c => c.id !== id));
-        addToast("success", "Đã xóa mã giảm giá!");
-    };
-
-    const handleToggleCouponStatus = (id: string, currentStatus: string) => {
-        setCoupons(coupons.map(c => {
-            if (c.id === id) {
-                return { ...c, status: currentStatus === "Active" ? "Expired" : "Active" };
-            }
-            return c;
-        }));
-        addToast("success", `Đã cập nhật trạng thái coupon thành ${currentStatus === "Active" ? "Hết hạn" : "Hoạt động"}!`);
-    };
-
     const handleReviewManualPayment = async () => {
         if (!selectedPayment || !reviewAction) return;
         setSubmittingReview(true);
@@ -588,16 +539,6 @@ export function SubscriptionManagement() {
                             {pendingPayments.length}
                         </span>
                     )}
-                </button>
-                <button
-                    onClick={() => setActiveTab("coupons")}
-                    className={`py-3 px-6 text-sm font-semibold transition-all border-b-2 ${
-                        activeTab === "coupons"
-                            ? "border-[#4a3728] text-[#4a3728]"
-                            : "border-transparent text-muted-foreground hover:text-[#4a3728]"
-                    }`}
-                >
-                    Mã giảm giá (Coupons)
                 </button>
                 <button
                     onClick={() => { setActiveTab("transactions"); setTxPage(1); }}
@@ -825,153 +766,6 @@ export function SubscriptionManagement() {
                                 </div>
                             </>
                         )}
-                    </div>
-                </div>
-            )}
-
-            {/* TAB: MÃ GIẢM GIÁ */}
-            {activeTab === "coupons" && (
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between bg-card p-4 rounded-xl border border-muted shadow-sm">
-                        <span className="text-sm text-muted-foreground">
-                            Đang hoạt động: <strong>{coupons.filter(c => c.status === "Active").length} mã coupon</strong>
-                        </span>
-                        <Button
-                            onClick={() => setShowCreateCoupon(!showCreateCoupon)}
-                            className="bg-[#4a3728] hover:bg-[#3d2d21] text-white"
-                        >
-                            <Plus className="w-4 h-4 mr-2" /> Tạo mã giảm giá
-                        </Button>
-                    </div>
-
-                    {showCreateCoupon && (
-                        <Card className="shadow-sm border-muted animate-in slide-in-from-top duration-300">
-                            <CardHeader>
-                                <CardTitle className="text-lg text-[#4a3728]">Tạo Coupon Mới</CardTitle>
-                                <CardDescription>Nhập chi tiết thông số cho mã coupon giảm giá Premium.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="grid gap-4 md:grid-cols-4">
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Mã Code</label>
-                                    <Input
-                                        placeholder="Ví dụ: SPRING30"
-                                        value={newCode}
-                                        onChange={(e) => setNewCode(e.target.value.toUpperCase())}
-                                        className="bg-background border-muted font-mono"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Phần trăm giảm (%)</label>
-                                    <Input
-                                        type="number"
-                                        min={1}
-                                        max={100}
-                                        value={newDiscount}
-                                        onChange={(e) => setNewDiscount(Number(e.target.value))}
-                                        className="bg-background border-muted"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Lượt dùng tối đa</label>
-                                    <Input
-                                        type="number"
-                                        value={newMaxUses}
-                                        onChange={(e) => setNewMaxUses(Number(e.target.value))}
-                                        className="bg-background border-muted"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Hạn sử dụng</label>
-                                    <Input
-                                        type="date"
-                                        value={newExpiry}
-                                        onChange={(e) => setNewExpiry(e.target.value)}
-                                        className="bg-background border-muted text-xs font-mono"
-                                    />
-                                </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-end gap-2 bg-muted/10 p-4 border-t border-muted">
-                                <Button variant="ghost" onClick={() => setShowCreateCoupon(false)} className="text-xs">
-                                    Hủy
-                                </Button>
-                                <Button onClick={handleCreateCoupon} className="bg-[#4a3728] hover:bg-[#3d2d21] text-white text-xs">
-                                    Tạo Coupon
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    )}
-
-                    <div className="rounded-xl border bg-card shadow-sm overflow-x-auto border-muted">
-                        <Table>
-                            <TableHeader className="bg-muted/50">
-                                <TableRow>
-                                    <TableHead>Mã Giảm Giá</TableHead>
-                                    <TableHead>Chiết Khấu</TableHead>
-                                    <TableHead>Đã dùng / Giới hạn</TableHead>
-                                    <TableHead>Hạn sử dụng</TableHead>
-                                    <TableHead>Trạng thái</TableHead>
-                                    <TableHead className="text-right">Hành động</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {coupons.map((coupon) => (
-                                    <TableRow key={coupon.id} className="hover:bg-muted/30 transition-colors">
-                                        <TableCell className="font-mono font-bold text-sm text-[#4a3728]">
-                                            {coupon.code}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-none font-semibold">
-                                                Giảm {coupon.discount}%
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-sm">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-semibold">{coupon.used}</span>
-                                                <span className="text-muted-foreground">/</span>
-                                                <span className="text-muted-foreground">{coupon.maxUses} lượt</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-sm text-muted-foreground font-mono">
-                                            {coupon.expiry}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                variant={coupon.status === "Active" ? "outline" : "secondary"}
-                                                className={`font-normal ${
-                                                    coupon.status === "Active"
-                                                        ? "border-green-500 text-green-700 bg-green-50 hover:bg-green-100"
-                                                        : "bg-gray-100 text-gray-500"
-                                                }`}
-                                            >
-                                                {coupon.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                                    onClick={() => handleToggleCouponStatus(coupon.id, coupon.status)}
-                                                    title="Bật/Tắt trạng thái coupon"
-                                                >
-                                                    {coupon.status === "Active" ? <X className="w-4 h-4 text-red-500" /> : <Check className="w-4 h-4 text-green-600" />}
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                                                    onClick={() => handleDeleteCoupon(coupon.id)}
-                                                    title="Xóa coupon"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
                     </div>
                 </div>
             )}

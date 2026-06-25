@@ -12,6 +12,7 @@ import { NotificationManagement } from "./components/admin/NotificationManagemen
 import { WardrobeManagement } from "./components/admin/WardrobeManagement";
 import { OutfitManagement } from "./components/admin/OutfitManagement";
 import { ClosetManagement } from "./components/admin/ClosetManagement";
+import { CouponManagement } from "./components/admin/CouponManagement";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: "notifications", Component: NotificationManagement },
       { path: "affiliate", Component: AffiliateManagement },
       { path: "subscriptions", Component: SubscriptionManagement },
+      { path: "coupons", Component: CouponManagement },
       { path: "ai-config", Component: AIConfig },
     ],
   },
