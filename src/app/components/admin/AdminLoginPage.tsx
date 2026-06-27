@@ -145,7 +145,7 @@ export function AdminLoginPage() {
                 <img 
                     src="https://media.giphy.com/media/xT0xezQGU5xCDJuCPe/giphy.gif" 
                     alt="V-Closet Showcase"
-                    className="absolute inset-0 w-full h-full object-cover opacity-60 dark:opacity-40 mix-blend-luminosity dark:mix-blend-lighten"
+                    className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#fcf8f2] via-transparent to-transparent dark:from-background" />
                 <div className="relative z-10 text-center space-y-6 px-12 pt-40">
