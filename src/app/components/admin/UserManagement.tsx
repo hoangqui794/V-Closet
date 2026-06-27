@@ -412,6 +412,17 @@ function BanUserModal({
 
     const handleBan = async () => {
         if (!user) return;
+        
+        if (!reason || reason.trim().length === 0) {
+            setError("Vui lòng nhập lý do khóa tài khoản.");
+            return;
+        }
+        
+        if (reason.trim().length < 10) {
+            setError("Lý do khóa phải có ít nhất 10 ký tự.");
+            return;
+        }
+
         setLoading(true);
         setError("");
         try {
@@ -446,7 +457,7 @@ function BanUserModal({
             await banAdminUser(user.userId, {
                 banType,
                 bannedUntil: bannedUntilStr,
-                reason: reason || undefined,
+                reason: reason.trim(),
             });
             onSuccess();
             onClose();
@@ -510,14 +521,14 @@ function BanUserModal({
                         </div>
                     )}
                     <div className="flex flex-col gap-1.5">
-                        <Label>Lý do (tùy chọn)</Label>
+                        <Label>Lý do (Bắt buộc) <span className="text-red-500">*</span></Label>
                         <Input placeholder="Vi phạm nội quy..." value={reason}
                             onChange={e => setReason(e.target.value)} />
                     </div>
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose} disabled={loading}>Hủy</Button>
-                    <Button variant="destructive" onClick={handleBan} disabled={loading}>
+                    <Button variant="destructive" onClick={handleBan} disabled={loading || !reason || reason.trim().length < 10}>
                         {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                         Xác nhận khóa
                     </Button>
