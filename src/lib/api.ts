@@ -515,6 +515,13 @@ export async function loginAdmin(payload: LoginPayload): Promise<LoginResponse> 
     });
 }
 
+export async function requestReactivation(payload: { email: string }): Promise<{ message: string }> {
+    return request<{ message: string }>("/api/auth/request-reactivation", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
+}
+
 // ─── Admin Products API ───────────────────────────────────────────────────────
 
 export interface AffiliateProduct {

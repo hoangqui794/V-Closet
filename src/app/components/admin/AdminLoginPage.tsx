@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { ShieldAlert, Mail, Lock, ArrowRight, X, KeyRound, CheckCircle2 } from "lucide-react";
-import { setToken, setRefreshToken, loginAdmin, forgotPassword, resetPassword } from "@/lib/api";
+import { setToken, setRefreshToken, loginAdmin, forgotPassword, resetPassword, requestReactivation } from "@/lib/api";
 import imgLogoVcloset from "@/assets/logoVcloset.png";
 
 export function AdminLoginPage() {
@@ -22,6 +22,13 @@ export function AdminLoginPage() {
     const [forgotLoading, setForgotLoading] = useState(false);
     const [forgotError, setForgotError] = useState("");
     const [forgotSuccessMessage, setForgotSuccessMessage] = useState("");
+
+    // Reactivation modal states
+    const [showReactivationModal, setShowReactivationModal] = useState(false);
+    const [reactivationEmail, setReactivationEmail] = useState("");
+    const [reactivationLoading, setReactivationLoading] = useState(false);
+    const [reactivationError, setReactivationError] = useState("");
+    const [reactivationSuccess, setReactivationSuccess] = useState("");
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -108,6 +115,25 @@ export function AdminLoginPage() {
             setForgotError(err.message || "Xác thực OTP thất bại hoặc mã OTP đã hết hạn.");
         } finally {
             setForgotLoading(false);
+        }
+    };
+
+    const handleRequestReactivation = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setReactivationError("");
+        setReactivationSuccess("");
+        setReactivationLoading(true);
+        try {
+            const res = await requestReactivation({ email: reactivationEmail });
+            setReactivationSuccess(res?.message || "Đã gửi yêu cầu mở lại tài khoản thành công.");
+            setTimeout(() => {
+                setShowReactivationModal(false);
+            }, 3000);
+        } catch (err: any) {
+            console.error("Lỗi yêu cầu mở khóa:", err);
+            setReactivationError(err.message || "Không thể gửi yêu cầu. Vui lòng thử lại sau.");
+        } finally {
+            setReactivationLoading(false);
         }
     };
 
@@ -221,10 +247,26 @@ export function AdminLoginPage() {
                         <motion.div
                             initial={{ opacity: 0, y: -5 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-3.5  dark:bg-red-500/10 border border-rose-100 rounded-xl flex items-start gap-2.5"
+                            className="p-3.5  dark:bg-red-500/10 border border-rose-100 rounded-xl flex flex-col gap-2.5"
                         >
-                            <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                            <span className="text-xs  dark:text-red-400 font-medium leading-relaxed">{error}</span>
+                            <div className="flex items-start gap-2.5">
+                                <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                                <span className="text-xs  dark:text-red-400 font-medium leading-relaxed">{error}</span>
+                            </div>
+                            {(error.toLowerCase().includes("vô hiệu hoá") || error.toLowerCase().includes("bị khoá") || error.toLowerCase().includes("ngưng") || error.toLowerCase().includes("inactive")) && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setReactivationEmail(email);
+                                        setReactivationError("");
+                                        setReactivationSuccess("");
+                                        setShowReactivationModal(true);
+                                    }}
+                                    className="text-xs font-semibold text-rose-600 hover:text-rose-700 underline self-start ml-6 cursor-pointer bg-transparent border-none"
+                                >
+                                    Khôi phục tài khoản
+                                </button>
+                            )}
                         </motion.div>
                     )}
 
@@ -434,6 +476,83 @@ export function AdminLoginPage() {
                 </div>
             )}
             </div>
+            {/* Reactivation Modal */}
+            {showReactivationModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#4a3728]/45 dark:bg-primary backdrop-blur-sm">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="w-full max-w-[480px] bg-card rounded-3xl shadow-2xl border border-[#dccbb5]/30 overflow-hidden p-8 relative z-50"
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowReactivationModal(false)}
+                            className="absolute top-5 right-5 text-[#4a3728]/50 dark:text-foreground hover:text-[#4a3728] dark:text-foreground hover:bg-[#4a3728]/5 dark:bg-primary/5 p-1.5 rounded-full transition-all cursor-pointer border-none bg-transparent"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        {/* Modal Header */}
+                        <div className="flex flex-col items-center justify-center text-center pb-6 border-b border-[#4a3728]/10 dark:border-primary/10 mb-6">
+                            <div className="w-12 h-12 rounded-2xl bg-[#4a3728]/5 dark:bg-primary/5 flex items-center justify-center text-[#4a3728] dark:text-foreground mb-3">
+                                <ShieldAlert className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-[#4a3728] dark:text-foreground tracking-tight">Mở lại tài khoản</h3>
+                            <p className="text-xs text-[#4a3728]/60 dark:text-foreground mt-1 font-medium">Gửi yêu cầu khôi phục tài khoản bị vô hiệu hoá</p>
+                        </div>
+
+                        <form onSubmit={handleRequestReactivation} className="space-y-5">
+                            {reactivationSuccess ? (
+                                <div className="p-4 bg-green-500/10 border border-green-200 text-green-700 text-sm rounded-xl font-medium text-center flex flex-col items-center justify-center gap-3">
+                                    <CheckCircle2 className="w-8 h-8 text-green-500" />
+                                    <span>{reactivationSuccess}</span>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-semibold text-[#4a3728]/80 dark:text-foreground uppercase tracking-wide flex items-center gap-1.5 pl-1">
+                                            <Mail className="w-3.5 h-3.5" /> Nhập Email của bạn
+                                        </label>
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="admin@vcloset.vn"
+                                            className="w-full h-12 bg-card rounded-xl border border-[#dccbb5]/80 dark:border-border px-4 text-sm text-[#4a3728] dark:text-foreground placeholder-[#a68d73]/60 dark:placeholder-muted-foreground focus:border-[#4a3728] dark:border-primary focus:ring-1 focus:ring-[#4a3728] outline-none transition-all"
+                                            value={reactivationEmail}
+                                            onChange={(e) => setReactivationEmail(e.target.value)}
+                                        />
+                                    </div>
+
+                                    {reactivationError && (
+                                        <div className="p-3.5 dark:bg-red-500/10 border border-rose-100 rounded-xl flex items-start gap-2.5 animate-fadeIn">
+                                            <ShieldAlert className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                                            <span className="text-xs dark:text-red-400 font-medium leading-relaxed whitespace-pre-line text-left">{reactivationError}</span>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        type="submit"
+                                        disabled={reactivationLoading}
+                                        className="w-full h-12 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer border-none transition-all disabled:bg-[#4a3728]/50 dark:bg-primary"
+                                    >
+                                        {reactivationLoading ? (
+                                            <span className="flex items-center gap-2 text-sm font-semibold">
+                                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Đang gửi yêu cầu...
+                                            </span>
+                                        ) : (
+                                            <>
+                                                <span>Gửi yêu cầu</span>
+                                                <ArrowRight className="w-4 h-4" />
+                                            </>
+                                        )}
+                                    </button>
+                                </>
+                            )}
+                        </form>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 }
