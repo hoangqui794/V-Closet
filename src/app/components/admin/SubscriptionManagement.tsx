@@ -254,7 +254,7 @@ export function SubscriptionManagement() {
             setGiftPlanId("");
             setGiftNote("");
             setGiftSearchTerm("");
-            if (activeTab === "billing") loadSubscriptions();
+            if (activeTab === "billing") loadPremiumSubscriptions();
         } catch (err: any) {
             addToast("error", err.message || "Đã xảy ra lỗi khi tặng gói.");
         } finally {

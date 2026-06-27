@@ -391,8 +391,8 @@ function UserDetailModal({
 // ─── Ban User Modal ───────────────────────────────────────────────────────────
 
 function BanUserModal({
-    user, open, onClose, onSuccess
-}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: () => void }) {
+    user, open, onClose, onSuccess, onError
+}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: () => void; onError?: (msg: string) => void }) {
     const [banType, setBanType] = useState("chat");
     const [duration, setDuration] = useState("7d");
     const [customDate, setCustomDate] = useState("");
@@ -451,7 +451,9 @@ function BanUserModal({
             onSuccess();
             onClose();
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : "Khóa người dùng thất bại");
+            const msg = e instanceof Error ? e.message : "Khóa người dùng thất bại";
+            setError(msg);
+            if (onError) onError(msg);
         } finally { setLoading(false); }
     };
 
@@ -528,8 +530,8 @@ function BanUserModal({
 // ─── Confirm Deactivate Modal ─────────────────────────────────────────────────
 
 function ConfirmDeactivateModal({
-    user, open, onClose, onSuccess
-}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: () => void }) {
+    user, open, onClose, onSuccess, onError
+}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: () => void; onError?: (msg: string) => void }) {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -548,7 +550,9 @@ function ConfirmDeactivateModal({
             onSuccess();
             onClose();
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : "Vô hiệu hóa tài khoản thất bại");
+            const msg = e instanceof Error ? e.message : "Vô hiệu hóa tài khoản thất bại";
+            setError(msg);
+            if (onError) onError(msg);
         } finally { setLoading(false); }
     };
 
@@ -800,8 +804,8 @@ function GrantPermissionModal({
 // ─── Update Role Modal ────────────────────────────────────────────────────────
 
 function UpdateRoleModal({
-    user, open, onClose, onSuccess
-}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: (newRole: string) => void }) {
+    user, open, onClose, onSuccess, onError
+}: { user: AdminUser | null; open: boolean; onClose: () => void; onSuccess: (newRole: string) => void; onError?: (msg: string) => void }) {
     const [role, setRole] = useState("Customer");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -824,7 +828,9 @@ function UpdateRoleModal({
             onSuccess(role);
             onClose();
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : "Cập nhật vai trò thất bại");
+            const msg = e instanceof Error ? e.message : "Cập nhật vai trò thất bại";
+            setError(msg);
+            if (onError) onError(msg);
         } finally { setLoading(false); }
     };
 
@@ -886,8 +892,7 @@ function EditAdminInternalModal({
     const [form, setForm] = useState({
         department: "",
         jobTitle: "",
-        employeeCode: "",
-        notes: ""
+        employeeCode: ""
     });
 
     useEffect(() => {
@@ -895,8 +900,7 @@ function EditAdminInternalModal({
             setForm({
                 department: user.profile?.department || "",
                 jobTitle: user.profile?.jobTitle || "",
-                employeeCode: user.profile?.employeeCode || "",
-                notes: user.profile?.notes || ""
+                employeeCode: user.profile?.employeeCode || ""
             });
             setError("");
         }
@@ -1250,6 +1254,7 @@ export function UserManagement() {
                         ) : (
                             users.map(user => {
                                 const status = getStatusInfo(user);
+                                const isSelf = !!(adminUser && (user.userId === adminUser.userId || user.userId === adminUser.id || user.email === adminUser.email));
                                 return (
                                     <TableRow key={user.userId} className="hover:bg-muted/30 transition-colors">
                                         <TableCell>
@@ -1261,7 +1266,14 @@ export function UserManagement() {
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="font-medium text-sm leading-tight">{user.displayName}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-medium text-sm leading-tight">{user.displayName}</p>
+                                                        {isSelf && (
+                                                            <Badge variant="outline" className="text-[10px] h-4 px-1.5 bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">
+                                                                (Bạn)
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                     <p className="text-xs text-muted-foreground font-mono">{user.userId.slice(0, 8)}…</p>
                                                 </div>
                                             </div>
@@ -1306,8 +1318,9 @@ export function UserManagement() {
                                                 {/* Deactivate */}
                                                 {user.isActive && (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-amber-500"
-                                                        title="Vô hiệu hóa tài khoản"
+                                                        className={`h-8 w-8 text-muted-foreground ${isSelf ? "opacity-50 cursor-not-allowed" : "hover: dark:text-amber-500"}`}
+                                                        title={isSelf ? "Bạn không thể tự vô hiệu hoá tài khoản của chính mình" : "Vô hiệu hóa tài khoản"}
+                                                        disabled={isSelf}
                                                         onClick={() => setDeactivateUser(user)}>
                                                         <UserX className="h-4 w-4" />
                                                     </Button>
@@ -1316,8 +1329,9 @@ export function UserManagement() {
                                                 {/* Update Role (For active users) */}
                                                 {user.isActive && (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-amber-500"
-                                                        title="Cập nhật vai trò"
+                                                        className={`h-8 w-8 text-muted-foreground ${isSelf ? "opacity-50 cursor-not-allowed" : "hover: dark:text-amber-500"}`}
+                                                        title={isSelf ? "Bạn không thể tự thay đổi chức vụ của chính mình" : "Cập nhật vai trò"}
+                                                        disabled={isSelf}
                                                         onClick={() => setRoleUser(user)}>
                                                         <UserCog className="h-4 w-4" />
                                                     </Button>
@@ -1343,8 +1357,9 @@ export function UserManagement() {
                                                     </Button>
                                                 ) : (
                                                     <Button variant="ghost" size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover: dark:text-red-400"
-                                                        title="Khóa quyền"
+                                                        className={`h-8 w-8 text-muted-foreground ${isSelf ? "opacity-50 cursor-not-allowed" : "hover: dark:text-red-400"}`}
+                                                        title={isSelf ? "Bạn không thể tự khoá tài khoản của chính mình" : "Khóa quyền"}
+                                                        disabled={isSelf}
                                                         onClick={() => setBanUser(user)}>
                                                         <Ban className="h-4 w-4" />
                                                     </Button>
@@ -1423,6 +1438,7 @@ export function UserManagement() {
                     addToast("success", `Đã khóa ${banUser?.displayName}`);
                     setUsers(prev => prev.map(u => u.userId === banUser?.userId ? { ...u, isBanned: true } : u));
                 }}
+                onError={(msg) => addToast("error", msg)}
             />
             <ConfirmDeactivateModal
                 user={deactivateUser}
@@ -1432,6 +1448,7 @@ export function UserManagement() {
                     addToast("success", `Đã vô hiệu hóa ${deactivateUser?.displayName}`);
                     setUsers(prev => prev.map(u => u.userId === deactivateUser?.userId ? { ...u, isActive: false } : u));
                 }}
+                onError={(msg) => addToast("error", msg)}
             />
             <GrantPermissionModal
                 user={permissionUser}
@@ -1447,6 +1464,7 @@ export function UserManagement() {
                     addToast("success", `Cập nhật vai trò cho ${roleUser?.displayName} thành công!`);
                     setUsers(prev => prev.map(u => u.userId === roleUser?.userId ? { ...u, role: newRole } : u));
                 }}
+                onError={(msg) => addToast("error", msg)}
             />
         </div>
     );
