@@ -139,41 +139,30 @@ export function AdminLoginPage() {
 
 
     return (
-        <div className="min-h-screen w-full lg:grid lg:grid-cols-2 bg-[#fcf8f2] dark:bg-background relative overflow-hidden font-poppins">
-            {/* Left side: Beautiful Animated Showcase (Hidden on Mobile) */}
-            <div className="hidden lg:flex flex-col items-center justify-center relative bg-[#dccbb5]/10 dark:bg-[#1a120f] overflow-hidden">
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#fcf8f2] dark:bg-background relative overflow-hidden font-poppins">
+            {/* Fullscreen Animated Showcase Background */}
+            <div className="absolute inset-0 z-0">
                 <img 
                     src="https://media.giphy.com/media/xT0xezQGU5xCDJuCPe/giphy.gif" 
                     alt="V-Closet Showcase"
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#fcf8f2] via-transparent to-transparent dark:from-background" />
-                <div className="relative z-10 text-center space-y-6 px-12 pt-40">
-                    <div className="w-24 h-24 bg-white/40 dark:bg-black/30 backdrop-blur-lg rounded-[2rem] mx-auto flex items-center justify-center border border-white/50 dark:border-white/10 shadow-2xl">
-                        <img src="/favicon.png" alt="V-Closet Logo" className="w-14 h-14" />
-                    </div>
-                    <div className="space-y-2">
-                        <h1 className="text-4xl lg:text-5xl font-extrabold text-[#4a3728] dark:text-white tracking-tight">Khám phá<br/>V-Closet</h1>
-                        <p className="text-[#4a3728]/80 dark:text-white/70 font-medium text-lg max-w-md mx-auto leading-relaxed">
-                            Nền tảng quản lý tủ đồ và phối đồ thông minh hàng đầu.
-                        </p>
-                    </div>
-                </div>
+                <div className="absolute inset-0 bg-black/20 dark:bg-black/40" />
             </div>
 
-            {/* Right side: Login Form */}
-            <div className="w-full h-full flex items-center justify-center relative px-4 lg:px-12">
+            {/* Login Form Container */}
+            <div className="w-full max-w-[480px] relative z-10 px-4">
                 {/* Background decorative blurry circles with animations */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4a3728]/10 dark:bg-amber-500/15 blur-[100px] animate-blob mix-blend-multiply dark:mix-blend-screen" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[#dccbb5]/30 dark:bg-orange-500/15 blur-[120px] animate-blob animation-delay-2000 mix-blend-multiply dark:mix-blend-screen" />
-            <div className="absolute top-[40%] left-[20%] w-[400px] h-[400px] rounded-full bg-rose-500/10 dark:bg-rose-500/10 blur-[100px] animate-blob animation-delay-4000 mix-blend-multiply dark:mix-blend-screen" />
+                <div className="absolute top-[-20%] left-[-20%] w-[300px] h-[300px] rounded-full bg-[#4a3728]/20 dark:bg-amber-500/20 blur-[80px] animate-blob mix-blend-multiply dark:mix-blend-screen -z-10" />
+                <div className="absolute bottom-[-20%] right-[-20%] w-[400px] h-[400px] rounded-full bg-[#dccbb5]/40 dark:bg-orange-500/20 blur-[100px] animate-blob animation-delay-2000 mix-blend-multiply dark:mix-blend-screen -z-10" />
+                <div className="absolute top-[30%] left-[10%] w-[250px] h-[250px] rounded-full bg-rose-500/20 dark:bg-rose-500/20 blur-[80px] animate-blob animation-delay-4000 mix-blend-multiply dark:mix-blend-screen -z-10" />
 
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full max-w-[480px] bg-card/70 backdrop-blur-md border border-white dark:border-white/15 rounded-3xl shadow-xl overflow-hidden relative z-10 p-8 md:p-10"
-            >
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    className="w-full bg-white/80 dark:bg-card/80 backdrop-blur-xl border border-white/50 dark:border-white/15 rounded-3xl shadow-2xl overflow-hidden p-8 md:p-10"
+                >
                 {/* Logo & Header */}
                 <div className="flex flex-col items-center justify-center text-center pb-8 border-b border-[#4a3728]/10 dark:border-primary/10 mb-8">
                     <motion.div
@@ -290,7 +279,8 @@ export function AdminLoginPage() {
                         )}
                     </motion.button>
                 </form>
-            </motion.div>
+                </motion.div>
+            </div>
 
             {/* Forgot Password Modal */}
             {showForgotModal && (
@@ -475,7 +465,7 @@ export function AdminLoginPage() {
                     </motion.div>
                 </div>
             )}
-            </div>
+
             {/* Reactivation Modal */}
             {showReactivationModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#4a3728]/45 dark:bg-primary backdrop-blur-sm">
