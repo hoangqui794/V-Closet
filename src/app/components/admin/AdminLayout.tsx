@@ -16,7 +16,8 @@ import {
     Megaphone,
     Shirt,
     Palette,
-    Ticket
+    Ticket,
+    DollarSign
 } from "lucide-react";
 import {
     Dialog, DialogContent, DialogHeader,
@@ -89,6 +90,11 @@ const menuItems = [
         title: "Gói đăng ký",
         url: "/admin/subscriptions",
         icon: CreditCard,
+    },
+    {
+        title: "Tài chính",
+        url: "/admin/finance",
+        icon: DollarSign,
     },
     {
         title: "Mã giảm giá",

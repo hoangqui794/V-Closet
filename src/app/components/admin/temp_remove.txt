@@ -1,0 +1,350 @@
+﻿            {/* TAB: Äá»I SOÃT GIAO Dá»ŠCH MOMO/PAYOS */}
+            {activeTab === "transactions" && (
+                <div className="space-y-6">
+                    <Card className="shadow-sm border-muted">
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
+                            <div>
+                                <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
+                                    <CreditCard className="w-5 h-5" /> Nháº­t kÃ½ giao dá»‹ch trá»±c tuyáº¿n
+                                </CardTitle>
+                                <CardDescription>
+                                    Xem vÃ  Ä‘á»‘i soÃ¡t toÃ n bá»™ dÃ²ng tiá»n thanh toÃ¡n trá»±c tuyáº¿n qua cá»•ng Momo hoáº·c PayOS.
+                                </CardDescription>
+                            </div>
+                            
+                            {/* Filter bar */}
+                            <div className="flex flex-wrap items-center gap-3">
+                                {/* Search by name/email */}
+                                <div className="relative">
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                                    <Input
+                                        type="text"
+                                        placeholder="TÃ¬m theo tÃªn hoáº·c email..."
+                                        value={txSearchTerm}
+                                        onChange={e => { setTxSearchTerm(e.target.value); setTxPage(1); }}
+                                        className="h-9 pl-8 w-52 text-xs bg-background"
+                                    />
+                                </div>
+
+                                {/* Filter by Gateway */}
+                                <select
+                                    value={txGatewayFilter}
+                                    onChange={e => { setTxGatewayFilter(e.target.value); setTxPage(1); }}
+                                    className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none"
+                                >
+                                    <option value="">Táº¥t cáº£ Cá»•ng</option>
+                                    <option value="Momo">VÃ­ Momo</option>
+                                    <option value="PayOS">Cá»•ng PayOS</option>
+                                </select>
+
+                                {/* Filter by Status */}
+                                <select
+                                    value={txStatusFilter}
+                                    onChange={e => { setTxStatusFilter(e.target.value); setTxPage(1); }}
+                                    className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none"
+                                >
+                                    <option value="">Táº¥t cáº£ TT</option>
+                                    <option value="Paid">ÄÃ£ thanh toÃ¡n</option>
+                                    <option value="Pending">Chá» thanh toÃ¡n</option>
+                                    <option value="Failed">Tháº¥t báº¡i</option>
+                                </select>
+                            </div>
+                        </CardHeader>
+                        
+                        <CardContent className="pt-6">
+                            {loadingTx ? (
+                                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
+                                    <span className="text-sm">Äang táº£i lá»‹ch sá»­ giao dá»‹ch trá»±c tuyáº¿n...</span>
+                                </div>
+                            ) : transactions.length === 0 ? (
+                                <div className="text-center py-16 text-muted-foreground space-y-2">
+                                    <HelpCircle className="w-12 h-12 mx-auto text-muted-foreground/30" />
+                                    <p className="text-sm font-semibold">ChÆ°a phÃ¡t sinh giao dá»‹ch nÃ o</p>
+                                    <p className="text-xs">
+                                        KhÃ´ng tÃ¬m tháº¥y lá»‹ch sá»­ thanh toÃ¡n qua cá»•ng tá»± Ä‘á»™ng MOMO/PAYOS.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="overflow-x-auto rounded-xl border border-muted">
+                                        <Table>
+                                            <TableHeader className="bg-muted/50">
+                                                <TableRow>
+                                                    <TableHead className="w-12 text-center">STT</TableHead>
+                                                    <TableHead>MÃ£ giao dá»‹ch cá»•ng</TableHead>
+                                                    <TableHead>KhÃ¡ch hÃ ng</TableHead>
+                                                    <TableHead>GÃ³i Premium</TableHead>
+                                                    <TableHead>Sá»‘ tiá»n</TableHead>
+                                                    <TableHead>Cá»•ng káº¿t ná»‘i</TableHead>
+                                                    <TableHead>Tráº¡ng thÃ¡i</TableHead>
+                                                    <TableHead>Thá»i gian</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {transactions.map((tx, idx) => {
+                                                    const formattedDate = new Date(tx.createdAt).toLocaleString("vi-VN", {
+                                                        year: "numeric",
+                                                        month: "2-digit",
+                                                        day: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit"
+                                                    });
+
+                                                    const getTxStatusBadgeColor = (status: string) => {
+                                                        switch (status.toLowerCase()) {
+                                                            case "paid":
+                                                            case "success":
+                                                                return " dark:bg-green-500/10  dark:text-green-400 border-none";
+                                                            case "pending":
+                                                                return " dark:bg-amber-500/10  dark:text-amber-400 border-none animate-pulse";
+                                                            case "failed":
+                                                                return " dark:bg-red-500/10  dark:text-red-400 border-none";
+                                                            default:
+                                                                return " dark:bg-muted  dark:text-foreground border-none";
+                                                        }
+                                                    };
+
+                                                    return (
+                                                        <TableRow key={tx.id} className="hover:bg-muted/30 transition-colors">
+                                                            <TableCell className="text-center font-mono text-xs text-muted-foreground">
+                                                                {(txPage - 1) * txPageSize + idx + 1}
+                                                            </TableCell>
+                                                            <TableCell className="font-mono text-xs font-semibold text-[#4a3728] dark:text-foreground">
+                                                                {tx.gatewayTransactionId && (tx.gatewayTransactionId.startsWith("http://") || tx.gatewayTransactionId.startsWith("https://")) ? (
+                                                                    <button
+                                                                        onClick={() => setZoomImage(tx.gatewayTransactionId)}
+                                                                        className="flex items-center gap-1.5  dark:text-amber-400 hover:text-amber-950 hover:underline bg-[#4a3728]/5 dark:bg-primary/5 hover:bg-[#4a3728]/10 dark:bg-primary/10 px-2.5 py-1 rounded-lg transition-colors border border-amber-800/10 cursor-pointer font-semibold text-[11px]"
+                                                                        title="Nháº¥p Ä‘á»ƒ xem áº£nh minh chá»©ng chuyá»ƒn khoáº£n"
+                                                                    >
+                                                                        <Eye className="w-3.5 h-3.5 shrink-0" />
+                                                                        Xem minh chá»©ng chuyá»ƒn khoáº£n
+                                                                    </button>
+                                                                ) : (
+                                                                    tx.gatewayTransactionId || "N/A"
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="text-xs font-semibold  dark:text-foreground">{tx.userDisplayName}</div>
+                                                                <div className="text-[10px] text-muted-foreground font-mono">ID User: <span title={tx.userId}>{tx.userId ? (tx.userId.substring(0, 8) + '...') : ''}</span></div>
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-medium  dark:text-muted-foreground">
+                                                                {tx.subscriptionPlanName}
+                                                            </TableCell>
+                                                            <TableCell className="font-mono font-bold text-xs">
+                                                                {tx.amount.toLocaleString("vi-VN")} {tx.currency}
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-semibold">
+                                                                <Badge variant="outline" className="border-muted bg-[#4a3728]/5 dark:bg-primary/5 text-[#4a3728] dark:text-foreground text-[10px]">
+                                                                    {tx.paymentGateway}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge className={`font-semibold text-[10px] px-2 py-0.5 rounded ${getTxStatusBadgeColor(tx.status)}`}>
+                                                                    {tx.status}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="text-xs font-mono text-muted-foreground">
+                                                                {formattedDate}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                    
+                                    {/* Pagination */}
+                                    <div className="flex items-center justify-between pt-2">
+                                        <p className="text-xs text-muted-foreground font-semibold">
+                                            Tá»•ng giao dá»‹ch: {txTotalCount} (Trang {txPage})
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setTxPage(p => Math.max(p - 1, 1))}
+                                                disabled={txPage === 1}
+                                                className="h-8 rounded-lg"
+                                            >
+                                                TrÆ°á»›c
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setTxPage(p => p + 1)}
+                                                disabled={transactions.length < txPageSize}
+                                                className="h-8 rounded-lg"
+                                            >
+                                                Sau
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {/* TAB: THá»NG KÃŠ DOANH THU */}
+            {activeTab === "revenue" && (
+                <div className="space-y-6">
+                    {/* Bá»™ lá»c */}
+                    <Card className="shadow-sm border-muted">
+                        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
+                            <div>
+                                <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
+                                    <BarChart2 className="w-5 h-5" /> Thá»‘ng kÃª Doanh thu
+                                </CardTitle>
+                                <CardDescription>Tá»•ng há»£p doanh thu tá»« cÃ¡c giao dá»‹ch thanh toÃ¡n trá»±c tuyáº¿n thÃ nh cÃ´ng.</CardDescription>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <span>Tá»«</span>
+                                    <input type="date" value={revenueFrom} onChange={e => setRevenueFrom(e.target.value)}
+                                        className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none" />
+                                    <span>Ä‘áº¿n</span>
+                                    <input type="date" value={revenueTo} onChange={e => setRevenueTo(e.target.value)}
+                                        className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none" />
+                                </div>
+                                <select value={revenueGateway} onChange={e => setRevenueGateway(e.target.value)}
+                                    className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none">
+                                    <option value="">Táº¥t cáº£ cá»•ng</option>
+                                    <option value="Momo">Momo</option>
+                                    <option value="PayOS">PayOS</option>
+                                </select>
+                                <Button size="sm" className="h-9 bg-[#4a3728] dark:bg-primary hover:bg-[#3d2d21] dark:hover:bg-primary/90 text-white dark:text-primary-foreground gap-1.5" onClick={fetchRevenue} disabled={loadingRevenue}>
+                                    {loadingRevenue ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                                    LÃ m má»›i
+                                </Button>
+                            </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-6">
+                            {loadingRevenue ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
+                                    <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
+                                    <span className="text-sm">Äang táº£i dá»¯ liá»‡u doanh thu...</span>
+                                </div>
+                            ) : !revenue ? (
+                                <div className="text-center py-16 text-muted-foreground space-y-2">
+                                    <BarChart2 className="w-12 h-12 mx-auto text-muted-foreground/30" />
+                                    <p className="text-sm font-semibold">ChÆ°a cÃ³ dá»¯ liá»‡u</p>
+                                    <p className="text-xs">Nháº¥n "LÃ m má»›i" Ä‘á»ƒ táº£i thá»‘ng kÃª doanh thu.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {/* Stat Cards */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-emerald-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Tá»•ng doanh thu</span>
+                                            <span className="text-2xl font-bold  dark:text-green-400">{revenue.totalRevenue.toLocaleString("vi-VN")}Ä‘</span>
+                                            <span className="text-[11px] text-muted-foreground">ÄÆ¡n vá»‹: {revenue.currency || "VND"}</span>
+                                        </div>
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-blue-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Tá»•ng giao dá»‹ch</span>
+                                            <span className="text-2xl font-bold  dark:text-blue-400">{revenue.totalTransactions}</span>
+                                            <span className="text-[11px] text-muted-foreground">Táº¥t cáº£ tráº¡ng thÃ¡i</span>
+                                        </div>
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-green-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">ÄÃ£ thanh toÃ¡n</span>
+                                            <span className="text-2xl font-bold  dark:text-green-400">{revenue.paidCount}</span>
+                                            <span className="text-[11px] text-muted-foreground">Giao dá»‹ch Paid/Success</span>
+                                        </div>
+                                        <div className="rounded-xl border border-muted bg-gradient-to-br from-amber-50 to-white p-4 flex flex-col gap-1 shadow-sm">
+                                            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Chá» / Tháº¥t báº¡i</span>
+                                            <span className="text-2xl font-bold  dark:text-amber-400">{revenue.pendingCount + revenue.failedCount}</span>
+                                            <span className="text-[11px] text-muted-foreground">{revenue.pendingCount} chá» Â· {revenue.failedCount} tháº¥t báº¡i</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Breakdown by Gateway */}
+                                    {revenue.byGateway && revenue.byGateway.length > 0 && (
+                                        <div className="rounded-xl border border-muted p-5 shadow-sm">
+                                            <h3 className="text-sm font-semibold text-[#4a3728] dark:text-foreground mb-4 flex items-center gap-2">
+                                                <CreditCard className="w-4 h-4" /> PhÃ¢n tÃ­ch theo cá»•ng thanh toÃ¡n
+                                            </h3>
+                                            <div className="grid sm:grid-cols-2 gap-4">
+                                                {revenue.byGateway.map(g => {
+                                                    const pct = revenue.totalRevenue > 0 ? Math.round((g.totalAmount / revenue.totalRevenue) * 100) : 0;
+                                                    return (
+                                                        <div key={g.gateway} className="flex flex-col gap-2 p-4 rounded-lg bg-muted/30 border border-muted">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-sm font-bold text-[#4a3728] dark:text-foreground">{g.gateway}</span>
+                                                                <Badge variant="outline" className="text-[11px] border-[#4a3728]/20 dark:border-primary/20 bg-[#4a3728]/5 dark:bg-primary/5 text-[#4a3728] dark:text-foreground">{g.count} giao dá»‹ch</Badge>
+                                                            </div>
+                                                            <span className="text-xl font-bold  dark:text-foreground">{g.totalAmount.toLocaleString("vi-VN")}Ä‘</span>
+                                                            <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                                                                <div className="h-full rounded-full bg-gradient-to-r from-[#4a3728] to-amber-600 transition-all duration-500" style={{ width: `${pct}%` }} />
+                                                            </div>
+                                                            <span className="text-xs text-muted-foreground">{pct}% tá»•ng doanh thu</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Biá»ƒu Ä‘á»“ doanh thu theo ngÃ y (SVG bar chart) */}
+                                    {revenue.dailyRevenue && revenue.dailyRevenue.length > 0 && (() => {
+                                        const data = revenue.dailyRevenue.slice(-30);
+                                        const maxAmt = Math.max(...data.map(d => d.totalAmount), 1);
+                                        const W = 100 / data.length;
+                                        return (
+                                            <div className="rounded-xl border border-muted p-5 shadow-sm">
+                                                <h3 className="text-sm font-semibold text-[#4a3728] dark:text-foreground mb-4 flex items-center gap-2">
+                                                    <TrendingUp className="w-4 h-4" /> Doanh thu theo ngÃ y (30 ngÃ y gáº§n nháº¥t)
+                                                </h3>
+                                                <div className="relative w-full overflow-x-auto">
+                                                    <svg viewBox={`0 0 ${Math.max(data.length * 24, 300)} 140`} className="w-full min-w-[300px]" preserveAspectRatio="none">
+                                                        {/* Grid lines */}
+                                                        {[0, 25, 50, 75, 100].map(pct => (
+                                                            <line key={pct}
+                                                                x1="0" y1={120 - pct * 1.1}
+                                                                x2={Math.max(data.length * 24, 300)} y2={120 - pct * 1.1}
+                                                                stroke="#e5e7eb" strokeWidth="0.5" strokeDasharray="3,3" />
+                                                        ))}
+                                                        {/* Bars */}
+                                                        {data.map((d, i) => {
+                                                            const bw = Math.max(data.length * 24, 300) / data.length;
+                                                            const h = (d.totalAmount / maxAmt) * 110;
+                                                            const x = i * bw + bw * 0.15;
+                                                            const bwFill = bw * 0.7;
+                                                            return (
+                                                                <g key={d.date}>
+                                                                    <rect x={x} y={120 - h} width={bwFill} height={h}
+                                                                        rx="3" fill="url(#barGrad)" opacity="0.9" />
+                                                                    {data.length <= 15 && (
+                                                                        <text x={x + bwFill / 2} y="135" textAnchor="middle" fontSize="7" fill="#9ca3af">
+                                                                            {d.date.slice(5)}
+                                                                        </text>
+                                                                    )}
+                                                                </g>
+                                                            );
+                                                        })}
+                                                        <defs>
+                                                            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="0%" stopColor="#92400e" />
+                                                                <stop offset="100%" stopColor="#d97706" />
+                                                            </linearGradient>
+                                                        </defs>
+                                                    </svg>
+                                                </div>
+                                                <div className="mt-2 flex flex-wrap gap-3">
+                                                    {data.slice(-7).map(d => (
+                                                        <div key={d.date} className="text-[10px] text-muted-foreground">
+                                                            <span className="font-semibold  dark:text-muted-foreground">{d.date.slice(5)}</span>: {d.totalAmount.toLocaleString("vi-VN")}Ä‘
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+

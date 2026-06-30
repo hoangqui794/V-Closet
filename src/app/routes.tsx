@@ -4,6 +4,7 @@ import { Dashboard } from "./components/admin/Dashboard";
 import { UserManagement } from "./components/admin/UserManagement";
 import { AffiliateManagement } from "./components/admin/AffiliateManagement";
 import { SubscriptionManagement } from "./components/admin/SubscriptionManagement";
+import { FinanceManagement } from "./components/admin/FinanceManagement";
 import { CampaignManagement } from "./components/admin/CampaignManagement";
 import { AIConfig } from "./components/admin/AIConfig";
 import { ReportManagement } from "./components/admin/ReportManagement";
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
       { path: "notifications", Component: NotificationManagement },
       { path: "affiliate", Component: AffiliateManagement },
       { path: "subscriptions", Component: SubscriptionManagement },
+      { path: "finance", Component: FinanceManagement },
       { path: "coupons", Component: CouponManagement },
       { path: "ai-config", Component: AIConfig },
     ],

@@ -493,7 +493,7 @@ function BanUserModal({
                             <SelectContent>
                                 <SelectItem value="chat">Khóa chat (Không thể chat)</SelectItem>
                                 <SelectItem value="post">Khóa đăng bài (Không thể đăng bài)</SelectItem>
-                                <SelectItem value="all">Khóa toàn bộ (Khóa mọi quyền)</SelectItem>
+                                <SelectItem value="account">Khóa toàn bộ (Khóa mọi quyền)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
