@@ -134,7 +134,7 @@ function ListItem({
             </div>
           ) : null
         )}
-        <span className="font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728] text-left">
+        <span className="font-manrope font-[500] text-[15px] text-[#4a3728] text-left">
           {label}
         </span>
       </div>
@@ -268,7 +268,7 @@ export function OnboardingPage() {
           {step > 0 && (
             <button
               onClick={handleSkip}
-              className="font-['Manrope',sans-serif] font-[500] text-[14px] text-[rgba(74,55,40,0.45)] bg-transparent border-none cursor-pointer p-[8px] -mr-[8px]"
+              className="font-manrope font-[500] text-[14px] text-[rgba(74,55,40,0.45)] bg-transparent border-none cursor-pointer p-[8px] -mr-[8px]"
             >
               {t("skip")}
             </button>
@@ -304,7 +304,7 @@ export function OnboardingPage() {
             {/* ── Step 0: Welcome ── */}
             {step === 0 && (
               <div className="flex flex-col items-center justify-center min-h-[65vh] pt-[40px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[26px] text-[#4a3728] text-center leading-[34px] tracking-[-0.5px] mb-[40px] whitespace-pre-line">
+                <div className="font-manrope font-[800] text-[26px] text-[#4a3728] text-center leading-[34px] tracking-[-0.5px] mb-[40px] whitespace-pre-line">
                   {t("welcomeOnboarding")}
                 </div>
                 <motion.div
@@ -330,7 +330,7 @@ export function OnboardingPage() {
             {/* ── Step 1: Nickname ── */}
             {step === 1 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[24px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[24px]">
                   {t("enterNickname")}
                 </div>
                 <input
@@ -339,9 +339,9 @@ export function OnboardingPage() {
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder="vcloset_user"
                   maxLength={15}
-                  className="w-full bg-white border border-[rgba(74,55,40,0.15)] rounded-[14px] px-[16px] py-[16px] font-['Manrope',sans-serif] font-[500] text-[16px] text-[#4a3728] outline-none placeholder-[rgba(74,55,40,0.25)] focus:border-[#4a3728] transition-colors"
+                  className="w-full bg-white border border-[rgba(74,55,40,0.15)] rounded-[14px] px-[16px] py-[16px] font-manrope font-[500] text-[16px] text-[#4a3728] outline-none placeholder-[rgba(74,55,40,0.25)] focus:border-[#4a3728] transition-colors"
                 />
-                <div className="font-['Manrope',sans-serif] font-[400] text-[12px] text-[rgba(74,55,40,0.4)] mt-[10px] leading-[18px]">
+                <div className="font-manrope font-[400] text-[12px] text-[rgba(74,55,40,0.4)] mt-[10px] leading-[18px]">
                   {t("nicknameHint")}
                 </div>
 
@@ -350,7 +350,7 @@ export function OnboardingPage() {
                   onClick={() => setShowReferral(!showReferral)}
                   className="flex items-center justify-between w-full mt-[32px] py-[14px] border-b border-[rgba(74,55,40,0.1)] bg-transparent cursor-pointer border-t-0 border-l-0 border-r-0 px-0"
                 >
-                  <span className="font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728]">
+                  <span className="font-manrope font-[500] text-[15px] text-[#4a3728]">
                     {t("referralCode")}
                   </span>
                   <motion.svg
@@ -378,7 +378,7 @@ export function OnboardingPage() {
                         value={referralCode}
                         onChange={(e) => setReferralCode(e.target.value)}
                         placeholder={t("enterReferral")}
-                        className="w-full bg-white border border-[rgba(74,55,40,0.15)] rounded-[14px] px-[16px] py-[14px] font-['Manrope',sans-serif] font-[500] text-[14px] text-[#4a3728] outline-none placeholder-[rgba(74,55,40,0.25)] mt-[12px] focus:border-[#4a3728] transition-colors"
+                        className="w-full bg-white border border-[rgba(74,55,40,0.15)] rounded-[14px] px-[16px] py-[14px] font-manrope font-[500] text-[14px] text-[#4a3728] outline-none placeholder-[rgba(74,55,40,0.25)] mt-[12px] focus:border-[#4a3728] transition-colors"
                       />
                     </motion.div>
                   )}
@@ -389,7 +389,7 @@ export function OnboardingPage() {
             {/* ── Step 2: Gender ── */}
             {step === 2 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
                   {t("genderQuestion")}
                 </div>
                 <div className="flex flex-col">
@@ -408,7 +408,7 @@ export function OnboardingPage() {
             {/* ── Step 3: Location ── */}
             {step === 3 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[20px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[20px]">
                   {t("locationQuestion")}
                 </div>
                 <button
@@ -433,7 +433,7 @@ export function OnboardingPage() {
                         />
                       </div>
                     )}
-                    <span className="font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728]">
+                    <span className="font-manrope font-[500] text-[15px] text-[#4a3728]">
                       {t(selectedCountryData?.labelKey || "")}
                     </span>
                   </div>
@@ -477,7 +477,7 @@ export function OnboardingPage() {
                               <img src={c.flag} className="w-full h-full object-cover" alt={t(c.labelKey)} />
                             </div>
                           )}
-                          <span className="font-['Manrope',sans-serif] font-[500] text-[14px] text-[#4a3728]">
+                          <span className="font-manrope font-[500] text-[14px] text-[#4a3728]">
                             {t(c.labelKey)}
                           </span>
                           {country === c.id && (
@@ -497,7 +497,7 @@ export function OnboardingPage() {
             {/* ── Step 4: Lifestyle ── */}
             {step === 4 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
                   {t("lifestyleQuestion")}
                 </div>
                 <div className="flex flex-col">
@@ -516,7 +516,7 @@ export function OnboardingPage() {
             {/* ── Step 5: Hair Color ── */}
             {step === 5 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
                   {t("hairColorQuestion")}
                 </div>
                 <div className="flex flex-col">
@@ -529,7 +529,7 @@ export function OnboardingPage() {
                       colorSwatch={h.color}
                       icon={
                         h.id === "other" ? (
-                          <span className="font-['Manrope',sans-serif] font-[700] text-[14px] text-[rgba(74,55,40,0.4)]">···</span>
+                          <span className="font-manrope font-[700] text-[14px] text-[rgba(74,55,40,0.4)]">···</span>
                         ) : h.id === "unsure" ? (
                           <span className="text-[16px]">🤔</span>
                         ) : undefined
@@ -543,7 +543,7 @@ export function OnboardingPage() {
             {/* ── Step 6: Eye Color ── */}
             {step === 6 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[12px]">
                   {t("eyeColorQuestion")}
                 </div>
                 <div className="flex flex-col">
@@ -556,7 +556,7 @@ export function OnboardingPage() {
                       colorSwatch={e.color}
                       icon={
                         e.id === "other" ? (
-                          <span className="font-['Manrope',sans-serif] font-[700] text-[14px] text-[rgba(74,55,40,0.4)]">···</span>
+                          <span className="font-manrope font-[700] text-[14px] text-[rgba(74,55,40,0.4)]">···</span>
                         ) : e.id === "unsure" ? (
                           <span className="text-[16px]">🤔</span>
                         ) : undefined
@@ -570,7 +570,7 @@ export function OnboardingPage() {
             {/* ── Step 7: Body Shape ── */}
             {step === 7 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
                   {t("bodyShapeQuestion")}
                 </div>
                 <div className="grid grid-cols-2 gap-[12px]">
@@ -597,7 +597,7 @@ export function OnboardingPage() {
                             <span className="text-[32px]">🤔</span>
                           )}
                         </div>
-                        <span className={`font-['Manrope',sans-serif] font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
+                        <span className={`font-manrope font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
                           }`}>
                           {t(s.labelKey)}
                         </span>
@@ -611,7 +611,7 @@ export function OnboardingPage() {
             {/* ── Step 8: Color Palette ── */}
             {step === 8 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
                   {t("colorPaletteQuestion")}
                 </div>
                 <div className="grid grid-cols-2 gap-[12px]">
@@ -641,7 +641,7 @@ export function OnboardingPage() {
                           )}
                         </div>
                         <div className="px-[10px] py-[10px]">
-                          <span className={`font-['Manrope',sans-serif] font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
+                          <span className={`font-manrope font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
                             }`}>
                             {t(p.labelKey)}
                           </span>
@@ -656,7 +656,7 @@ export function OnboardingPage() {
             {/* ── Step 9: Fashion Style (multi-select) ── */}
             {step === 9 && (
               <div className="pt-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
+                <div className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[30px] tracking-[-0.5px] mb-[16px]">
                   {t("fashionStyleQuestion")}
                 </div>
                 <div className="grid grid-cols-2 gap-[12px]">
@@ -691,7 +691,7 @@ export function OnboardingPage() {
                           />
                         </div>
                         <div className="px-[10px] py-[10px]">
-                          <span className={`font-['Manrope',sans-serif] font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
+                          <span className={`font-manrope font-[600] text-[13px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.6)]"
                             }`}>
                             {t(s.labelKey)}
                           </span>
@@ -716,7 +716,7 @@ export function OnboardingPage() {
             : "bg-[#c4b5a5] cursor-not-allowed"
             }`}
         >
-          <span className="font-['Manrope',sans-serif] font-[700] text-[16px] text-[#fdfaf6] tracking-[0.2px]">
+          <span className="font-manrope font-[700] text-[16px] text-[#fdfaf6] tracking-[0.2px]">
             {getButtonLabel()}
           </span>
         </motion.button>

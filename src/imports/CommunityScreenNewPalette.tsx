@@ -34,7 +34,7 @@ function Heading() {
   return (
     <div className="flex-[1_0_0] min-h-px min-w-px relative" data-name="Heading 2">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center relative w-full">
-        <div className="flex flex-col font-['Manrope:Extra_Bold',sans-serif] h-[23px] justify-center leading-[0] not-italic relative shrink-0 text-[#5d4037] text-[18px] text-center tracking-[-0.45px] w-[93.77px]">
+        <div className="flex flex-col font-manrope h-[23px] justify-center leading-[0] not-italic relative shrink-0 text-[#5d4037] text-[18px] text-center tracking-[-0.45px] w-[93.77px]">
           <p className="leading-[22.5px]">Cộng Đồng</p>
         </div>
       </div>
@@ -91,7 +91,7 @@ function Header() {
 function Background() {
   return (
     <div className="absolute bg-[#d4a373] content-stretch flex items-start left-[24px] px-[8px] py-[4px] rounded-[4px] top-[24px]" data-name="Background">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-white tracking-[1px] uppercase w-[125.63px]">
+      <div className="flex flex-col font-manrope font-bold h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-white tracking-[1px] uppercase w-[125.63px]">
         <p className="leading-[15px]">Tháng 10 Challenge</p>
       </div>
     </div>
@@ -101,7 +101,7 @@ function Background() {
 function Heading1() {
   return (
     <div className="absolute content-stretch flex flex-col items-start left-[24px] right-[55.02px] top-[54.62px]" data-name="Heading 2">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[32px] justify-center leading-[0] relative shrink-0 text-[24px] text-white w-full">
+      <div className="flex flex-col font-manrope font-bold h-[32px] justify-center leading-[0] relative shrink-0 text-[24px] text-white w-full">
         <p className="leading-[32px]">Autumn Elegance</p>
       </div>
     </div>
@@ -111,7 +111,7 @@ function Heading1() {
 function Container5() {
   return (
     <div className="absolute content-stretch flex flex-col items-start left-[24px] right-[-15.98px] top-[90.62px]" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[14px] text-[rgba(255,255,255,0.8)] w-[298px]">
+      <div className="flex flex-col font-manrope font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[14px] text-[rgba(255,255,255,0.8)] w-[298px]">
         <p className="leading-[20px]">Khoe phong cách thu nhẹ nhàng của bạn</p>
       </div>
     </div>
@@ -133,7 +133,7 @@ function Container6() {
 function Button1() {
   return (
     <div className="absolute bg-white content-stretch flex gap-[8px] items-center left-[24px] px-[20px] py-[8px] rounded-[9999px] top-[127px]" data-name="Button">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center tracking-[0.6px] uppercase w-[98.88px]">
+      <div className="flex flex-col font-manrope font-extralight h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center tracking-[0.6px] uppercase w-[98.88px]">
         <p className="leading-[16px]">Tham gia ngay</p>
       </div>
       <Container6 />
@@ -200,7 +200,7 @@ function Container7() {
 function Heading2() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Heading 3">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[18px] w-full">
+      <div className="flex flex-col font-manrope font-bold justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[18px] w-full">
         <p className="leading-[22.5px]">Vòng Xoay May Mắn</p>
       </div>
     </div>
@@ -210,7 +210,7 @@ function Heading2() {
 function Container10() {
   return (
     <div className="content-stretch flex flex-col items-start pb-[12px] relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight justify-center leading-[20px] relative shrink-0 text-[#7f5539] text-[14px] w-full">
+      <div className="flex flex-col font-manrope font-extralight justify-center leading-[20px] relative shrink-0 text-[#7f5539] text-[14px] w-full">
         <p className="mb-0">Quay ngay để nhận voucher</p>
         <p>{`mua sắm & quà tặng!`}</p>
       </div>
@@ -221,7 +221,7 @@ function Container10() {
 function Button2() {
   return (
     <div className="bg-[#3b2d22] content-stretch flex items-center justify-center py-[10px] relative rounded-[12px] shrink-0 w-full" data-name="Button">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[14px] text-center text-white tracking-[0.35px] w-[95.61px]">
+      <div className="flex flex-col font-manrope font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[14px] text-center text-white tracking-[0.35px] w-[95.61px]">
         <p className="leading-[20px]">THỬ VẬN MAY</p>
       </div>
     </div>
@@ -253,7 +253,7 @@ function LuckySpinSection() {
 function Heading3() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Heading 3">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[28px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[18px] w-[147.77px]">
+      <div className="flex flex-col font-manrope font-bold h-[28px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[18px] w-[147.77px]">
         <p className="leading-[28px]">Vote Phối Đồ Đẹp</p>
       </div>
     </div>
@@ -263,7 +263,7 @@ function Heading3() {
 function Link() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Link">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight h-[16px] justify-center leading-[0] relative shrink-0 text-[#d4a373] text-[12px] tracking-[0.6px] uppercase w-[75.11px]">
+      <div className="flex flex-col font-manrope font-extralight h-[16px] justify-center leading-[0] relative shrink-0 text-[#d4a373] text-[12px] tracking-[0.6px] uppercase w-[75.11px]">
         <p className="leading-[16px]">Xem tất cả</p>
       </div>
     </div>
@@ -333,7 +333,7 @@ function Container13() {
 function Container17() {
   return (
     <div className="content-stretch flex flex-col items-center mb-[-1px] relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] text-center w-[111.78px]">
+      <div className="flex flex-col font-manrope font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] text-center w-[111.78px]">
         <p className="leading-[20px]">Beige Minimalist</p>
       </div>
     </div>
@@ -343,7 +343,7 @@ function Container17() {
 function Container18() {
   return (
     <div className="content-stretch flex flex-col items-center mb-[-1px] pb-[13px] relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight h-[17px] justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] text-center w-[71.41px]">
+      <div className="flex flex-col font-manrope font-extralight h-[17px] justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] text-center w-[71.41px]">
         <p className="leading-[16.5px]">bởi @linh_linh</p>
       </div>
     </div>
@@ -365,7 +365,7 @@ function Container19() {
 function Container20() {
   return (
     <div className="content-stretch flex flex-col items-center relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center w-[55.13px]">
+      <div className="flex flex-col font-manrope font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center w-[55.13px]">
         <p className="leading-[16px]">128 Votes</p>
       </div>
     </div>
@@ -452,7 +452,7 @@ function Container21() {
 function Container25() {
   return (
     <div className="content-stretch flex flex-col items-center mb-[-1px] relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] text-center w-[116.58px]">
+      <div className="flex flex-col font-manrope font-bold h-[20px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] text-center w-[116.58px]">
         <p className="leading-[20px]">Streetwear Vibes</p>
       </div>
     </div>
@@ -462,7 +462,7 @@ function Container25() {
 function Container26() {
   return (
     <div className="content-stretch flex flex-col items-center mb-[-1px] pb-[13px] relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight h-[17px] justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] text-center w-[81.03px]">
+      <div className="flex flex-col font-manrope font-extralight h-[17px] justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] text-center w-[81.03px]">
         <p className="leading-[16.5px]">bởi @minh_khoi</p>
       </div>
     </div>
@@ -484,7 +484,7 @@ function Container27() {
 function Container28() {
   return (
     <div className="content-stretch flex flex-col items-center relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center w-[50.14px]">
+      <div className="flex flex-col font-manrope font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center w-[50.14px]">
         <p className="leading-[16px]">94 Votes</p>
       </div>
     </div>
@@ -571,7 +571,7 @@ function Container29() {
 function Container33() {
   return (
     <div className="content-stretch flex flex-col items-center mb-[-1px] relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight h-[20px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] text-center w-[102.77px]">
+      <div className="flex flex-col font-manrope font-extralight h-[20px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] text-center w-[102.77px]">
         <p className="leading-[20px]">Warm Knitwear</p>
       </div>
     </div>
@@ -581,7 +581,7 @@ function Container33() {
 function Container34() {
   return (
     <div className="content-stretch flex flex-col items-center mb-[-1px] pb-[13px] relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight h-[17px] justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] text-center w-[80.27px]">
+      <div className="flex flex-col font-manrope font-extralight h-[17px] justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] text-center w-[80.27px]">
         <p className="leading-[16.5px]">bởi @hanh_ngo</p>
       </div>
     </div>
@@ -603,7 +603,7 @@ function Container35() {
 function Container36() {
   return (
     <div className="content-stretch flex flex-col items-center relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center w-[54.81px]">
+      <div className="flex flex-col font-manrope font-extralight h-[16px] justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[12px] text-center w-[54.81px]">
         <p className="leading-[16px]">215 Votes</p>
       </div>
     </div>
@@ -662,7 +662,7 @@ function VoteSection() {
 function Heading4() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Heading 3">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[18px] w-full">
+      <div className="flex flex-col font-manrope font-bold justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[18px] w-full">
         <p className="leading-[28px]">Hoạt động gần đây</p>
       </div>
     </div>
@@ -694,7 +694,7 @@ function Container38() {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative w-full">
-        <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-['Manrope:ExtraLight',sans-serif] font-bold font-extralight justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] w-full">
+        <div className="flex flex-col font-manrope font-manrope font-bold font-extralight justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] w-full">
           <p className="mb-0">
             <span className="leading-[20px]">Lan Anh</span>
             <span className="leading-[20px]">{` đã bình chọn cho trang phục của`}</span>
@@ -710,7 +710,7 @@ function Container39() {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative w-full">
-        <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] w-full">
+        <div className="flex flex-col font-manrope font-extralight justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] w-full">
           <p className="leading-[16.5px]">2 phút trước</p>
         </div>
       </div>
@@ -764,7 +764,7 @@ function Container40() {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative w-full">
-        <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-['Manrope:ExtraLight',sans-serif] font-bold font-extralight justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] w-full">
+        <div className="flex flex-col font-manrope font-manrope font-bold font-extralight justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] w-full">
           <p className="mb-0">
             <span className="leading-[20px]">Hoàng Nam</span>
             <span className="leading-[20px]">{` đã đăng một phối đồ mới trong`}</span>
@@ -800,7 +800,7 @@ function Container41() {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative w-full">
-        <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] w-full">
+        <div className="flex flex-col font-manrope font-extralight justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] w-full">
           <p className="leading-[16.5px]">15 phút trước</p>
         </div>
       </div>
@@ -855,12 +855,12 @@ function Container42() {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative w-full">
-        <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] w-full">
+        <div className="flex flex-col font-manrope font-extralight justify-center leading-[0] relative shrink-0 text-[#3b2d22] text-[14px] w-full">
           <p className="mb-0">
             <span className="leading-[20px]">Thanh Lam</span>
-            <span className="font-['Manrope:ExtraLight',sans-serif] font-extralight leading-[20px]">{` vừa trúng `}</span>
+            <span className="font-manrope font-extralight leading-[20px]">{` vừa trúng `}</span>
             <span className="leading-[20px]">Voucher 50k</span>
-            <span className="font-['Manrope:ExtraLight',sans-serif] font-extralight leading-[20px]">{` từ Vòng`}</span>
+            <span className="font-manrope font-extralight leading-[20px]">{` từ Vòng`}</span>
           </p>
           <p className="leading-[20px]">Xoay!</p>
         </div>
@@ -873,7 +873,7 @@ function Container43() {
   return (
     <div className="relative shrink-0 w-full" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative w-full">
-        <div className="flex flex-col font-['Manrope:ExtraLight',sans-serif] font-extralight justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] w-full">
+        <div className="flex flex-col font-manrope font-extralight justify-center leading-[0] relative shrink-0 text-[#7f5539] text-[11px] w-full">
           <p className="leading-[16.5px]">1 giờ trước</p>
         </div>
       </div>
@@ -987,7 +987,7 @@ function Container44() {
 function Container46() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[18px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[12px] tracking-[0.3px] w-[66px]">
+      <div className="flex flex-col font-manrope font-bold h-[18px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[12px] tracking-[0.3px] w-[66px]">
         <p className="leading-[18px]">Cộng đồng</p>
       </div>
     </div>
@@ -1028,7 +1028,7 @@ function Container47() {
 function Container49() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[32.78px]">
+      <div className="flex flex-col font-manrope font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[32.78px]">
         <p className="leading-[18px]">Tủ đồ</p>
       </div>
     </div>
@@ -1077,7 +1077,7 @@ function Container50() {
 function Container53() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[57px]">
+      <div className="flex flex-col font-manrope font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[57px]">
         <p className="leading-[18px]">Chụp ảnh</p>
       </div>
     </div>
@@ -1118,7 +1118,7 @@ function Container54() {
 function Container56() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-[83px]" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] text-center tracking-[0.3px] w-[83px]">
+      <div className="flex flex-col font-manrope font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] text-center tracking-[0.3px] w-[83px]">
         <p className="leading-[18px]">Phối đồ</p>
       </div>
     </div>
@@ -1159,7 +1159,7 @@ function Container57() {
 function Container59() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Medium',sans-serif] font-medium h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[48.45px]">
+      <div className="flex flex-col font-manrope font-medium h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[48.45px]">
         <p className="leading-[18px]">Cá nhân</p>
       </div>
     </div>

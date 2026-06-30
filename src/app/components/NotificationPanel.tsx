@@ -155,7 +155,7 @@ export function NotificationPanel() {
             {/* Header */}
             <div className="px-[20px] pt-[48px] pb-[16px]">
               <div className="flex items-center justify-between mb-[16px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[20px] text-[#4a3728]">
+                <div className="font-manrope font-[800] text-[20px] text-[#4a3728]">
                   Thông báo
                 </div>
                 <button
@@ -182,7 +182,7 @@ export function NotificationPanel() {
               <div className="flex gap-[4px] bg-[#f0e6d9] rounded-[10px] p-[3px]">
                 <button
                   onClick={() => setActiveTab("all")}
-                  className={`flex-1 py-[8px] rounded-[8px] border-none cursor-pointer font-['Manrope',sans-serif] text-[13px] transition-all duration-150 ${activeTab === "all"
+                  className={`flex-1 py-[8px] rounded-[8px] border-none cursor-pointer font-manrope text-[13px] transition-all duration-150 ${activeTab === "all"
                       ? "bg-white text-[#4a3728] font-bold shadow-[0px_1px_3px_rgba(0,0,0,0.08)]"
                       : "bg-transparent text-[rgba(74,55,40,0.5)] font-medium"
                     }`}
@@ -191,7 +191,7 @@ export function NotificationPanel() {
                 </button>
                 <button
                   onClick={() => setActiveTab("unread")}
-                  className={`flex-1 py-[8px] rounded-[8px] border-none cursor-pointer font-['Manrope',sans-serif] text-[13px] transition-all duration-150 flex items-center justify-center gap-[6px] ${activeTab === "unread"
+                  className={`flex-1 py-[8px] rounded-[8px] border-none cursor-pointer font-manrope text-[13px] transition-all duration-150 flex items-center justify-center gap-[6px] ${activeTab === "unread"
                       ? "bg-white text-[#4a3728] font-bold shadow-[0px_1px_3px_rgba(0,0,0,0.08)]"
                       : "bg-transparent text-[rgba(74,55,40,0.5)] font-medium"
                     }`}
@@ -223,7 +223,7 @@ export function NotificationPanel() {
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                   </svg>
-                  <div className="font-['Manrope',sans-serif] font-medium text-[14px] text-[rgba(74,55,40,0.35)] mt-[12px]">
+                  <div className="font-manrope font-medium text-[14px] text-[rgba(74,55,40,0.35)] mt-[12px]">
                     Không có thông báo mới
                   </div>
                 </div>
@@ -265,7 +265,7 @@ export function NotificationPanel() {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="font-['Manrope',sans-serif] text-[13px] text-[#4a3728] leading-[18px]">
+                        <div className="font-manrope text-[13px] text-[#4a3728] leading-[18px]">
                           <span
                             style={{
                               fontWeight: notif.unread ? 700 : 600,
@@ -284,7 +284,7 @@ export function NotificationPanel() {
                             {notif.body}
                           </span>
                         </div>
-                        <div className="font-['Manrope',sans-serif] font-normal text-[11px] text-[rgba(74,55,40,0.4)] mt-[4px]">
+                        <div className="font-manrope font-normal text-[11px] text-[rgba(74,55,40,0.4)] mt-[4px]">
                           {notif.time}
                         </div>
                       </div>
@@ -303,7 +303,7 @@ export function NotificationPanel() {
             {unreadCount > 0 && (
               <div className="px-[20px] pb-[32px] pt-[8px] border-t border-[rgba(74,55,40,0.08)]">
                 <button className="w-full py-[12px] rounded-[12px] border border-[rgba(74,55,40,0.15)] bg-transparent cursor-pointer active:bg-[rgba(74,55,40,0.04)] transition-colors">
-                  <span className="font-['Manrope',sans-serif] font-bold text-[13px] text-[#4a3728]">
+                  <span className="font-manrope font-bold text-[13px] text-[#4a3728]">
                     Đánh dấu tất cả đã đọc
                   </span>
                 </button>

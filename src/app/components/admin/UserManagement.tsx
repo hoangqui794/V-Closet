@@ -196,11 +196,11 @@ function UserDetailModal({
                                 <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
                                     <Badge className={`text-xs border ${getRoleBadge(user.role)}`}>{user.role}</Badge>
                                     {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
-                                    {!user.isActive && <Badge variant="outline" className="text-xs  dark:text-amber-500  dark:border-amber-500/20">Inactive</Badge>}
+                                    {!user.isActive && <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-500 dark:border-amber-500/20">Inactive</Badge>}
                                     {user.isEmailVerified ? (
-                                        <Badge className=" dark:bg-green-500/10  dark:text-green-400  dark:border-green-500/20 border text-xs">Email Verified</Badge>
+                                        <Badge className=" bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20 border text-xs">Email Verified</Badge>
                                     ) : (
-                                        <Badge className=" dark:bg-red-500/10  dark:text-red-400  dark:border-red-500/20 border text-xs">Unverified Email</Badge>
+                                        <Badge className=" bg-red-100 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20 border text-xs">Unverified Email</Badge>
                                     )}
                                 </div>
                             </div>
@@ -1142,9 +1142,9 @@ export function UserManagement() {
     };
 
     const getStatusInfo = (user: AdminUser) => {
-        if (user.isBanned) return { label: "Banned", color: " dark:bg-red-500/100", text: " dark:text-red-400  dark:bg-red-500/10  dark:border-red-500/20" };
-        if (!user.isActive) return { label: "Inactive", color: "bg-yellow-400", text: " dark:text-amber-500  dark:bg-amber-500/10  dark:border-amber-500/20" };
-        return { label: "Active", color: " dark:bg-green-500/100", text: " dark:text-green-400  dark:bg-green-500/10  dark:border-green-500/20" };
+        if (user.isBanned) return { label: "Banned", color: " bg-red-500 dark:bg-red-500/100", text: " bg-red-100 text-red-700 dark:text-red-400  dark:bg-red-500/10  dark:border-red-500/20" };
+        if (!user.isActive) return { label: "Inactive", color: "bg-yellow-400 dark:bg-amber-500", text: " bg-amber-100 text-amber-700 dark:text-amber-500  dark:bg-amber-500/10  dark:border-amber-500/20" };
+        return { label: "Active", color: " bg-green-500 dark:bg-green-500/100", text: " bg-green-100 text-green-700 dark:text-green-400  dark:bg-green-500/10  dark:border-green-500/20" };
     };
 
     return (

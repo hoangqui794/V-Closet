@@ -94,7 +94,7 @@ export function EditProfilePage() {
                     </svg>
                 </button>
                 <div className="flex-1 text-center pr-[18px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
+                    <span className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
                         Thông tin cá nhân
                     </span>
                 </div>
@@ -141,14 +141,14 @@ export function EditProfilePage() {
                                     className="hidden" 
                                 />
                             </div>
-                            <span className="mt-[12px] font-['Manrope',sans-serif] font-[600] text-[14px] text-[#4a3728]">
+                            <span className="mt-[12px] font-manrope font-[600] text-[14px] text-[#4a3728]">
                                 Thay đổi ảnh đại diện
                             </span>
                         </SlideUp>
 
                         <div className="space-y-[20px]">
                             <div>
-                                <label className="block font-['Manrope',sans-serif] font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
+                                <label className="block font-manrope font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
                                     Biệt danh (ID)
                                 </label>
                                 <input
@@ -156,12 +156,12 @@ export function EditProfilePage() {
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
                                     placeholder="Nhập biệt danh của bạn"
-                                    className="w-full bg-white border border-[rgba(74,55,40,0.12)] rounded-[16px] px-[20px] py-[16px] font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728] outline-none focus:border-[#4a3728] transition-colors"
+                                    className="w-full bg-white border border-[rgba(74,55,40,0.12)] rounded-[16px] px-[20px] py-[16px] font-manrope font-[500] text-[15px] text-[#4a3728] outline-none focus:border-[#4a3728] transition-colors"
                                 />
                             </div>
 
                             <div>
-                                <label className="block font-['Manrope',sans-serif] font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
+                                <label className="block font-manrope font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
                                     Giới tính
                                 </label>
                                 <div className="grid grid-cols-2 gap-[12px]">
@@ -169,7 +169,7 @@ export function EditProfilePage() {
                                         <button
                                             key={g}
                                             onClick={() => setGender(g)}
-                                            className={`py-[14px] rounded-[16px] font-['Manrope',sans-serif] font-[600] text-[14px] border-2 transition-all cursor-pointer ${
+                                            className={`py-[14px] rounded-[16px] font-manrope font-[600] text-[14px] border-2 transition-all cursor-pointer ${
                                                 gender?.toLowerCase() === g.toLowerCase()
                                                     ? "bg-[#4a3728] border-[#4a3728] text-white"
                                                     : "bg-white border-[rgba(74,55,40,0.08)] text-[#4a3728]"
@@ -182,14 +182,14 @@ export function EditProfilePage() {
                             </div>
 
                             <div>
-                                <label className="block font-['Manrope',sans-serif] font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
+                                <label className="block font-manrope font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
                                     Quốc gia
                                 </label>
                                 <input
                                     type="text"
                                     value={country}
                                     onChange={(e) => setCountry(e.target.value)}
-                                    className="w-full bg-white border border-[rgba(74,55,40,0.12)] rounded-[16px] px-[20px] py-[16px] font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728] outline-none focus:border-[#4a3728] transition-colors"
+                                    className="w-full bg-white border border-[rgba(74,55,40,0.12)] rounded-[16px] px-[20px] py-[16px] font-manrope font-[500] text-[15px] text-[#4a3728] outline-none focus:border-[#4a3728] transition-colors"
                                 />
                             </div>
                         </div>
@@ -200,7 +200,7 @@ export function EditProfilePage() {
                             disabled={isSaving || isUploading}
                             className="w-full mt-[40px] bg-[#4a3728] disabled:opacity-70 rounded-[16px] py-[18px] cursor-pointer shadow-[0px_8px_20px_rgba(74,55,40,0.18)] border-none"
                         >
-                            <span className="font-['Manrope',sans-serif] font-bold text-[16px] text-white">
+                            <span className="font-manrope font-bold text-[16px] text-white">
                                 {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
                             </span>
                         </motion.button>

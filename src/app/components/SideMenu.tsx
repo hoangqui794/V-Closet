@@ -111,10 +111,10 @@ export function SideMenu() {
                   </svg>
                 </div>
                 <div>
-                  <div className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#4a3728]">
+                  <div className="font-manrope font-bold text-[16px] text-[#4a3728]">
                     Người dùng V-Closet
                   </div>
-                  <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.5)]">
+                  <div className="font-manrope font-normal text-[12px] text-[rgba(74,55,40,0.5)]">
                     @vcloset_user
                   </div>
                 </div>
@@ -139,7 +139,7 @@ export function SideMenu() {
                         <MenuIcon icon={item.icon} active={active} />
                       </div>
                       <span
-                        className={`font-['Manrope',sans-serif] text-[15px] ${active
+                        className={`font-manrope text-[15px] ${active
                             ? "text-[#4a3728] font-bold"
                             : "text-[#7f5539] font-medium"
                           }`}
@@ -168,7 +168,7 @@ export function SideMenu() {
                     <div className="w-[24px] flex items-center justify-center">
                       <SecondaryIcon type={item.icon} />
                     </div>
-                    <span className="font-['Manrope',sans-serif] font-medium text-[14px] text-[rgba(74,55,40,0.6)]">
+                    <span className="font-manrope font-medium text-[14px] text-[rgba(74,55,40,0.6)]">
                       {item.label}
                     </span>
                   </button>
@@ -196,7 +196,7 @@ export function SideMenu() {
                   <polyline points="16 17 21 12 16 7" />
                   <line x1="21" y1="12" x2="9" y2="12" />
                 </svg>
-                <span className="font-['Manrope',sans-serif] font-medium text-[14px] text-[#c0392b]">
+                <span className="font-manrope font-medium text-[14px] text-[#c0392b]">
                   Đăng xuất
                 </span>
               </button>

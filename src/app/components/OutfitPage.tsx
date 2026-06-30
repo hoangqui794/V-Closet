@@ -66,12 +66,12 @@ function AIScanPrompt({
 
         {/* Text */}
         <div className="text-center mb-[8px]">
-          <div className="font-['Manrope',sans-serif] font-[800] text-[20px] text-[#4a3728] tracking-[-0.5px] leading-[26px]">
+          <div className="font-manrope font-[800] text-[20px] text-[#4a3728] tracking-[-0.5px] leading-[26px]">
             AI Body Scan 🤖
           </div>
         </div>
         <div className="text-center mb-[24px]">
-          <div className="font-['Manrope',sans-serif] font-[400] text-[14px] text-[rgba(74,55,40,0.6)] leading-[20px] max-w-[280px] mx-auto">
+          <div className="font-manrope font-[400] text-[14px] text-[rgba(74,55,40,0.6)] leading-[20px] max-w-[280px] mx-auto">
             Để AI scan cơ thể bạn để xem outfit chuẩn nhất nhé! Chỉ cần 1 tấm ảnh toàn thân là đủ ✨
           </div>
         </div>
@@ -79,7 +79,7 @@ function AIScanPrompt({
         {/* Privacy note */}
         <div className="bg-[#f0e6da] rounded-[14px] px-[16px] py-[12px] mb-[20px] flex items-start gap-[10px]">
           <span className="text-[16px] shrink-0 mt-[1px]">🔒</span>
-          <span className="font-['Manrope',sans-serif] font-[400] text-[12px] text-[rgba(74,55,40,0.6)] leading-[17px]">
+          <span className="font-manrope font-[400] text-[12px] text-[rgba(74,55,40,0.6)] leading-[17px]">
             Chúng tôi chỉ lưu trữ các chỉ số tỷ lệ, không lưu trữ hình ảnh nhạy cảm của bạn. Ảnh sẽ được xóa ngay sau khi phân tích.
           </span>
         </div>
@@ -94,7 +94,7 @@ function AIScanPrompt({
             <path d="M23 19C23 19.5 22.8 20 22.4 20.4C22 20.8 21.5 21 21 21H3C2.5 21 2 20.8 1.6 20.4C1.2 20 1 19.5 1 19V8C1 7.5 1.2 7 1.6 6.6C2 6.2 2.5 6 3 6H7L9 3H15L17 6H21C21.5 6 22 6.2 22.4 6.6C22.8 7 23 7.5 23 8V19Z" stroke="#fdfaf6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="12" cy="13" r="4" stroke="#fdfaf6" strokeWidth="1.5" />
           </svg>
-          <span className="font-['Manrope',sans-serif] font-bold text-[15px] text-[#fdfaf6] tracking-[0.3px]">
+          <span className="font-manrope font-bold text-[15px] text-[#fdfaf6] tracking-[0.3px]">
             Chụp ảnh ngay
           </span>
         </motion.button>
@@ -103,7 +103,7 @@ function AIScanPrompt({
           onClick={onDismiss}
           className="w-full h-[44px] rounded-[14px] bg-transparent border-none cursor-pointer"
         >
-          <span className="font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.5)]">
+          <span className="font-manrope font-[600] text-[14px] text-[rgba(74,55,40,0.5)]">
             Để sau nhé
           </span>
         </button>
@@ -197,7 +197,7 @@ export function OutfitPage() {
                 onClick={() => setShowScan(true)}
               >
                 <div className="size-[16px] bg-white rounded-full animate-pulse opacity-40" />
-                <span className="font-['Manrope',sans-serif] font-extrabold text-[9px] text-white uppercase tracking-[1px]">
+                <span className="font-manrope font-extrabold text-[9px] text-white uppercase tracking-[1px]">
                   AI Scan Pending
                 </span>
               </motion.div>
@@ -222,14 +222,14 @@ export function OutfitPage() {
           <StaggerItem className="px-[16px] pt-[24px]">
             <div className="flex gap-[8px] items-center mb-[20px]">
               <div className="bg-[#3b2d22] h-[4px] rounded-full w-[32px]" />
-              <div className="font-['Manrope',sans-serif] font-[800] text-[14px] text-[#3b2d22] tracking-[1.4px] uppercase">
+              <div className="font-manrope font-[800] text-[14px] text-[#3b2d22] tracking-[1.4px] uppercase">
                 Tùy Chỉnh Nhân Vật
               </div>
             </div>
 
             {/* Dáng người */}
             <div className="mb-[24px]">
-              <div className="font-['Manrope',sans-serif] font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase mb-[12px] px-[4px]">
+              <div className="font-manrope font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase mb-[12px] px-[4px]">
                 Dáng người
               </div>
               <div className="flex gap-[10px] overflow-x-auto pb-[4px]">
@@ -242,7 +242,7 @@ export function OutfitPage() {
                       : "bg-[#e3d5ca] text-[#3b2d22] opacity-70"
                       }`}
                   >
-                    <span className="font-['Manrope',sans-serif] font-bold text-[14px]">{shape}</span>
+                    <span className="font-manrope font-bold text-[14px]">{shape}</span>
                   </button>
                 ))}
               </div>
@@ -251,7 +251,7 @@ export function OutfitPage() {
             {/* Size & Color Picker */}
             <div className="grid grid-cols-2 gap-[20px] mb-[32px]">
               <div>
-                <div className="font-['Manrope',sans-serif] font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase mb-[12px] px-[4px]">
+                <div className="font-manrope font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase mb-[12px] px-[4px]">
                   Kich co
                 </div>
                 <div className="flex gap-[8px]">
@@ -264,13 +264,13 @@ export function OutfitPage() {
                         : "bg-white border border-[rgba(0,0,0,0.1)] text-[#3b2d22]"
                         }`}
                     >
-                      <span className="font-['Manrope',sans-serif] font-extrabold text-[15px]">{s}</span>
+                      <span className="font-manrope font-extrabold text-[15px]">{s}</span>
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <div className="font-['Manrope',sans-serif] font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase mb-[12px] px-[4px]">
+                <div className="font-manrope font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase mb-[12px] px-[4px]">
                   Mau sac
                 </div>
                 <div className="flex gap-[14px] items-center h-[48px]">
@@ -297,14 +297,14 @@ export function OutfitPage() {
                 <path d="M3 6H21" stroke="#f5ebe0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14" stroke="#f5ebe0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="font-['Manrope',sans-serif] font-extrabold text-[15px] text-[#f5ebe0] uppercase tracking-[1.5px]">Mua trên Shopee</span>
+              <span className="font-manrope font-extrabold text-[15px] text-[#f5ebe0] uppercase tracking-[1.5px]">Mua trên Shopee</span>
             </motion.button>
           </StaggerItem>
 
           {/* Wardrobe Selector */}
           <StaggerItem className="px-[16px]">
             <div className="flex items-center justify-between mb-[16px] px-[4px]">
-              <div className="font-['Manrope',sans-serif] font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase tracking-[1px]">
+              <div className="font-manrope font-bold text-[11px] text-[rgba(59,45,34,0.5)] uppercase tracking-[1px]">
                 KÉO VÀ THẢ ĐỂ THỬ ĐỒ
               </div>
               <button
@@ -319,7 +319,7 @@ export function OutfitPage() {
                 <div className="aspect-square bg-[rgba(245,235,224,0.4)] border-2 border-dashed border-[rgba(213,189,175,0.5)] rounded-[24px] w-full flex items-center justify-center">
                   <span className="text-[28px] text-[rgba(213,189,175,0.7)] font-light">+</span>
                 </div>
-                <span className="font-['Manrope',sans-serif] font-bold text-[10px] text-[rgba(59,45,34,0.4)] uppercase mt-[8px]">Thêm đồ</span>
+                <span className="font-manrope font-bold text-[10px] text-[rgba(59,45,34,0.4)] uppercase mt-[8px]">Thêm đồ</span>
               </button>
               {dragItems.map((item, i) => (
                 <button
@@ -330,7 +330,7 @@ export function OutfitPage() {
                   <div className="bg-white rounded-[24px] border border-[rgba(214,204,194,0.25)] shadow-sm w-full p-[10px] aspect-square flex items-center justify-center overflow-hidden">
                     <img src={item.img} alt={item.name} className="w-full h-full object-contain" />
                   </div>
-                  <span className="font-['Manrope',sans-serif] font-bold text-[10px] text-[#3b2d22] uppercase mt-[10px] opacity-60 truncate w-full text-center px-[4px]">
+                  <span className="font-manrope font-bold text-[10px] text-[#3b2d22] uppercase mt-[10px] opacity-60 truncate w-full text-center px-[4px]">
                     {item.name}
                   </span>
                 </button>

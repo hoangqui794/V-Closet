@@ -45,7 +45,7 @@ export function CameraPage() {
         </button>
 
         <span
-          className="font-['Manrope',sans-serif] text-[17px] text-[#4a3728] text-center tracking-[-0.4px]"
+          className="font-manrope text-[17px] text-[#4a3728] text-center tracking-[-0.4px]"
           style={{ fontWeight: 700 }}
         >
           Chụp ảnh trang phục
@@ -91,7 +91,7 @@ export function CameraPage() {
                   <path d={svgPaths.p876af00} fill="white" fillOpacity="0.55" />
                 </svg>
                 <span
-                  className="font-['Manrope',sans-serif] text-[14px] text-[rgba(255,255,255,0.6)] text-center"
+                  className="font-manrope text-[14px] text-[rgba(255,255,255,0.6)] text-center"
                   style={{ fontWeight: 500 }}
                 >
                   Đặt trang phục phẳng{"\n"}trong khung hình
@@ -109,13 +109,13 @@ export function CameraPage() {
           >
             <div className="flex flex-col items-start">
               <span
-                className="font-['Manrope',sans-serif] text-[12px] text-white tracking-[0.5px] uppercase"
+                className="font-manrope text-[12px] text-white tracking-[0.5px] uppercase"
                 style={{ fontWeight: 700, lineHeight: "16px" }}
               >
                 Tách nền AI
               </span>
               <span
-                className="font-['Manrope',sans-serif] text-[10px] text-[rgba(255,255,255,0.65)]"
+                className="font-manrope text-[10px] text-[rgba(255,255,255,0.65)]"
                 style={{ fontWeight: 400, lineHeight: "14px" }}
               >
                 Tự động làm sạch ảnh
@@ -151,7 +151,7 @@ export function CameraPage() {
             <img src={imgRecent} alt="" className="w-full h-full object-cover" />
           </div>
           <span
-            className="font-['Manrope',sans-serif] text-[10px] text-[rgba(74,55,40,0.5)] tracking-[0.4px] uppercase"
+            className="font-manrope text-[10px] text-[rgba(74,55,40,0.5)] tracking-[0.4px] uppercase"
             style={{ fontWeight: 700 }}
           >
             Gần đây
@@ -194,7 +194,7 @@ export function CameraPage() {
             </svg>
           </div>
           <span
-            className="font-['Manrope',sans-serif] text-[10px] text-[rgba(74,55,40,0.5)] tracking-[0.4px] uppercase"
+            className="font-manrope text-[10px] text-[rgba(74,55,40,0.5)] tracking-[0.4px] uppercase"
             style={{ fontWeight: 700 }}
           >
             Thư viện

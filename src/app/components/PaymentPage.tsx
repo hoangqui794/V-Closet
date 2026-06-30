@@ -44,7 +44,7 @@ export function PaymentPage() {
                     </svg>
                 </button>
                 <div className="flex-1 text-center pr-[18px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
+                    <span className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
                         {t("payment")}
                     </span>
                 </div>
@@ -54,34 +54,34 @@ export function PaymentPage() {
                 {/* Order Summary */}
                 <SlideUp>
                     <div className="bg-white rounded-[24px] p-[24px] border border-[rgba(74,55,40,0.1)] shadow-sm mb-[32px]">
-                        <div className="font-['Manrope',sans-serif] font-[700] text-[14px] text-[rgba(74,55,40,0.5)] uppercase tracking-[1px] mb-[16px]">
+                        <div className="font-manrope font-[700] text-[14px] text-[rgba(74,55,40,0.5)] uppercase tracking-[1px] mb-[16px]">
                             Tóm tắt đơn hàng
                         </div>
                         <div className="flex justify-between items-center mb-[12px]">
                             <div className="flex flex-col">
-                                <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728]">
+                                <span className="font-manrope font-[800] text-[18px] text-[#4a3728]">
                                     Gói {selectedPlan}
                                 </span>
-                                <span className="font-['Manrope',sans-serif] font-medium text-[13px] text-[rgba(74,55,40,0.6)]">
+                                <span className="font-manrope font-medium text-[13px] text-[rgba(74,55,40,0.6)]">
                                     Thời hạn 1 {selectedPlan === "YEARLY" ? "năm" : "tháng"}
                                 </span>
                             </div>
                             <div className="text-right">
-                                <div className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728]">
+                                <div className="font-manrope font-[800] text-[18px] text-[#4a3728]">
                                     {currentPlan.price}
                                 </div>
                             </div>
                         </div>
                         <div className="h-px bg-[rgba(74,55,40,0.06)] my-[16px]" />
                         <div className="flex justify-between items-center">
-                            <span className="font-['Manrope',sans-serif] font-[800] text-[16px] text-[#4a3728]">Tổng cộng</span>
-                            <span className="font-['Manrope',sans-serif] font-[800] text-[20px] text-[#4a3728]">{currentPlan.price}</span>
+                            <span className="font-manrope font-[800] text-[16px] text-[#4a3728]">Tổng cộng</span>
+                            <span className="font-manrope font-[800] text-[20px] text-[#4a3728]">{currentPlan.price}</span>
                         </div>
                     </div>
                 </SlideUp>
 
                 {/* Payment Methods */}
-                <div className="font-['Manrope',sans-serif] font-[700] text-[14px] text-[rgba(74,55,40,0.5)] uppercase tracking-[1px] mb-[16px] px-[8px]">
+                <div className="font-manrope font-[700] text-[14px] text-[rgba(74,55,40,0.5)] uppercase tracking-[1px] mb-[16px] px-[8px]">
                     Phương thức thanh toán
                 </div>
 
@@ -117,8 +117,8 @@ export function PaymentPage() {
                     <div className="mt-[40px] flex items-start gap-[12px] p-[20px] bg-white rounded-[20px] border border-[rgba(74,55,40,0.08)]">
                         <div className="text-[20px]">🔒</div>
                         <div className="flex flex-col gap-[4px]">
-                            <span className="font-['Manrope',sans-serif] font-[700] text-[14px] text-[#4a3728]">Thanh toán an toàn</span>
-                            <p className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)] leading-[18px]">
+                            <span className="font-manrope font-[700] text-[14px] text-[#4a3728]">Thanh toán an toàn</span>
+                            <p className="font-manrope font-normal text-[12px] text-[rgba(74,55,40,0.6)] leading-[18px]">
                                 Thông tin của bạn được bảo mật tuyệt đối bởi các hệ thống thanh toán hàng đầu Việt Nam.
                             </p>
                         </div>
@@ -162,9 +162,9 @@ function PaymentMethodItem({
                     )}
                 </div>
                 <div className="flex flex-col items-start gap-[2px]">
-                    <span className="font-['Manrope',sans-serif] font-[700] text-[16px] text-[#4a3728]">{name}</span>
+                    <span className="font-manrope font-[700] text-[16px] text-[#4a3728]">{name}</span>
                     {badge && (
-                        <span className="bg-[rgba(74,55,40,0.05)] text-[rgba(74,55,40,0.6)] font-['Manrope',sans-serif] font-bold text-[10px] px-[8px] py-[2px] rounded-full uppercase tracking-[0.5px]">
+                        <span className="bg-[rgba(74,55,40,0.05)] text-[rgba(74,55,40,0.6)] font-manrope font-bold text-[10px] px-[8px] py-[2px] rounded-full uppercase tracking-[0.5px]">
                             {badge}
                         </span>
                     )}

@@ -36,7 +36,7 @@ export function LanguageSettingsPage() {
                     </svg>
                 </button>
                 <div className="flex-1 text-center pr-[18px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
+                    <span className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
                         {t("language")}
                     </span>
                 </div>
@@ -51,10 +51,10 @@ export function LanguageSettingsPage() {
                             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                         </svg>
                     </div>
-                    <h2 className="font-['Manrope',sans-serif] font-[700] text-[18px] text-[#4a3728] mb-[8px]">
+                    <h2 className="font-manrope font-[700] text-[18px] text-[#4a3728] mb-[8px]">
                         {language === "vi" ? "Chọn ngôn ngữ của bạn" : "Select your language"}
                     </h2>
-                    <p className="font-['Manrope',sans-serif] font-[400] text-[14px] text-[rgba(74,55,40,0.5)] leading-[20px]">
+                    <p className="font-manrope font-[400] text-[14px] text-[rgba(74,55,40,0.5)] leading-[20px]">
                         {language === "vi" ? "Giao diện ứng dụng sẽ thay đổi theo ngôn ngữ bạn chọn." : "The app interface will change based on your selected language."}
                     </p>
                 </SlideUp>
@@ -75,10 +75,10 @@ export function LanguageSettingsPage() {
                                             <img src={lang.flag} className="w-full h-full object-cover" alt={lang.label} />
                                         </div>
                                         <div className="flex flex-col items-start">
-                                            <span className={`font-['Manrope',sans-serif] font-[600] text-[16px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.7)]"}`}>
+                                            <span className={`font-manrope font-[600] text-[16px] ${isSelected ? "text-[#4a3728]" : "text-[rgba(74,55,40,0.7)]"}`}>
                                                 {lang.label}
                                             </span>
-                                            <span className="font-['Manrope',sans-serif] font-[400] text-[12px] text-[rgba(74,55,40,0.4)]">
+                                            <span className="font-manrope font-[400] text-[12px] text-[rgba(74,55,40,0.4)]">
                                                 {lang.native}
                                             </span>
                                         </div>

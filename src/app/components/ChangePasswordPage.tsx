@@ -47,7 +47,7 @@ export function ChangePasswordPage() {
         setShow: (v: boolean) => void
     }) => (
         <div>
-            <label className="block font-['Manrope',sans-serif] font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
+            <label className="block font-manrope font-[700] text-[13px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px] mb-[8px] ml-[4px]">
                 {label}
             </label>
             <div className="relative">
@@ -55,7 +55,7 @@ export function ChangePasswordPage() {
                     type={show ? "text" : "password"}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="w-full bg-white border border-[rgba(74,55,40,0.12)] rounded-[16px] px-[20px] py-[16px] font-['Manrope',sans-serif] font-[500] text-[15px] text-[#4a3728] outline-none focus:border-[#4a3728] transition-colors pr-[50px]"
+                    className="w-full bg-white border border-[rgba(74,55,40,0.12)] rounded-[16px] px-[20px] py-[16px] font-manrope font-[500] text-[15px] text-[#4a3728] outline-none focus:border-[#4a3728] transition-colors pr-[50px]"
                 />
                 <button
                     onClick={() => setShow(!show)}
@@ -84,7 +84,7 @@ export function ChangePasswordPage() {
                     </svg>
                 </button>
                 <div className="flex-1 text-center pr-[18px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
+                    <span className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
                         Đổi mật khẩu
                     </span>
                 </div>
@@ -98,7 +98,7 @@ export function ChangePasswordPage() {
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                         </svg>
                     </div>
-                    <p className="font-['Manrope',sans-serif] font-[400] text-[14px] text-[rgba(74,55,40,0.6)] px-[20px] leading-[22px]">
+                    <p className="font-manrope font-[400] text-[14px] text-[rgba(74,55,40,0.6)] px-[20px] leading-[22px]">
                         Để đảm bảo an toàn, mật khẩu cần ít nhất 6 ký tự bao gồm chữ cái và số.
                     </p>
                 </SlideUp>
@@ -132,14 +132,14 @@ export function ChangePasswordPage() {
                     onClick={handleUpdate}
                     className="w-full mt-[48px] bg-[#4a3728] rounded-[16px] py-[18px] cursor-pointer shadow-[0px_8px_20px_rgba(74,55,40,0.18)] border-none"
                 >
-                    <span className="font-['Manrope',sans-serif] font-bold text-[16px] text-white">
+                    <span className="font-manrope font-bold text-[16px] text-white">
                         Cập nhật mật khẩu
                     </span>
                 </motion.button>
 
                 <button
                     onClick={() => toast("Hệ thống sẽ gửi mã qua email của bạn...")}
-                    className="w-full mt-[20px] bg-transparent border-none cursor-pointer font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.45)] hover:text-[#4a3728] transition-colors"
+                    className="w-full mt-[20px] bg-transparent border-none cursor-pointer font-manrope font-[600] text-[14px] text-[rgba(74,55,40,0.45)] hover:text-[#4a3728] transition-colors"
                 >
                     Bạn quên mật khẩu?
                 </button>

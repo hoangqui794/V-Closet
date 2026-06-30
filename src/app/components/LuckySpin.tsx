@@ -52,10 +52,10 @@ export function LuckySpin({ onClose }: { onClose: () => void }) {
                     </svg>
                 </button>
 
-                <div className="font-['Manrope',sans-serif] font-[800] text-[22px] text-[#3b2d22] mb-[8px] mt-[12px] text-center">
+                <div className="font-manrope font-[800] text-[22px] text-[#3b2d22] mb-[8px] mt-[12px] text-center">
                     Vòng Xoay May Mắn 🎰
                 </div>
-                <div className="font-['Manrope',sans-serif] text-[14px] text-[rgba(59,45,34,0.6)] mb-[32px] text-center">
+                <div className="font-manrope text-[14px] text-[rgba(59,45,34,0.6)] mb-[32px] text-center">
                     Thử vận may của bạn hôm nay nhé!
                 </div>
 
@@ -82,7 +82,7 @@ export function LuckySpin({ onClose }: { onClose: () => void }) {
                                 style={{ transform: `translate(-50%, -50%) rotate(${i * (360 / prizes.length) + (360 / prizes.length / 2)}deg)` }}
                             >
                                 <div
-                                    className="font-['Manrope',sans-serif] font-bold text-[10px] absolute top-[20px] left-1/2 -translate-x-1/2"
+                                    className="font-manrope font-bold text-[10px] absolute top-[20px] left-1/2 -translate-x-1/2"
                                     style={{ color: p.textColor || "#3b2d22" }}
                                 >
                                     {p.text}
@@ -100,7 +100,7 @@ export function LuckySpin({ onClose }: { onClose: () => void }) {
                     disabled={spinning}
                     className={`w-full h-[56px] rounded-[16px] border-none cursor-pointer shadow-[0px_8px_24px_rgba(59,45,34,0.25)] flex items-center justify-center transition-all ${spinning ? "bg-[rgba(59,45,34,0.5)]" : "bg-[#3b2d22]"}`}
                 >
-                    <span className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#f5ebe0] tracking-[1px] uppercase">
+                    <span className="font-manrope font-bold text-[16px] text-[#f5ebe0] tracking-[1px] uppercase">
                         {spinning ? "Đang quay..." : "Quay ngay"}
                     </span>
                 </motion.button>

@@ -59,7 +59,7 @@ export function WardrobePage() {
             <path d={svgPaths.p2bce57c0} fill="#3B2D22" />
           </svg>
         </button>
-        <div className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px]">
+        <div className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px]">
           V-Closet
         </div>
         <button onClick={openNotif} className="shrink-0 bg-transparent border-none cursor-pointer p-0 active:opacity-60 transition-opacity">
@@ -75,7 +75,7 @@ export function WardrobePage() {
           <svg width="11.667" height="9.333" viewBox="0 0 11.667 9.333" fill="none">
             <path d={svgPaths.p4d36180} fill="white" />
           </svg>
-          <span className="font-['Manrope',sans-serif] font-bold text-[14px] text-white whitespace-nowrap">
+          <span className="font-manrope font-bold text-[14px] text-white whitespace-nowrap">
             V-Closet Try-on
           </span>
         </button>
@@ -83,7 +83,7 @@ export function WardrobePage() {
           <svg width="9.333" height="11.667" viewBox="0 0 9.333 11.667" fill="none">
             <path d={svgPaths.p1b92a600} fill="#4a3728" />
           </svg>
-          <span className="font-['Manrope',sans-serif] font-medium text-[14px] text-[#4a3728] whitespace-nowrap">
+          <span className="font-manrope font-medium text-[14px] text-[#4a3728] whitespace-nowrap">
             Import from Shopee
           </span>
         </button>
@@ -95,7 +95,7 @@ export function WardrobePage() {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`bg-transparent border-none cursor-pointer pb-[8px] px-0 font-['Manrope',sans-serif] text-[14px] ${activeCategory === cat
+            className={`bg-transparent border-none cursor-pointer pb-[8px] px-0 font-manrope text-[14px] ${activeCategory === cat
               ? "text-[#4a3728] font-bold border-b-2 border-[#4a3728]"
               : "text-[rgba(74,55,40,0.5)] font-medium"
               }`}
@@ -114,16 +114,16 @@ export function WardrobePage() {
             </svg>
           </div>
           <div>
-            <div className="font-['Manrope',sans-serif] font-bold text-[14px] text-[#4a3728]">
+            <div className="font-manrope font-bold text-[14px] text-[#4a3728]">
               Tách nền AI
             </div>
-            <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
+            <div className="font-manrope font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
               Đang xử lý 3 món đồ...
             </div>
           </div>
         </div>
         <button onClick={() => toast("⚙️ Đang xử lý 3 trang phục...")} className="bg-[#4a3728] rounded-[9999px] px-[16px] py-[8px] border-none cursor-pointer">
-          <span className="font-['Manrope',sans-serif] font-bold text-[12px] text-white">
+          <span className="font-manrope font-bold text-[12px] text-white">
             View Status
           </span>
         </button>
@@ -147,10 +147,10 @@ export function WardrobePage() {
               className="w-full h-full object-contain p-[12px]"
             />
             <div className="absolute bottom-0 left-0 right-0 p-[12px] bg-gradient-to-t from-[rgba(0,0,0,0.5)] to-transparent">
-              <div className="font-['Manrope',sans-serif] font-bold text-[14px] text-white leading-[18px]">
+              <div className="font-manrope font-bold text-[14px] text-white leading-[18px]">
                 {item.name}
               </div>
-              <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(255,255,255,0.8)]">
+              <div className="font-manrope font-normal text-[12px] text-[rgba(255,255,255,0.8)]">
                 {item.category}
               </div>
             </div>

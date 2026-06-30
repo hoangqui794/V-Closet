@@ -805,8 +805,8 @@ export function SubscriptionManagement() {
                                                     <Badge
                                                         variant={sub.isActive ? "default" : "secondary"}
                                                         className={sub.isActive 
-                                                            ? " dark:bg-green-500/10  dark:text-green-400 hover:bg-green-200 border-none font-normal" 
-                                                            : " dark:bg-muted text-gray-500 font-normal"
+                                                            ? " bg-green-100 text-green-700 dark:bg-green-500/10  dark:text-green-400 hover:bg-green-200 border-none font-normal" 
+                                                            : " bg-red-100 text-red-700 dark:bg-muted dark:text-gray-500 font-normal border-none"
                                                         }
                                                     >
                                                         {sub.isActive ? "Active" : "Expired"}
@@ -934,8 +934,8 @@ export function SubscriptionManagement() {
                                                             <Badge
                                                                 variant={plan.isActive ? "default" : "secondary"}
                                                                 className={plan.isActive 
-                                                                    ? " dark:bg-green-500/10  dark:text-green-400 hover:bg-green-200 border-none"
-                                                                    : " dark:bg-muted text-gray-500"
+                                                                    ? " bg-green-100 text-green-700 dark:bg-green-500/10  dark:text-green-400 hover:bg-green-200 border-none"
+                                                                    : " bg-amber-100 text-amber-700 dark:bg-muted dark:text-gray-500 border-none"
                                                                 }
                                                             >
                                                                 {plan.isActive ? "Active" : "Inactive"}

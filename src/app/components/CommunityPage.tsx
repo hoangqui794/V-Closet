@@ -83,7 +83,7 @@ export function CommunityPage() {
             <path d="M4 8h16M4 16h16" stroke="#3B2D22" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
-        <div className="font-['Outfit',sans-serif] font-[700] text-[20px] text-[#3b2d22] tracking-[-0.5px]">
+        <div className="font-outfit font-[700] text-[20px] text-[#3b2d22] tracking-[-0.5px]">
           CỘNG ĐỒNG
         </div>
         <div className="flex items-center gap-[16px]">
@@ -109,7 +109,7 @@ export function CommunityPage() {
           <input
             type="text"
             placeholder="Tìm kiếm phong cách, người dùng..."
-            className="bg-transparent border-none outline-none ml-[12px] w-full font-['Manrope',sans-serif] text-[15px] text-[#3b2d22] placeholder:text-[rgba(59,45,34,0.4)]"
+            className="bg-transparent border-none outline-none ml-[12px] w-full font-manrope text-[15px] text-[#3b2d22] placeholder:text-[rgba(59,45,34,0.4)]"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -122,7 +122,7 @@ export function CommunityPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`whitespace-nowrap pb-[8px] border-b-2 transition-all font-['Manrope',sans-serif] font-bold text-[14px] border-none bg-transparent cursor-pointer ${activeTab === tab ? "text-[#3b2d22] border-b-[#3b2d22]!" : "text-[rgba(59,45,34,0.4)] border-transparent!"
+            className={`whitespace-nowrap pb-[8px] border-b-2 transition-all font-manrope font-bold text-[14px] border-none bg-transparent cursor-pointer ${activeTab === tab ? "text-[#3b2d22] border-b-[#3b2d22]!" : "text-[rgba(59,45,34,0.4)] border-transparent!"
               }`}
           >
             {tab}
@@ -133,7 +133,7 @@ export function CommunityPage() {
       {/* Top Stylists (Stories Style) */}
       <SlideUp delay={0.1} className="mt-[24px]">
         <div className="flex items-center justify-between px-[20px] mb-[12px]">
-          <div className="font-['Outfit',sans-serif] font-bold text-[18px] text-[#3b2d22]">
+          <div className="font-outfit font-bold text-[18px] text-[#3b2d22]">
             Top Stylist trong tuần
           </div>
           <button className="text-[#d4a373] font-bold text-[13px] bg-transparent border-none">Xem tất cả</button>
@@ -146,7 +146,7 @@ export function CommunityPage() {
                   <img src={stylist.avatar} alt={stylist.name} className="w-full h-full object-cover" />
                 </div>
               </div>
-              <span className="font-['Manrope',sans-serif] text-[11px] font-bold text-[#3b2d22] max-w-[64px] truncate text-center">
+              <span className="font-manrope text-[11px] font-bold text-[#3b2d22] max-w-[64px] truncate text-center">
                 {stylist.name}
               </span>
             </div>
@@ -164,20 +164,20 @@ export function CommunityPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(26,18,13,0.9)] via-[rgba(26,18,13,0.4)] to-transparent" />
         <div className="absolute bottom-0 left-0 p-[24px] w-full">
           <div className="flex items-center gap-[8px] mb-[8px]">
-            <span className="bg-[#d4a373] rounded-[6px] px-[10px] py-[4px] font-['Outfit',sans-serif] font-bold text-[10px] text-white tracking-[1px] uppercase">
+            <span className="bg-[#d4a373] rounded-[6px] px-[10px] py-[4px] font-outfit font-bold text-[10px] text-white tracking-[1px] uppercase">
               LIVE CHALLENGE
             </span>
-            <span className="text-[rgba(255,255,255,0.8)] text-[12px] font-['Manrope',sans-serif]">1.2k đang tham gia</span>
+            <span className="text-[rgba(255,255,255,0.8)] text-[12px] font-manrope">1.2k đang tham gia</span>
           </div>
-          <div className="font-['Outfit',sans-serif] font-bold text-[28px] text-white leading-tight mb-[4px]">
+          <div className="font-outfit font-bold text-[28px] text-white leading-tight mb-[4px]">
             Autumn Elegance 🍂
           </div>
-          <div className="font-['Manrope',sans-serif] text-[14px] text-[rgba(255,255,255,0.7)] mb-[16px]">
+          <div className="font-manrope text-[14px] text-[rgba(255,255,255,0.7)] mb-[16px]">
             Khoe phong cách thu nhẹ nhàng của bạn nhận ngay voucher 500k.
           </div>
           <div className="flex items-center gap-[12px]">
             <button
-              className="bg-white rounded-full px-[24px] py-[12px] border-none cursor-pointer font-['Outfit',sans-serif] font-bold text-[13px] text-[#3b2d22] active:scale-95 transition-transform"
+              className="bg-white rounded-full px-[24px] py-[12px] border-none cursor-pointer font-outfit font-bold text-[13px] text-[#3b2d22] active:scale-95 transition-transform"
               onClick={() => toast.success("Đã đăng ký Autumn Challenge! 🍁")}
             >
               Tham gia ngay
@@ -210,8 +210,8 @@ export function CommunityPage() {
               </svg>
             </div>
             <div className="text-left">
-              <div className="font-['Outfit',sans-serif] font-bold text-[17px] text-white">Vòng Xoay May Mắn</div>
-              <div className="font-['Manrope',sans-serif] text-[13px] text-[rgba(212,163,115,0.8)]">Nhận ngay Voucher 100k & quà tặng</div>
+              <div className="font-outfit font-bold text-[17px] text-white">Vòng Xoay May Mắn</div>
+              <div className="font-manrope text-[13px] text-[rgba(212,163,115,0.8)]">Nhận ngay Voucher 100k & quà tặng</div>
             </div>
           </div>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="relative z-10">
@@ -223,7 +223,7 @@ export function CommunityPage() {
       {/* Community Social Feed */}
       <div className="mt-[32px]">
         <div className="px-[20px] mb-[20px] flex items-center justify-between">
-          <div className="font-['Outfit',sans-serif] font-bold text-[22px] text-[#3b2d22]">Khám phá style</div>
+          <div className="font-outfit font-bold text-[22px] text-[#3b2d22]">Khám phá style</div>
           <div className="flex gap-[8px]">
             <button className="p-[8px] bg-white rounded-lg border border-[rgba(59,45,34,0.1)]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -243,8 +243,8 @@ export function CommunityPage() {
                     <img src={post.avatar} alt={post.user} className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <div className="font-['Outfit',sans-serif] font-bold text-[15px] text-[#3b2d22]">{post.user}</div>
-                    <div className="font-['Manrope',sans-serif] text-[11px] text-[rgba(59,45,34,0.5)]">{post.time}</div>
+                    <div className="font-outfit font-bold text-[15px] text-[#3b2d22]">{post.user}</div>
+                    <div className="font-manrope text-[11px] text-[rgba(59,45,34,0.5)]">{post.time}</div>
                   </div>
                 </div>
                 <button className="p-[8px] bg-transparent border-none">
@@ -267,7 +267,7 @@ export function CommunityPage() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6zM3 6h18M16 10a4 4 0 0 1-8 0" stroke="#3B2D22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <span className="font-['Outfit',sans-serif] font-bold text-[12px] text-[#3b2d22]">Shop the look</span>
+                  <span className="font-outfit font-bold text-[12px] text-[#3b2d22]">Shop the look</span>
                 </button>
               </div>
 
@@ -279,13 +279,13 @@ export function CommunityPage() {
                       <svg width="24" height="24" viewBox="0 0 24 24" fill={likes[post.id] ? "#e63946" : "none"} stroke={likes[post.id] ? "#e63946" : "#3B2D22"} strokeWidth="2">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                       </svg>
-                      <span className="font-['Outfit',sans-serif] font-bold text-[14px] text-[#3b2d22]">{post.likes + (likes[post.id] ? 1 : 0)}</span>
+                      <span className="font-outfit font-bold text-[14px] text-[#3b2d22]">{post.likes + (likes[post.id] ? 1 : 0)}</span>
                     </button>
                     <button className="flex items-center gap-[6px] bg-transparent border-none p-0">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B2D22" strokeWidth="2">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                       </svg>
-                      <span className="font-['Outfit',sans-serif] font-bold text-[14px] text-[#3b2d22]">{post.comments}</span>
+                      <span className="font-outfit font-bold text-[14px] text-[#3b2d22]">{post.comments}</span>
                     </button>
                     <button className="bg-transparent border-none p-0">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B2D22" strokeWidth="2">
@@ -299,7 +299,7 @@ export function CommunityPage() {
                     </svg>
                   </button>
                 </div>
-                <div className="font-['Manrope',sans-serif] text-[14px] text-[#3b2d22] leading-[22px]">
+                <div className="font-manrope text-[14px] text-[#3b2d22] leading-[22px]">
                   <span className="font-bold mr-[8px]">{post.user}</span>
                   {post.caption}
                 </div>
@@ -313,8 +313,8 @@ export function CommunityPage() {
       <SlideUp delay={0.4} className="mt-[48px] px-[20px] pb-[40px]">
         <div className="bg-[#f5ebe0] rounded-[32px] p-[24px]">
           <div className="text-center mb-[24px]">
-            <div className="font-['Outfit',sans-serif] font-bold text-[24px] text-[#3b2d22]">Style Battle 🔥</div>
-            <div className="font-['Manrope',sans-serif] text-[13px] text-[#7f5539]">Bình chọn phối đồ bạn yêu thích</div>
+            <div className="font-outfit font-bold text-[24px] text-[#3b2d22]">Style Battle 🔥</div>
+            <div className="font-manrope text-[13px] text-[#7f5539]">Bình chọn phối đồ bạn yêu thích</div>
           </div>
           <div className="flex gap-[16px]">
             {/* Card 1 */}
@@ -330,7 +330,7 @@ export function CommunityPage() {
                 </button>
               </div>
               <div className="text-center">
-                <div className="font-['Outfit',sans-serif] font-bold text-[14px] text-[#3b2d22]">Chic Beige</div>
+                <div className="font-outfit font-bold text-[14px] text-[#3b2d22]">Chic Beige</div>
                 <div className="text-[10px] text-[#7f5539]">{voteCounts[1]} votes</div>
               </div>
             </div>
@@ -347,7 +347,7 @@ export function CommunityPage() {
                 </button>
               </div>
               <div className="text-center">
-                <div className="font-['Outfit',sans-serif] font-bold text-[14px] text-[#3b2d22]">Urban Dark</div>
+                <div className="font-outfit font-bold text-[14px] text-[#3b2d22]">Urban Dark</div>
                 <div className="text-[10px] text-[#7f5539]">{voteCounts[2]} votes</div>
               </div>
             </div>

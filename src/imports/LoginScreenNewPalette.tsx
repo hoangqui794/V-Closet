@@ -9,7 +9,7 @@ function Frame() {
 function Heading() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Heading 1">
-      <div className="flex flex-col font-['Manrope:Extra_Bold',sans-serif] h-[36px] justify-center leading-[0] not-italic relative shrink-0 text-[#4a3728] text-[30px] tracking-[-0.75px] w-[122.44px]">
+      <div className="flex flex-col font-manrope h-[36px] justify-center leading-[0] not-italic relative shrink-0 text-[#4a3728] text-[30px] tracking-[-0.75px] w-[122.44px]">
         <p className="leading-[36px]">V-Closet</p>
       </div>
     </div>
@@ -35,7 +35,7 @@ function Margin() {
 function Heading1() {
   return (
     <div className="content-stretch flex flex-col items-center relative shrink-0 w-full" data-name="Heading 2">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[30px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[24px] text-center w-[167.77px]">
+      <div className="flex flex-col font-manrope font-bold h-[30px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[24px] text-center w-[167.77px]">
         <p className="leading-[30px]">Welcome Back</p>
       </div>
     </div>
@@ -45,7 +45,7 @@ function Heading1() {
 function Container4() {
   return (
     <div className="content-stretch flex flex-col items-center relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[24px] justify-center leading-[0] relative shrink-0 text-[16px] text-[rgba(74,55,40,0.7)] text-center w-[344.95px]">
+      <div className="flex flex-col font-manrope font-normal h-[24px] justify-center leading-[0] relative shrink-0 text-[16px] text-[rgba(74,55,40,0.7)] text-center w-[344.95px]">
         <p className="leading-[24px]">Access your digital wardrobe and virtual try-on.</p>
       </div>
     </div>
@@ -72,7 +72,7 @@ function Margin1() {
 function Label() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Label">
-      <div className="flex flex-col font-['Manrope:Semi_Bold',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(74,55,40,0.8)] w-full">
+      <div className="flex flex-col font-manrope justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(74,55,40,0.8)] w-full">
         <p className="leading-[20px]">Email or Username</p>
       </div>
     </div>
@@ -93,7 +93,7 @@ function Container8() {
   return (
     <div className="flex-[1_0_0] min-h-px min-w-px relative" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[inherit] w-full">
-        <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[#6b7280] text-[16px] w-full">
+        <div className="flex flex-col font-manrope font-normal justify-center leading-[0] relative shrink-0 text-[#6b7280] text-[16px] w-full">
           <p className="leading-[normal]">Enter your email</p>
         </div>
       </div>
@@ -147,7 +147,7 @@ function Container6() {
 function Label1() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Label">
-      <div className="flex flex-col font-['Manrope:Semi_Bold',sans-serif] h-[20px] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(74,55,40,0.8)] w-[64.36px]">
+      <div className="flex flex-col font-manrope h-[20px] justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(74,55,40,0.8)] w-[64.36px]">
         <p className="leading-[20px]">Password</p>
       </div>
     </div>
@@ -157,7 +157,7 @@ function Label1() {
 function Link() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Link">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[12px] w-[103.05px]">
+      <div className="flex flex-col font-manrope font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[12px] w-[103.05px]">
         <p className="leading-[16px]">Forgot password?</p>
       </div>
     </div>
@@ -187,7 +187,7 @@ function Container13() {
   return (
     <div className="flex-[1_0_0] min-h-px min-w-px relative" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start overflow-clip relative rounded-[inherit] w-full">
-        <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[#6b7280] text-[16px] w-full">
+        <div className="flex flex-col font-manrope font-normal justify-center leading-[0] relative shrink-0 text-[#6b7280] text-[16px] w-full">
           <p className="leading-[normal]">••••••••</p>
         </div>
       </div>
@@ -241,7 +241,7 @@ function Container10() {
 function Container15() {
   return (
     <div className="content-stretch flex flex-col items-center relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[24px] justify-center leading-[0] relative shrink-0 text-[#fdfaf6] text-[16px] text-center w-[154.77px]">
+      <div className="flex flex-col font-manrope font-bold h-[24px] justify-center leading-[0] relative shrink-0 text-[#fdfaf6] text-[16px] text-center w-[154.77px]">
         <p className="leading-[24px]">Login to Your Closet</p>
       </div>
     </div>
@@ -283,7 +283,7 @@ function Container5() {
 function Container18() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[12px] text-[rgba(74,55,40,0.4)] tracking-[0.6px] uppercase w-[123.72px]">
+      <div className="flex flex-col font-manrope font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[12px] text-[rgba(74,55,40,0.4)] tracking-[0.6px] uppercase w-[123.72px]">
         <p className="leading-[16px]">Or continue with</p>
       </div>
     </div>
@@ -332,7 +332,7 @@ function Container20() {
   return (
     <div className="relative shrink-0" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center relative">
-        <div className="flex flex-col font-['Manrope:Medium',sans-serif] font-medium h-[20px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[14px] text-center w-[46.97px]">
+        <div className="flex flex-col font-manrope font-medium h-[20px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[14px] text-center w-[46.97px]">
           <p className="leading-[20px]">Google</p>
         </div>
       </div>
@@ -354,7 +354,7 @@ function Container21() {
   return (
     <div className="relative shrink-0" data-name="Container">
       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center relative">
-        <div className="flex flex-col font-['Manrope:Medium',sans-serif] font-medium h-[20px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[14px] text-center w-[37.61px]">
+        <div className="flex flex-col font-manrope font-medium h-[20px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[14px] text-center w-[37.61px]">
           <p className="leading-[20px]">Apple</p>
         </div>
       </div>
@@ -388,7 +388,7 @@ function Container19() {
 function Link1() {
   return (
     <div className="content-stretch flex items-start justify-center relative shrink-0" data-name="Link">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[24px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[16px] text-center w-[65.72px]">
+      <div className="flex flex-col font-manrope font-bold h-[24px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[16px] text-center w-[65.72px]">
         <p className="leading-[24px]">Register</p>
       </div>
     </div>
@@ -398,7 +398,7 @@ function Link1() {
 function Container22() {
   return (
     <div className="content-stretch flex gap-[4px] items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[24px] justify-center leading-[0] relative shrink-0 text-[16px] text-[rgba(74,55,40,0.6)] text-center w-[174.83px]">
+      <div className="flex flex-col font-manrope font-normal h-[24px] justify-center leading-[0] relative shrink-0 text-[16px] text-[rgba(74,55,40,0.6)] text-center w-[174.83px]">
         <p className="leading-[24px]">{`Don't have an account? `}</p>
       </div>
       <Link1 />

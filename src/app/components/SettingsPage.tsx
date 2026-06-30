@@ -23,7 +23,7 @@ function SettingItem({ label, icon, onClick, destructive }: SettingItemProps) {
                 <div className={`w-[36px] h-[36px] rounded-[10px] flex items-center justify-center shrink-0 ${destructive ? 'bg-[rgba(231,76,60,0.1)]' : 'bg-[#f0e6da]'}`}>
                     {icon}
                 </div>
-                <span className={`font-['Manrope',sans-serif] font-medium text-[16px] ${destructive ? 'text-[#e74c3c]' : 'text-[#4a3728]'}`}>
+                <span className={`font-manrope font-medium text-[16px] ${destructive ? 'text-[#e74c3c]' : 'text-[#4a3728]'}`}>
                     {label}
                 </span>
             </div>
@@ -54,7 +54,7 @@ export function SettingsPage() {
                     </svg>
                 </button>
                 <div className="flex-1 text-center pr-[18px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
+                    <span className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
                         {t("settings")}
                     </span>
                 </div>
@@ -63,7 +63,7 @@ export function SettingsPage() {
             <div className="flex-1 overflow-y-auto pb-[40px]">
                 {/* Section: Tài khoản */}
                 <div className="mt-[24px] px-[20px] mb-[12px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
+                    <span className="font-manrope font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
                         {t("account")}
                     </span>
                 </div>
@@ -86,7 +86,7 @@ export function SettingsPage() {
 
                 {/* Section: Thông báo & Bảo mật */}
                 <div className="mt-[32px] px-[20px] mb-[12px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
+                    <span className="font-manrope font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
                         App
                     </span>
                 </div>
@@ -116,7 +116,7 @@ export function SettingsPage() {
 
                 {/* Section: Hỗ trợ */}
                 <div className="mt-[32px] px-[20px] mb-[12px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
+                    <span className="font-manrope font-[800] text-[13px] text-[rgba(74,55,40,0.45)] uppercase tracking-[1px]">
                         Hỗ trợ & Pháp lý
                     </span>
                 </div>
@@ -147,10 +147,10 @@ export function SettingsPage() {
 
                 {/* Footer info */}
                 <div className="mt-[40px] flex flex-col items-center">
-                    <div className="font-['Manrope',sans-serif] font-[700] text-[14px] text-[#4a3728]">
+                    <div className="font-manrope font-[700] text-[14px] text-[#4a3728]">
                         V-Closet
                     </div>
-                    <div className="font-['Manrope',sans-serif] font-[400] text-[12px] text-[rgba(74,55,40,0.4)] mt-[4px]">
+                    <div className="font-manrope font-[400] text-[12px] text-[rgba(74,55,40,0.4)] mt-[4px]">
                         Phiên bản 1.0.2 (Build 2026)
                     </div>
                 </div>

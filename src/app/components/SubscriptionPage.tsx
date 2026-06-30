@@ -46,7 +46,7 @@ export function SubscriptionPage() {
                     </svg>
                 </button>
                 <div className="flex-1 text-center pr-[18px]">
-                    <span className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
+                    <span className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
                         {t("subscription")}
                     </span>
                 </div>
@@ -55,10 +55,10 @@ export function SubscriptionPage() {
             <div className="px-[16px] mt-[24px]">
                 <SlideUp>
                     <div className="text-center mb-[32px]">
-                        <h1 className="font-['Manrope',sans-serif] font-[800] text-[24px] text-[#4a3728] leading-[32px]">
+                        <h1 className="font-manrope font-[800] text-[24px] text-[#4a3728] leading-[32px]">
                             Nâng cấp trải nghiệm <br /> cùng V-Closet Premium
                         </h1>
-                        <p className="font-['Manrope',sans-serif] font-normal text-[14px] text-[rgba(74,55,40,0.6)] mt-[8px]">
+                        <p className="font-manrope font-normal text-[14px] text-[rgba(74,55,40,0.6)] mt-[8px]">
                             Chọn gói phù hợp để tận hưởng trọn bộ tính năng AI
                         </p>
                     </div>
@@ -111,7 +111,7 @@ export function SubscriptionPage() {
                 <SlideUp delay={0.4}>
                     <div className="bg-white rounded-[24px] border border-[rgba(74,55,40,0.1)] overflow-hidden shadow-sm">
                         <div className="p-[20px] bg-[rgba(74,55,40,0.03)] border-b border-[rgba(74,55,40,0.05)]">
-                            <span className="font-['Manrope',sans-serif] font-[800] text-[14px] text-[#4a3728] uppercase tracking-[1px]">
+                            <span className="font-manrope font-[800] text-[14px] text-[#4a3728] uppercase tracking-[1px]">
                                 So sánh các gói
                             </span>
                         </div>
@@ -119,23 +119,23 @@ export function SubscriptionPage() {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-[rgba(74,55,40,0.01)]">
-                                        <th className="p-[12px] font-['Manrope',sans-serif] font-[700] text-[12px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px]">Tính năng</th>
-                                        <th className="p-[12px] font-['Manrope',sans-serif] font-[700] text-[12px] text-[#4a3728] text-center">FREE</th>
-                                        <th className="p-[12px] font-['Manrope',sans-serif] font-[700] text-[12px] text-[#4a3728] text-center">MONTHLY</th>
-                                        <th className="p-[12px] font-['Manrope',sans-serif] font-[700] text-[12px] text-[#4a3728] text-center">YEARLY</th>
+                                        <th className="p-[12px] font-manrope font-[700] text-[12px] text-[rgba(74,55,40,0.5)] uppercase tracking-[0.5px]">Tính năng</th>
+                                        <th className="p-[12px] font-manrope font-[700] text-[12px] text-[#4a3728] text-center">FREE</th>
+                                        <th className="p-[12px] font-manrope font-[700] text-[12px] text-[#4a3728] text-center">MONTHLY</th>
+                                        <th className="p-[12px] font-manrope font-[700] text-[12px] text-[#4a3728] text-center">YEARLY</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {features.map((f, i) => (
                                         <tr key={i} className="border-t border-[rgba(74,55,40,0.05)]">
-                                            <td className="p-[12px] font-['Manrope',sans-serif] font-medium text-[13px] text-[#4a3728]">{f.name}</td>
-                                            <td className="p-[12px] font-['Manrope',sans-serif] text-[12px] text-center text-[rgba(74,55,40,0.7)]">
+                                            <td className="p-[12px] font-manrope font-medium text-[13px] text-[#4a3728]">{f.name}</td>
+                                            <td className="p-[12px] font-manrope text-[12px] text-center text-[rgba(74,55,40,0.7)]">
                                                 {typeof f.free === "boolean" ? (f.free ? "✓" : "-") : f.free}
                                             </td>
-                                            <td className="p-[12px] font-['Manrope',sans-serif] text-[12px] text-center text-[#4a3728] font-bold">
+                                            <td className="p-[12px] font-manrope text-[12px] text-center text-[#4a3728] font-bold">
                                                 {typeof f.monthly === "boolean" ? (f.monthly ? "✓" : "-") : f.monthly}
                                             </td>
-                                            <td className="p-[12px] font-['Manrope',sans-serif] text-[12px] text-center text-[#4a3728] font-bold">
+                                            <td className="p-[12px] font-manrope text-[12px] text-center text-[#4a3728] font-bold">
                                                 {typeof f.yearly === "boolean" ? (f.yearly ? "✓" : "-") : f.yearly}
                                             </td>
                                         </tr>
@@ -181,21 +181,21 @@ function PlanCard({
         >
             {isBestValue && (
                 <div className="absolute -top-[12px] right-[24px] bg-[#e74c3c] px-[12px] py-[4px] rounded-full shadow-md">
-                    <span className="font-['Manrope',sans-serif] font-bold text-[10px] text-white uppercase tracking-[0.5px]">
+                    <span className="font-manrope font-bold text-[10px] text-white uppercase tracking-[0.5px]">
                         Best Value
                     </span>
                 </div>
             )}
             <div className="flex justify-between items-start mb-[8px]">
-                <div className="font-['Manrope',sans-serif] font-[800] text-[14px] uppercase tracking-[1.5px] opacity-70">
+                <div className="font-manrope font-[800] text-[14px] uppercase tracking-[1.5px] opacity-70">
                     {title}
                 </div>
             </div>
             <div className="flex items-baseline gap-[4px] mb-[4px]">
-                <span className="font-['Manrope',sans-serif] font-[800] text-[28px] tracking-[-1px]">{price}</span>
-                {period && <span className="font-['Manrope',sans-serif] font-medium text-[14px] opacity-60">{period}</span>}
+                <span className="font-manrope font-[800] text-[28px] tracking-[-1px]">{price}</span>
+                {period && <span className="font-manrope font-medium text-[14px] opacity-60">{period}</span>}
             </div>
-            <div className="font-['Manrope',sans-serif] font-medium text-[14px] opacity-80 mb-[20px]">
+            <div className="font-manrope font-medium text-[14px] opacity-80 mb-[20px]">
                 {description}
             </div>
             <div className="flex flex-col gap-[10px] mb-[24px] flex-1">
@@ -204,13 +204,13 @@ function PlanCard({
                         <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
                             <path d="M1 5L5 9L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <span className="font-['Manrope',sans-serif] font-medium text-[13px]">{f}</span>
+                        <span className="font-manrope font-medium text-[13px]">{f}</span>
                     </div>
                 ))}
             </div>
             <button
                 onClick={onSelect}
-                className={`w-full h-[52px] rounded-[16px] font-['Manrope',sans-serif] font-[800] text-[15px] cursor-pointer transition-all border-none ${isPremium ? "bg-[#fdfaf6] text-[#4a3728]" : "bg-[#4a3728] text-[#fdfaf6]"
+                className={`w-full h-[52px] rounded-[16px] font-manrope font-[800] text-[15px] cursor-pointer transition-all border-none ${isPremium ? "bg-[#fdfaf6] text-[#4a3728]" : "bg-[#4a3728] text-[#fdfaf6]"
                     }`}
             >
                 Chọn {title}

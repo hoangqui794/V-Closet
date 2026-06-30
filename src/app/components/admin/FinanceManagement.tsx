@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router";
 import {
     CreditCard,
@@ -128,10 +128,10 @@ export function FinanceManagement() {
 
     const getTxStatusBadgeColor = (status: string) => {
         switch (status.toLowerCase()) {
-            case "paid": case "success": return " dark:bg-green-500/10 dark:text-green-400 border-none";
-            case "pending": return " dark:bg-amber-500/10 dark:text-amber-400 border-none animate-pulse";
-            case "failed": return " dark:bg-red-500/10 dark:text-red-400 border-none";
-            default: return " dark:bg-muted dark:text-foreground border-none";
+            case "paid": case "success": return " bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-none";
+            case "pending": return " bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-none animate-pulse";
+            case "failed": return " bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 border-none";
+            default: return " bg-gray-100 text-gray-700 dark:bg-muted dark:text-foreground border-none";
         }
     };
 
@@ -151,7 +151,7 @@ export function FinanceManagement() {
                     <DollarSign className="w-7 h-7" /> Quản Lý Tài Chính
                 </h2>
                 <p className="text-muted-foreground mt-1">
-                    Doi soat giao dich thanh toan truc tuyen va thong ke doanh thu.
+                    Đối soát giao dịch thanh toán trực tuyến và thống kê doanh thu.
                 </p>
             </div>
 
@@ -159,10 +159,10 @@ export function FinanceManagement() {
             <div className="border-b border-muted">
                 <div className="flex items-center gap-0">
                     <button onClick={() => setActiveTab("transactions")} className={tabClass("transactions")}>
-                        <CreditCard className="w-3.5 h-3.5" /> Doi soat Giao dich Momo/PayOS
+                        <CreditCard className="w-3.5 h-3.5" /> Đối soát Giao dịch Momo/PayOS
                     </button>
                     <button onClick={() => setActiveTab("revenue")} className={tabClass("revenue")}>
-                        <TrendingUp className="w-3.5 h-3.5" /> Thong ke Doanh thu
+                        <TrendingUp className="w-3.5 h-3.5" /> Thống kê Doanh thu
                     </button>
                 </div>
             </div>
@@ -174,31 +174,31 @@ export function FinanceManagement() {
                         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
                             <div>
                                 <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
-                                    <CreditCard className="w-5 h-5" /> Nhat ky giao dich truc tuyen
+                                    <CreditCard className="w-5 h-5" /> Nhật ký giao dịch trực tuyến
                                 </CardTitle>
                                 <CardDescription>
-                                    Xem va doi soat toan bo dong tien thanh toan truc tuyen qua cong Momo hoac PayOS.
+                                    Xem và đối soát toàn bộ dòng tiền thanh toán trực tuyến qua cổng Momo hoặc PayOS.
                                 </CardDescription>
                             </div>
                             <div className="flex flex-wrap items-center gap-3">
                                 <div className="relative">
                                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-                                    <Input type="text" placeholder="Tim theo ten hoac email..." value={txSearchTerm}
+                                    <Input type="text" placeholder="Tìm theo tên hoặc email..." value={txSearchTerm}
                                         onChange={e => { setTxSearchTerm(e.target.value); setTxPage(1); }}
                                         className="h-9 pl-8 w-52 text-xs bg-background" />
                                 </div>
                                 <select value={txGatewayFilter} onChange={e => { setTxGatewayFilter(e.target.value); setTxPage(1); }}
                                     className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none">
-                                    <option value="">Tat ca Cong</option>
-                                    <option value="Momo">Vi Momo</option>
-                                    <option value="PayOS">Cong PayOS</option>
+                                    <option value="">Tất cả Cổng</option>
+                                    <option value="Momo">Ví Momo</option>
+                                    <option value="PayOS">Cổng PayOS</option>
                                 </select>
                                 <select value={txStatusFilter} onChange={e => { setTxStatusFilter(e.target.value); setTxPage(1); }}
                                     className="h-9 rounded-lg border border-input bg-background px-2.5 py-1 text-xs focus-visible:outline-none">
-                                    <option value="">Tat ca TT</option>
-                                    <option value="Paid">Da thanh toan</option>
-                                    <option value="Pending">Cho thanh toan</option>
-                                    <option value="Failed">That bai</option>
+                                    <option value="">Tất cả TT</option>
+                                    <option value="Paid">Đã thanh toán</option>
+                                    <option value="Pending">Chờ thanh toán</option>
+                                    <option value="Failed">Thất bại</option>
                                 </select>
                             </div>
                         </CardHeader>
@@ -206,12 +206,12 @@ export function FinanceManagement() {
                             {loadingTx ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
                                     <Loader2 className="w-8 h-8 animate-spin text-[#4a3728] dark:text-foreground" />
-                                    <span className="text-sm">Dang tai lich su giao dich...</span>
+                                    <span className="text-sm">Đang tải lịch sử giao dịch...</span>
                                 </div>
                             ) : transactions.length === 0 ? (
                                 <div className="text-center py-16 text-muted-foreground space-y-2">
                                     <HelpCircle className="w-12 h-12 mx-auto text-muted-foreground/30" />
-                                    <p className="text-sm font-semibold">Chua phat sinh giao dich nao</p>
+                                    <p className="text-sm font-semibold">Chưa phát sinh giao dịch nào</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -220,13 +220,13 @@ export function FinanceManagement() {
                                             <TableHeader className="bg-muted/50">
                                                 <TableRow>
                                                     <TableHead className="w-12 text-center">STT</TableHead>
-                                                    <TableHead>Ma giao dich cong</TableHead>
-                                                    <TableHead>Khach hang</TableHead>
-                                                    <TableHead>Goi Premium</TableHead>
-                                                    <TableHead>So tien</TableHead>
-                                                    <TableHead>Cong ket noi</TableHead>
-                                                    <TableHead>Trang thai</TableHead>
-                                                    <TableHead>Thoi gian</TableHead>
+                                                    <TableHead>Mã giao dịch cổng</TableHead>
+                                                    <TableHead>Khách hàng</TableHead>
+                                                    <TableHead>Gói Premium</TableHead>
+                                                    <TableHead>Số tiền</TableHead>
+                                                    <TableHead>Cổng kết nối</TableHead>
+                                                    <TableHead>Trạng thái</TableHead>
+                                                    <TableHead>Thời gian</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -237,23 +237,23 @@ export function FinanceManagement() {
                                                     });
                                                     return (
                                                         <TableRow key={tx.id} className="hover:bg-muted/30 transition-colors">
-                                                            <TableCell className="text-center font-mono text-xs text-muted-foreground">
+                                                            <TableCell className="text-center font-medium text-xs text-muted-foreground">
                                                                 {(txPage - 1) * txPageSize + idx + 1}
                                                             </TableCell>
-                                                            <TableCell className="font-mono text-xs font-semibold text-[#4a3728] dark:text-foreground">
+                                                            <TableCell className="font-medium text-xs text-[#4a3728] dark:text-foreground">
                                                                 {tx.gatewayTransactionId && (tx.gatewayTransactionId.startsWith("http://") || tx.gatewayTransactionId.startsWith("https://")) ? (
                                                                     <button onClick={() => setZoomImage(tx.gatewayTransactionId)}
                                                                         className="flex items-center gap-1.5 dark:text-amber-400 hover:underline bg-[#4a3728]/5 px-2.5 py-1 rounded-lg transition-colors border border-amber-800/10 cursor-pointer font-semibold text-[11px]">
-                                                                        <Eye className="w-3.5 h-3.5 shrink-0" /> Xem minh chung
+                                                                        <Eye className="w-3.5 h-3.5 shrink-0" /> Xem minh chứng
                                                                     </button>
                                                                 ) : (tx.gatewayTransactionId || "N/A")}
                                                             </TableCell>
                                                             <TableCell>
                                                                 <div className="text-xs font-semibold dark:text-foreground">{tx.userDisplayName}</div>
-                                                                <div className="text-[10px] text-muted-foreground font-mono">ID: <span title={tx.userId}>{tx.userId ? tx.userId.substring(0, 8) + '...' : ''}</span></div>
+                                                                <div className="text-[10px] text-muted-foreground font-medium">ID: <span title={tx.userId}>{tx.userId ? tx.userId.substring(0, 8) + '...' : ''}</span></div>
                                                             </TableCell>
                                                             <TableCell className="text-xs font-medium dark:text-muted-foreground">{tx.subscriptionPlanName}</TableCell>
-                                                            <TableCell className="font-mono font-bold text-xs">{tx.amount.toLocaleString("vi-VN")} {tx.currency}</TableCell>
+                                                            <TableCell className="font-semibold text-xs">{tx.amount.toLocaleString("vi-VN")} {tx.currency}</TableCell>
                                                             <TableCell>
                                                                 <Badge variant="outline" className="border-muted bg-[#4a3728]/5 dark:bg-primary/5 text-[#4a3728] dark:text-foreground text-[10px]">
                                                                     {tx.paymentGateway}
@@ -264,7 +264,7 @@ export function FinanceManagement() {
                                                                     {tx.status}
                                                                 </Badge>
                                                             </TableCell>
-                                                            <TableCell className="text-xs font-mono text-muted-foreground">{formattedDate}</TableCell>
+                                                            <TableCell className="text-xs font-medium text-muted-foreground">{formattedDate}</TableCell>
                                                         </TableRow>
                                                     );
                                                 })}
@@ -272,9 +272,9 @@ export function FinanceManagement() {
                                         </Table>
                                     </div>
                                     <div className="flex items-center justify-between pt-2">
-                                        <p className="text-xs text-muted-foreground font-semibold">Tong giao dich: {txTotalCount} (Trang {txPage})</p>
+                                        <p className="text-xs text-muted-foreground font-semibold">Tổng giao dịch: {txTotalCount} (Trang {txPage})</p>
                                         <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="sm" onClick={() => setTxPage(p => Math.max(p - 1, 1))} disabled={txPage === 1} className="h-8 rounded-lg">Truoc</Button>
+                                            <Button variant="outline" size="sm" onClick={() => setTxPage(p => Math.max(p - 1, 1))} disabled={txPage === 1} className="h-8 rounded-lg">Trước</Button>
                                             <Button variant="outline" size="sm" onClick={() => setTxPage(p => p + 1)} disabled={transactions.length < txPageSize} className="h-8 rounded-lg">Sau</Button>
                                         </div>
                                     </div>
@@ -292,9 +292,9 @@ export function FinanceManagement() {
                         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-muted gap-4">
                             <div>
                                 <CardTitle className="text-[#4a3728] dark:text-foreground text-lg flex items-center gap-2">
-                                    <BarChart2 className="w-5 h-5" /> Thong ke Doanh thu
+                                    <BarChart2 className="w-5 h-5" /> Thống kê Doanh thu
                                 </CardTitle>
-                                <CardDescription>Tong hop doanh thu tu cac giao dich thanh toan truc tuyen thanh cong.</CardDescription>
+                                <CardDescription>Tổng hợp doanh thu từ các giao dịch thanh toán trực tuyến thành công.</CardDescription>
                             </div>
                             <div className="flex flex-wrap items-center gap-3">
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

@@ -52,7 +52,7 @@ export function LoginPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-0 mb-[24px]"
         >
-          <div className="font-['Manrope',sans-serif] font-[800] text-[30px] text-[#4a3728] tracking-[-0.75px] leading-[36px]">
+          <div className="font-manrope font-[800] text-[30px] text-[#4a3728] tracking-[-0.75px] leading-[36px]">
             V-Closet
           </div>
         </motion.div>
@@ -64,10 +64,10 @@ export function LoginPage() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex flex-col gap-[4px] items-center w-full mb-[28px]"
         >
-          <div className="font-['Manrope',sans-serif] font-bold text-[24px] text-[#4a3728] text-center leading-[30px]">
+          <div className="font-manrope font-bold text-[24px] text-[#4a3728] text-center leading-[30px]">
             {t("welcomeBack")}
           </div>
-          <div className="font-['Manrope',sans-serif] font-normal text-[16px] text-[rgba(74,55,40,0.7)] text-center leading-[24px]">
+          <div className="font-manrope font-normal text-[16px] text-[rgba(74,55,40,0.7)] text-center leading-[24px]">
             {t("loginSub")}
           </div>
         </motion.div>
@@ -82,7 +82,7 @@ export function LoginPage() {
           {/* Email Field */}
           <div className="flex flex-col gap-[8px] items-start w-full">
             <div className="pl-[4px] w-full">
-              <div className="font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
+              <div className="font-manrope font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
                 {t("emailOrUser")}
               </div>
             </div>
@@ -93,7 +93,7 @@ export function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t("enterEmail")}
-                  className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[17px] font-['Manrope',sans-serif] font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
+                  className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[17px] font-manrope font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
                 />
               </div>
               <div className="absolute left-[16px] top-1/2 -translate-y-1/2">
@@ -116,10 +116,10 @@ export function LoginPage() {
           {/* Password Field */}
           <div className="flex flex-col gap-[8px] items-start w-full">
             <div className="pl-[4px] flex items-center justify-between w-full">
-              <div className="font-['Manrope',sans-serif] font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
+              <div className="font-manrope font-[600] text-[14px] text-[rgba(74,55,40,0.8)] leading-[20px]">
                 {t("password")}
               </div>
-              <button className="font-['Manrope',sans-serif] font-bold text-[12px] text-[#4a3728] leading-[16px] bg-transparent border-none cursor-pointer p-0">
+              <button className="font-manrope font-bold text-[12px] text-[#4a3728] leading-[16px] bg-transparent border-none cursor-pointer p-0">
                 {t("forgotPassword")}
               </button>
             </div>
@@ -130,7 +130,7 @@ export function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="????????"
-                  className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[17px] font-['Manrope',sans-serif] font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
+                  className="w-full h-full rounded-[12px] border border-[#dccbb5] pl-[49px] pr-[17px] py-[17px] font-manrope font-normal text-[16px] text-[#4a3728] placeholder-[#6b7280] bg-white outline-none focus:border-[#4a3728]"
                 />
               </div>
               <div className="absolute left-[20px] top-1/2 -translate-y-1/2">
@@ -158,7 +158,7 @@ export function LoginPage() {
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
             className="bg-[#4a3728] flex gap-[8px] h-[56px] items-center justify-center rounded-[12px] w-full cursor-pointer border-none shadow-[0px_10px_15px_-3px_rgba(74,55,40,0.2),0px_4px_6px_-4px_rgba(74,55,40,0.2)]"
           >
-            <span className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#fdfaf6] text-center leading-[24px]">
+            <span className="font-manrope font-bold text-[16px] text-[#fdfaf6] text-center leading-[24px]">
               {t("loginToCloset")}
             </span>
             <svg width="15" height="12" viewBox="0 0 15 12" fill="none">
@@ -175,7 +175,7 @@ export function LoginPage() {
           className="flex gap-[16px] items-center w-full max-w-[254px] mt-[20px]"
         >
           <div className="bg-[rgba(220,203,181,0.6)] flex-1 h-px" />
-          <div className="font-['Manrope',sans-serif] font-bold text-[12px] text-[rgba(74,55,40,0.4)] tracking-[0.6px] uppercase leading-[16px]">
+          <div className="font-manrope font-bold text-[12px] text-[rgba(74,55,40,0.4)] tracking-[0.6px] uppercase leading-[16px]">
             {t("orContinueWith")}
           </div>
           <div className="bg-[rgba(220,203,181,0.6)] flex-1 h-px" />
@@ -206,7 +206,7 @@ export function LoginPage() {
                 </clipPath>
               </defs>
             </svg>
-            <span className="font-['Manrope',sans-serif] font-medium text-[14px] text-[#4a3728] text-center leading-[20px]">
+            <span className="font-manrope font-medium text-[14px] text-[#4a3728] text-center leading-[20px]">
               Google
             </span>
           </motion.button>
@@ -225,7 +225,7 @@ export function LoginPage() {
                 />
               </div>
             </div>
-            <span className="font-['Manrope',sans-serif] font-medium text-[14px] text-[#4a3728] text-center leading-[20px]">
+            <span className="font-manrope font-medium text-[14px] text-[#4a3728] text-center leading-[20px]">
               Apple
             </span>
           </motion.button>
@@ -238,11 +238,11 @@ export function LoginPage() {
           transition={{ duration: 0.5, delay: 0.8 }}
           className="flex gap-[4px] items-start mt-[27px]"
         >
-          <span className="font-['Manrope',sans-serif] font-normal text-[16px] text-[rgba(74,55,40,0.6)] text-center leading-[24px]">
+          <span className="font-manrope font-normal text-[16px] text-[rgba(74,55,40,0.6)] text-center leading-[24px]">
             {t("dontHaveAccount")}{" "}
           </span>
           <button
-            className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#4a3728] text-center leading-[24px] bg-transparent border-none cursor-pointer p-0"
+            className="font-manrope font-bold text-[16px] text-[#4a3728] text-center leading-[24px] bg-transparent border-none cursor-pointer p-0"
             onClick={() => navigate("/register")}
           >
             {t("register")}

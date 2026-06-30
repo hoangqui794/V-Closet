@@ -45,7 +45,7 @@ export function ShopeeImportPage() {
                         <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#3B2D22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
-                <div className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#3b2d22] tracking-[-0.45px]">
+                <div className="font-manrope font-[800] text-[18px] text-[#3b2d22] tracking-[-0.45px]">
                     Import Shopee
                 </div>
                 <div className="w-[40px]" />
@@ -61,10 +61,10 @@ export function ShopeeImportPage() {
                             </svg>
                         </div>
                         <div>
-                            <div className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#3b2d22]">
+                            <div className="font-manrope font-bold text-[16px] text-[#3b2d22]">
                                 {connected ? "Hi, Truong! 👋" : "Chưa kết nối"}
                             </div>
-                            <div className="font-['Manrope',sans-serif] text-[13px] text-[rgba(59,45,34,0.6)]">
+                            <div className="font-manrope text-[13px] text-[rgba(59,45,34,0.6)]">
                                 {connected ? "Cập nhật đơn hàng: Vừa xong" : "Đăng nhập Shopee để lấy kho đồ"}
                             </div>
                         </div>
@@ -83,14 +83,14 @@ export function ShopeeImportPage() {
 
                 {/* Link Import */}
                 <div className="mb-[32px]">
-                    <div className="font-['Manrope',sans-serif] font-bold text-[14px] text-[#3b2d22] uppercase tracking-[1px] mb-[12px] pl-[4px]">
+                    <div className="font-manrope font-bold text-[14px] text-[#3b2d22] uppercase tracking-[1px] mb-[12px] pl-[4px]">
                         Nhập link sản phẩm
                     </div>
                     <div className="flex gap-[8px]">
                         <input
                             type="text"
                             placeholder="Dán link sản phẩm Shopee tại đây..."
-                            className="flex-1 h-[48px] bg-white rounded-[14px] px-[16px] border border-[rgba(214,204,194,0.8)] focus:border-[#4a3728] focus:outline-none font-['Manrope',sans-serif] text-[14px]"
+                            className="flex-1 h-[48px] bg-white rounded-[14px] px-[16px] border border-[rgba(214,204,194,0.8)] focus:border-[#4a3728] focus:outline-none font-manrope text-[14px]"
                         />
                         <button className="h-[48px] px-[20px] bg-[#4a3728] rounded-[14px] border-none text-white font-bold text-[14px] cursor-pointer active:scale-95 transition-transform">
                             Tìm
@@ -101,7 +101,7 @@ export function ShopeeImportPage() {
                 {/* Recent Orders List */}
                 <div>
                     <div className="flex items-center justify-between mb-[16px] px-[4px]">
-                        <div className="font-['Manrope',sans-serif] font-bold text-[14px] text-[#3b2d22] uppercase tracking-[1px]">
+                        <div className="font-manrope font-bold text-[14px] text-[#3b2d22] uppercase tracking-[1px]">
                             Đơn hàng gần đây
                         </div>
                         {connected && <span className="text-[12px] text-[#EE4D2D] font-bold">Xem tất cả</span>}
@@ -117,10 +117,10 @@ export function ShopeeImportPage() {
                                 <div className="size-[64px] bg-[#f5f0e6] rounded-full flex items-center justify-center mb-[16px]">
                                     <span className="text-[24px]">📦</span>
                                 </div>
-                                <div className="font-['Manrope',sans-serif] font-bold text-[15px] text-[#3b2d22] mb-[4px]">
+                                <div className="font-manrope font-bold text-[15px] text-[#3b2d22] mb-[4px]">
                                     Bạn chưa đăng nhập Shopee
                                 </div>
-                                <div className="font-['Manrope',sans-serif] text-[13px] text-[rgba(59,45,34,0.5)]">
+                                <div className="font-manrope text-[13px] text-[rgba(59,45,34,0.5)]">
                                     Hãy kết nối tài khoản để tự động lấy các trang phục bạn đã mua nhé!
                                 </div>
                             </motion.div>
@@ -138,14 +138,14 @@ export function ShopeeImportPage() {
                                             <img src={order.img} alt={order.name} className="size-full object-cover" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-['Manrope',sans-serif] font-bold text-[14px] text-[#3b2d22] truncate">
+                                            <div className="font-manrope font-bold text-[14px] text-[#3b2d22] truncate">
                                                 {order.name}
                                             </div>
-                                            <div className="font-['Manrope',sans-serif] text-[12px] text-[rgba(59,45,34,0.5)] mb-[4px]">
+                                            <div className="font-manrope text-[12px] text-[rgba(59,45,34,0.5)] mb-[4px]">
                                                 {order.shop}
                                             </div>
                                             <div className="flex items-center gap-[8px]">
-                                                <span className="font-['Manrope',sans-serif] font-bold text-[13px] text-[#EE4D2D]">
+                                                <span className="font-manrope font-bold text-[13px] text-[#EE4D2D]">
                                                     {order.price}
                                                 </span>
                                                 <div className="h-[10px] w-px bg-[rgba(59,45,34,0.1)]" />
@@ -174,7 +174,7 @@ export function ShopeeImportPage() {
             <div className="absolute bottom-[20px] left-0 right-0 flex justify-center pointer-events-none opacity-40">
                 <div className="flex items-center gap-[6px]">
                     <span className="text-[12px]">🛡️</span>
-                    <span className="font-['Manrope',sans-serif] text-[10px] text-[#3b2d22] uppercase tracking-[1px] font-bold">
+                    <span className="font-manrope text-[10px] text-[#3b2d22] uppercase tracking-[1px] font-bold">
                         V-Closet Secure Partnership
                     </span>
                 </div>

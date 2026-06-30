@@ -103,7 +103,7 @@ export function BottomNav() {
             </div>
 
             <span
-              className={`font-['Manrope',sans-serif] text-[10px] tracking-[0.2px] transition-colors duration-150 ${active
+              className={`font-manrope text-[10px] tracking-[0.2px] transition-colors duration-150 ${active
                   ? "text-[#4a3728]"
                   : "text-[#8b7355]"
                 }`}

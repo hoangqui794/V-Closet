@@ -17,7 +17,7 @@ function Container1() {
 function Container2() {
   return (
     <div className="content-stretch flex flex-col items-center relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Medium',sans-serif] font-medium h-[20px] justify-center leading-[0] relative shrink-0 text-[14px] text-[rgba(255,255,255,0.6)] text-center w-[256.11px]">
+      <div className="flex flex-col font-manrope font-medium h-[20px] justify-center leading-[0] relative shrink-0 text-[14px] text-[rgba(255,255,255,0.6)] text-center w-[256.11px]">
         <p className="leading-[20px]">Đặt trang phục phẳng trong khung hình</p>
       </div>
     </div>
@@ -55,7 +55,7 @@ function AiGuideOverlay() {
 function Container4() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[12px] text-white tracking-[0.6px] uppercase w-[79.44px]">
+      <div className="flex flex-col font-manrope font-bold h-[16px] justify-center leading-[0] relative shrink-0 text-[12px] text-white tracking-[0.6px] uppercase w-[79.44px]">
         <p className="leading-[16px]">Tách nền AI</p>
       </div>
     </div>
@@ -65,7 +65,7 @@ function Container4() {
 function Container5() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-[rgba(255,255,255,0.7)] w-[99.7px]">
+      <div className="flex flex-col font-manrope font-normal h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-[rgba(255,255,255,0.7)] w-[99.7px]">
         <p className="leading-[15px]">Tự động làm sạch ảnh</p>
       </div>
     </div>
@@ -165,7 +165,7 @@ function Button1() {
 function Heading() {
   return (
     <div className="content-stretch flex flex-col h-[40px] items-center relative shrink-0 w-[292px]" data-name="Heading 2">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold justify-center leading-[22.5px] relative shrink-0 text-[#4a3728] text-[18px] text-center tracking-[-0.45px] w-[232px]">
+      <div className="flex flex-col font-manrope font-bold justify-center leading-[22.5px] relative shrink-0 text-[#4a3728] text-[18px] text-center tracking-[-0.45px] w-[232px]">
         <p className="mb-0">&nbsp;</p>
         <p>Chụp ảnh trang phục</p>
       </div>
@@ -236,7 +236,7 @@ function Button3() {
   return (
     <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Button">
       <BackgroundBorder />
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-[rgba(74,55,40,0.6)] text-center w-[42.45px]">
+      <div className="flex flex-col font-manrope font-bold h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-[rgba(74,55,40,0.6)] text-center w-[42.45px]">
         <p className="leading-[15px]">GẦN ĐÂY</p>
       </div>
     </div>
@@ -300,7 +300,7 @@ function Button5() {
   return (
     <div className="content-stretch flex flex-col gap-[4px] items-center relative shrink-0" data-name="Button">
       <BackgroundBorder1 />
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-[rgba(74,55,40,0.6)] text-center w-[44.73px]">
+      <div className="flex flex-col font-manrope font-bold h-[15px] justify-center leading-[0] relative shrink-0 text-[10px] text-[rgba(74,55,40,0.6)] text-center w-[44.73px]">
         <p className="leading-[15px]">THƯ VIỆN</p>
       </div>
     </div>
@@ -368,7 +368,7 @@ function Container12() {
 function Container14() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[66px]">
+      <div className="flex flex-col font-manrope font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[66px]">
         <p className="leading-[18px]">Cộng đồng</p>
       </div>
     </div>
@@ -409,7 +409,7 @@ function Container15() {
 function Container17() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[32.78px]">
+      <div className="flex flex-col font-manrope font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[32.78px]">
         <p className="leading-[18px]">Tủ đồ</p>
       </div>
     </div>
@@ -458,7 +458,7 @@ function Container18() {
 function Container21() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold h-[18px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[12px] tracking-[0.3px] w-[61px]">
+      <div className="flex flex-col font-manrope font-bold h-[18px] justify-center leading-[0] relative shrink-0 text-[#4a3728] text-[12px] tracking-[0.3px] w-[61px]">
         <p className="leading-[18px]">Chụp ảnh</p>
       </div>
     </div>
@@ -499,7 +499,7 @@ function Container22() {
 function Container24() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0 w-[83px]" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Regular',sans-serif] font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] text-center tracking-[0.3px] w-[83px]">
+      <div className="flex flex-col font-manrope font-normal h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] text-center tracking-[0.3px] w-[83px]">
         <p className="leading-[18px]">Phối đồ</p>
       </div>
     </div>
@@ -540,7 +540,7 @@ function Container25() {
 function Container27() {
   return (
     <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Container">
-      <div className="flex flex-col font-['Manrope:Medium',sans-serif] font-medium h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[48.45px]">
+      <div className="flex flex-col font-manrope font-medium h-[18px] justify-center leading-[0] relative shrink-0 text-[#8b7355] text-[12px] tracking-[0.3px] w-[48.45px]">
         <p className="leading-[18px]">Cá nhân</p>
       </div>
     </div>

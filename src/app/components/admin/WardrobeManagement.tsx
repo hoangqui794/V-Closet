@@ -212,13 +212,13 @@ export function WardrobeManagement({ showHeader = true }: { showHeader?: boolean
     const getAiBadgeStyle = (status: string) => {
         switch (status?.toLowerCase()) {
             case "completed":
-                return " dark:bg-green-500/100/10  dark:text-green-400  dark:border-green-500/20";
+                return " bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20";
             case "failed":
-                return " dark:bg-red-500/100/10  dark:text-red-400  dark:border-red-500/20";
+                return " bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20";
             case "processing":
-                return " dark:bg-blue-500/100/10  dark:text-blue-400  dark:border-blue-500/20 animate-pulse";
+                return " bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 animate-pulse";
             default:
-                return " dark:bg-muted/500/10  dark:text-muted-foreground border-slate-200";
+                return " bg-gray-100 text-gray-700 dark:bg-muted/50 dark:text-muted-foreground border-slate-200";
         }
     };
 

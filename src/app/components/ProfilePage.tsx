@@ -70,10 +70,10 @@ function BodyMeasurementPanel({
               <div className="w-[40px] h-[4px] rounded-full bg-[rgba(74,55,40,0.15)]" />
             </div>
 
-            <div className="font-['Manrope',sans-serif] font-[800] text-[20px] text-[#4a3728] tracking-[-0.5px] mb-[4px]">
+            <div className="font-manrope font-[800] text-[20px] text-[#4a3728] tracking-[-0.5px] mb-[4px]">
               Số đo cá nhân 📐
             </div>
-            <div className="font-['Manrope',sans-serif] font-[400] text-[13px] text-[rgba(74,55,40,0.5)] mb-[20px]">
+            <div className="font-manrope font-[400] text-[13px] text-[rgba(74,55,40,0.5)] mb-[20px]">
               Chạm vào vị trí trên hình người để nhập số đo
             </div>
 
@@ -141,7 +141,7 @@ function BodyMeasurementPanel({
                     className="rounded-[14px] border-2 px-[12px] py-[10px] cursor-pointer"
                     onClick={() => setActivePoint(pt.key)}
                   >
-                    <div className="font-['Manrope',sans-serif] font-[700] text-[11px] text-[rgba(74,55,40,0.5)] tracking-[0.5px] uppercase mb-[4px]">
+                    <div className="font-manrope font-[700] text-[11px] text-[rgba(74,55,40,0.5)] tracking-[0.5px] uppercase mb-[4px]">
                       {pt.label}
                     </div>
                     <div className="flex items-center gap-[6px]">
@@ -158,9 +158,9 @@ function BodyMeasurementPanel({
                           }
                         }}
                         onFocus={() => setActivePoint(pt.key)}
-                        className="w-full bg-transparent border-none outline-none font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] placeholder-[rgba(74,55,40,0.25)] p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full bg-transparent border-none outline-none font-manrope font-[800] text-[18px] text-[#4a3728] placeholder-[rgba(74,55,40,0.25)] p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <span className="font-['Manrope',sans-serif] font-[600] text-[12px] text-[rgba(74,55,40,0.4)] shrink-0">
+                      <span className="font-manrope font-[600] text-[12px] text-[rgba(74,55,40,0.4)] shrink-0">
                         {pt.unit}
                       </span>
                     </div>
@@ -175,7 +175,7 @@ function BodyMeasurementPanel({
                   }}
                   className="mt-[6px] w-full h-[44px] rounded-[12px] bg-[#4a3728] border-none cursor-pointer shadow-[0px_4px_12px_rgba(74,55,40,0.2)]"
                 >
-                  <span className="font-['Manrope',sans-serif] font-bold text-[14px] text-[#fdfaf6]">
+                  <span className="font-manrope font-bold text-[14px] text-[#fdfaf6]">
                     Lưu số đo
                   </span>
                 </motion.button>
@@ -184,7 +184,7 @@ function BodyMeasurementPanel({
 
             <div className="mt-[16px] bg-[#f0e6da] rounded-[12px] px-[14px] py-[10px] flex items-start gap-[8px]">
               <span className="text-[14px] shrink-0">💡</span>
-              <span className="font-['Manrope',sans-serif] font-[400] text-[11px] text-[rgba(74,55,40,0.55)] leading-[16px]">
+              <span className="font-manrope font-[400] text-[11px] text-[rgba(74,55,40,0.55)] leading-[16px]">
                 Dùng thước dây đo vòng ngực, eo, hông ở vị trí rộng nhất. Số đo chính xác giúp AI gợi ý size chuẩn nhất cho bạn.
               </span>
             </div>
@@ -224,7 +224,7 @@ export function ProfilePage() {
             <path d="M0 0H18V2H0V0ZM0 5H18V7H0V5ZM0 10H18V12H0V10Z" fill="#4a3728" />
           </svg>
         </button>
-        <div className="font-['Manrope',sans-serif] font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
+        <div className="font-manrope font-[800] text-[18px] text-[#4a3728] tracking-[-0.45px] uppercase">
           {t("profile")}
         </div>
         <div className="w-[18px]" />
@@ -237,10 +237,10 @@ export function ProfilePage() {
             <path d={svgPaths.p85bff00} fill="#4a3728" />
           </svg>
         </div>
-        <div className="mt-[16px] font-['Manrope',sans-serif] font-bold text-[20px] text-[#4a3728]">
+        <div className="mt-[16px] font-manrope font-bold text-[20px] text-[#4a3728]">
           {profile.nickname || "Người dùng V-Closet"}
         </div>
-        <div className="mt-[4px] font-['Manrope',sans-serif] font-normal text-[14px] text-[rgba(74,55,40,0.6)]">
+        <div className="mt-[4px] font-manrope font-normal text-[14px] text-[rgba(74,55,40,0.6)]">
           @{profile.nickname || "vcloset_user"}
         </div>
         {/* Badges */}
@@ -248,14 +248,14 @@ export function ProfilePage() {
           <div className="mt-[10px] flex items-center gap-[6px] flex-wrap justify-center">
             {bodyShapeLabel && (
               <div className="bg-[#4a3728] px-[14px] py-[5px] rounded-full">
-                <span className="font-['Manrope',sans-serif] font-[600] text-[12px] text-[#fdfaf6]">
+                <span className="font-manrope font-[600] text-[12px] text-[#fdfaf6]">
                   👗 {bodyShapeLabel}
                 </span>
               </div>
             )}
             {profile.colorPalette && profile.colorPalette !== "unsure" && (
               <div className="bg-white border border-[rgba(74,55,40,0.12)] px-[10px] py-[5px] rounded-full">
-                <span className="font-['Manrope',sans-serif] font-[600] text-[12px] text-[rgba(74,55,40,0.6)]">
+                <span className="font-manrope font-[600] text-[12px] text-[rgba(74,55,40,0.6)]">
                   🎨 {profile.colorPalette === "warm-bright" ? "Ấm áp" : profile.colorPalette === "cool-soft" ? "Mát mẻ" : profile.colorPalette === "warm-deep" ? "Sâu lắng" : "Cá tính"}
                 </span>
               </div>
@@ -267,28 +267,28 @@ export function ProfilePage() {
       {/* Stats */}
       <SlideUp delay={0.2} className="flex justify-around px-[32px] py-[20px] mx-[16px] bg-white rounded-[16px] border border-[rgba(74,55,40,0.1)]">
         <div className="flex flex-col items-center">
-          <div className="font-['Manrope',sans-serif] font-bold text-[20px] text-[#4a3728]">
+          <div className="font-manrope font-bold text-[20px] text-[#4a3728]">
             24
           </div>
-          <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
+          <div className="font-manrope font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
             {t("posts")}
           </div>
         </div>
         <div className="w-px bg-[rgba(74,55,40,0.1)]" />
         <div className="flex flex-col items-center">
-          <div className="font-['Manrope',sans-serif] font-bold text-[20px] text-[#4a3728]">
+          <div className="font-manrope font-bold text-[20px] text-[#4a3728]">
             8
           </div>
-          <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
+          <div className="font-manrope font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
             {t("outfit")}
           </div>
         </div>
         <div className="w-px bg-[rgba(74,55,40,0.1)]" />
         <div className="flex flex-col items-center">
-          <div className="font-['Manrope',sans-serif] font-bold text-[20px] text-[#4a3728]">
+          <div className="font-manrope font-bold text-[20px] text-[#4a3728]">
             156
           </div>
-          <div className="font-['Manrope',sans-serif] font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
+          <div className="font-manrope font-normal text-[12px] text-[rgba(74,55,40,0.6)]">
             {t("votes")}
           </div>
         </div>
@@ -311,18 +311,18 @@ export function ProfilePage() {
                 } ${idx === 4 ? "rounded-b-[16px]" : ""}`}
             >
               <div className="flex flex-col items-start">
-                <span className="font-['Manrope',sans-serif] font-medium text-[16px] text-[#4a3728]">
+                <span className="font-manrope font-medium text-[16px] text-[#4a3728]">
                   {item.label}
                 </span>
                 {item.subtitle && (
-                  <span className="font-['Manrope',sans-serif] font-[400] text-[12px] text-[rgba(74,55,40,0.45)] mt-[2px]">
+                  <span className="font-manrope font-[400] text-[12px] text-[rgba(74,55,40,0.45)] mt-[2px]">
                     {item.subtitle}
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-[8px]">
                 {item.label === "Số đo cá nhân" && !profile.measurements.height && (
-                  <span className="bg-[#e74c3c] text-white font-['Manrope',sans-serif] font-[700] text-[9px] px-[7px] py-[2px] rounded-full tracking-[0.3px]">
+                  <span className="bg-[#e74c3c] text-white font-manrope font-[700] text-[9px] px-[7px] py-[2px] rounded-full tracking-[0.3px]">
                     MỚI
                   </span>
                 )}
@@ -345,7 +345,7 @@ export function ProfilePage() {
           onClick={() => { toast("👋 Đã đăng xuất"); navigate("/"); }}
           className="w-full bg-transparent border border-[#4a3728] rounded-[12px] py-[14px] cursor-pointer"
         >
-          <span className="font-['Manrope',sans-serif] font-bold text-[16px] text-[#4a3728]">
+          <span className="font-manrope font-bold text-[16px] text-[#4a3728]">
             {t("logout")}
           </span>
         </motion.button>
